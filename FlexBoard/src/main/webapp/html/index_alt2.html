@@ -1,0 +1,77 @@
+﻿<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>FlexBoard – Feed</title>
+  <link rel="stylesheet" href="src/css/base.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <a href="#feed" class="skip">Zum Inhalt springen</a>
+
+  <header class="app-header">
+    <a class="logo" href="index.html">FlexBoard</a>
+    <div class="header-actions">
+      <button id="theme-toggle" class="btn btn-outline btn-icon" aria-label="Theme: auto">🌗</button>
+      <button id="btn-new" class="btn-primary">+ Neuer Eintrag</button>
+      <a class="btn-outline" href="login.html">Anmelden</a>
+    </div>
+  </header>
+
+  <!-- Suche (sticky) -->
+  <section class="filters container filters--search-only" role="search" aria-label="Suche">
+    <div class="search-wrap">
+      <input id="search" class="search-input" placeholder="Suche..." aria-label="Suche"/>
+      <span class="icon-search" aria-hidden="true"></span>
+    </div>
+  </section>
+
+  <main class="container">
+    <!-- Filter-Reihe -->
+    <div class="grid-filters">
+      <select id="filter-category" aria-label="Kategorie"></select>
+      <select id="filter-type" aria-label="Typ">
+        <option value="">Typ…</option>
+        <option value="offer">Angebot</option>
+        <option value="request">Gesuch</option>
+        <option value="event">Event</option>
+      </select>
+      <input id="filter-city" class="search" placeholder="Stadt" aria-label="Stadt"/>
+    </div>
+
+    <!-- Feed -->
+    <div id="feed" class="card-grid" aria-live="polite"></div>
+    <div id="empty" class="empty" >Keine Treffer.</div>
+
+    <!-- Pagination -->
+    <button id="more" class="btn-outline" style="margin:16px auto;display:block;">
+      Mehr laden
+    </button>
+  </main>
+
+  <template id="card-tpl">
+    <article class="card">
+      <a class="card-link" href="#" aria-label="">
+        <img class="card-img" alt=""/>
+   <!--       <div class="card-body">
+          <div class="badge type"></div>
+          <h3 class="title"></h3>
+          <p class="desc"></p>
+          <div class="meta">
+            <span class="city"></span>
+            <time class="date" datetime=""></time>
+          </div>
+        </div> -->
+      </a>
+    </article>
+  </template>
+
+  <!-- ★ neu: zentrale API-Base -->
+  <script src="src/js/env.js"></script>
+  <!-- Module -->
+  <script type="module" src="src/js/theme.js"></script>
+  <script type="module" src="src/js/feed.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>FlexBoard – Details</title>
+  <link rel="stylesheet" href="src/css/base.css"/>
+</head>
+<body>
+  <header class="app-header">
+    <a class="logo" href="index.html">← FlexBoard</a>
+    <div class="header-actions">
+      <button id="theme-toggle" class="btn btn-outline btn-icon" aria-label="Theme: auto">🌗</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <article id="post" class="card" style="max-width:860px;margin:0 auto;">
+      <img id="img" class="card-img" alt="Vorschaubild"/>
+      <div class="card-body">
+        <div class="badge" id="type"></div>
+        <h1 class="title" id="title"></h1>
+        <p class="desc" id="desc"></p>
+        <div class="meta">
+          <span id="city"></span>
+          <time id="date" datetime=""></time>
+        </div>
+      </div>
+    </article>
+    <p id="status" class="status"></p>
+  </main>
+
+  <!-- ★ neu: zentrale API-Base -->
+  <script src="src/js/env.js"></script>
+  <!-- Module -->
+  <script type="module" src="src/js/theme.js"></script>
+  <script type="module" src="src/js/post.js"></script>
+</body>
+</html>
+
+

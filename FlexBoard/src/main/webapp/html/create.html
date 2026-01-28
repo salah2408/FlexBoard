@@ -1,0 +1,70 @@
+﻿<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Neuer Eintrag – FlexBoard</title>
+  <link rel="stylesheet" href="src/css/base.css" />
+</head>
+<body>
+  <header class="app-header">
+    <a class="logo" href="index.html">FlexBoard</a>
+    <div class="header-actions">
+      <button id="theme-toggle" class="btn btn-outline btn-icon" aria-label="Theme: auto">🌗</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>Neuen Eintrag erstellen</h1>
+
+    <form id="post-form" class="form">
+      <label>Titel
+        <input id="title" name="title" type="text" required />
+      </label>
+
+      <label>Beschreibung
+        <textarea id="description" name="description"></textarea>
+      </label>
+
+      <label>Typ
+        <select id="type" name="type" required>
+          <option value="">Bitte wählen…</option>
+          <option value="offer">Angebot</option>
+          <option value="request">Gesuch</option>
+          <option value="event">Event</option>
+        </select>
+      </label>
+
+      <div class="grid-2">
+        <label>Stadt
+          <input id="city" name="city" type="text" />
+        </label>
+        <label>Preis (optional)
+          <input id="price" name="price" type="text" placeholder="z. B. 12,50" />
+        </label>
+      </div>
+
+      <label>Kategorie
+        <select id="category" name="category_id" required></select>
+      </label>
+
+      <label>Bild
+        <input id="image" type="file" accept="image/*" />
+        <img id="img-preview" style="display:none; max-width:200px;" />
+        <button type="button" id="clear-image" style="display:none;">Bild entfernen</button>
+      </label>
+
+      <button class="btn-primary" type="submit">Eintrag speichern</button>
+    </form>
+
+    <p id="form-msg" style="margin-top:1em;color:var(--danger,#ff6b6b);"></p>
+  </main>
+
+  <!-- ★ neu: zentrale API-Base -->
+  <script src="src/js/env.js"></script>
+  <!-- Module -->
+  <script type="module" src="src/js/theme.js"></script>
+  <script type="module" src="src/js/create.js"></script>
+</body>
+</html>
+

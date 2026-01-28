@@ -1,0 +1,26 @@
+# Eclipse
+.metadata/
+.recommenders/
+.settings/
+.classpath
+.project
+
+# Java
+*.class
+
+# Build
+/build/
+/bin/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tomcat
+Servers/
+
+# Maven/Gradle (falls später)
+target/

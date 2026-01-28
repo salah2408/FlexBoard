@@ -1,0 +1,278 @@
+﻿/* ===========================
+   FlexBoard Design Tokens (WCAG AA)
+   =========================== */
+
+/* Light Theme Tokens */
+:root{
+  /* Primärpalette */
+  --bg:#F7F9FC;
+  --surface:#FFFFFF;
+  --text:#0F172A;
+  --text-2:#334155;
+  --primary:#1E3A8A;
+  --on-primary:#FFFFFF;
+  --border:#E2E8F0;
+  --focus:#1D4ED8;
+
+  /* Status (farbenblind-sicher) */
+  --info:#0072B2;     --on-info:#FFFFFF;
+  --success:#009E73;  --on-success:#FFFFFF;
+  --warning:#E69F00;  --on-warning:#111827; /* dunkler Text auf Warnflächen */
+  --danger:#D55E00;   --on-danger:#FFFFFF;
+
+  /* Sonstiges */
+  --radius:16px;
+  --shadow:0 1px 2px rgba(15,23,42,.06), 0 4px 12px rgba(15,23,42,.06);
+}
+
+/* Dark Theme Tokens (per data-theme="dark") */
+:root[data-theme="dark"]{
+  --bg:#0B1220;
+  --surface:#111827;
+  --text:#F8FAFC;
+  --text-2:#CBD5E1;
+  --primary:#60A5FA;
+  --on-primary:#0B1220;
+  --border:#1F2937;
+  --focus:#60A5FA;
+
+  --info:#38BDF8;    --on-info:#0B1220;
+  --success:#34D399; --on-success:#0B1220;
+  --warning:#F59E0B; --on-warning:#111827;
+  --danger:#F87171;  --on-danger:#0B1220;
+}
+
+/* auto: folgt dem System, solange kein data-theme gesetzt ist */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ 
+    /* nutzt Dark-Tokens oben automatisch */
+  }
+}
+
+/* ========== Base ========== */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+}
+
+/* Links: nicht nur Farbe → auch unterstrichen */
+a{ color:var(--primary); text-decoration:underline; }
+a:hover{ text-decoration:underline; opacity:.9; }
+/* Karten: ganzer Link bleibt block, aber nur der Titel ist unterstrichen */
+.card-link{ display:block; color:inherit; text-decoration:none; }
+.card-link .title{ text-decoration:underline; }
+.card-link .desc,
+.card-link .badge,
+.card-link .meta { text-decoration:none; }
+
+
+/* Tastatur-Fokus klar sichtbar (WCAG) */
+:focus-visible{
+  outline:3px solid var(--focus);
+  outline-offset:3px;
+  border-radius:8px;
+}
+
+/* Screenreader-only */
+.sr-only{
+  position:absolute!important; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+
+/* ========== Layout / Header ========== */
+.app-header{
+  display:flex; gap:12px; align-items:center; justify-content:space-between;
+  padding:12px 16px; background:var(--surface); border-bottom:1px solid var(--border);
+}
+.logo{ font-weight:700; font-size:18px; color:var(--primary); text-decoration:none; }
+.header-actions{ display:flex; gap:8px; align-items:center; }
+
+/* Zentrierte Filter-Bar unter dem Header */
+.filters{
+  position: sticky;
+  top: 56px;                 /* ggf. 60–64px, wenn dein Header höher ist */
+  z-index: 50;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.filters--search-only{
+  display: grid;
+  grid-template-columns: 1fr;   /* nur ein großes Feld */
+  padding: 10px 0;
+}
+
+
+/* Mindestbreiten */
+.filters--bar select{ min-width: 160px; }
+
+/* Suchfeld mit Icon rechts innen */
+.search-wrap{ position: relative; }
+.search-input{
+  height: 44px;
+  width: 100%;
+  padding: 0 44px 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+}
+.search-input::placeholder{ color: var(--text-2); }
+
+/* Lupe als Icon (SVG via data-URL) */
+.icon-search{
+  position: absolute;
+  right: 12px; top: 50%; transform: translateY(-50%);
+  width: 20px; height: 20px; pointer-events: none; opacity: .8;
+  background: no-repeat center/contain
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='%2360737b' viewBox='0 0 24 24'%3E%3Cpath d='M10 2a8 8 0 105.293 14.293l3.707 3.707 1.414-1.414-3.707-3.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z'/%3E%3C/svg%3E");
+}
+
+/* Icon-Input: kompakt (44px) – klappt bei Fokus/Value auf */
+.icon-input{
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  transition: width .18s ease, padding .18s ease;
+}
+
+/* Pin-Icon (data-URL) */
+.icon-search{
+  position: absolute;
+  right: 12px; top: 50%; transform: translateY(-50%);
+  width: 20px; height: 20px; opacity: .8; pointer-events: none;
+  background: no-repeat center/contain
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='%2360737b' viewBox='0 0 24 24'%3E%3Cpath d='M10 2a8 8 0 105.293 14.293l3.707 3.707 1.414-1.414-3.707-3.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z'/%3E%3C/svg%3E");
+}
+
+/* Aufklappen bei Fokus oder wenn Text drin ist */
+.icon-input--pin:focus,
+.icon-input--pin:not(:placeholder-shown){
+  width: 200px;                   /* aufgeklappt */
+  padding: 0 12px 0 14px;
+  text-indent: 0;
+  background-image: none;         /* Icon verschwindet, Platz für Text */
+}
+
+
+
+/* ========== Controls ========== */
+.search, select, input, textarea{
+  height:40px;
+  padding:0 12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--surface);
+  color:var(--text);
+}
+textarea{ height:auto; padding:10px; min-height:120px; }
+select{ padding-right:28px; }
+.search::placeholder, input::placeholder{ color:var(--text-2); }
+
+/* Buttons – Primär nur für Kernaktionen (CTA) */
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  height:40px; padding:0 14px; border-radius:12px; cursor:pointer; border:1px solid transparent; text-decoration:none;
+}
+.btn-primary{ background:var(--primary); color:var(--on-primary); }
+.btn-outline{ background:var(--surface); color:var(--text); border-color:var(--border); }
+.btn-icon{ width:40px; padding:0; }
+
+/* :focus-visible kommt global; Hover minimal */
+.btn:hover{ filter:brightness(0.98); }
+
+/* ========== Grid / Cards ========== */
+main{ padding:16px; }
+.card-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px;   max-width: 1200px;         /* Breite des Grids begrenzen */
+  margin-inline: auto;     }
+
+.card{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.card-link{ display:block; color:inherit; text-decoration:none; }
+.card-img{
+  width:100%;
+  aspect-ratio: 16 / 9;   /* konsistente Höhe über alle Breakpoints */
+  object-fit:cover;
+  background:#EEF2FF;
+}
+.card-body{ padding:12px; display:flex; flex-direction:column; gap:6px; }
+.badge{ display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; background:#EEF2FF; color:var(--primary); }
+.title{ margin:0; font-size:16px; line-height:1.3; }
+.desc{ margin:0; color:var(--text-2); font-size:14px; line-height:1.45;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+/* Kleine Filterzeile direkt über dem Grid */
+.grid-filters{
+  max-width: 1100px;            /* gleiche Breite wie .card-grid */
+  margin: 8px auto 10px;        /* kleiner Abstand nach oben/unten */
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;       /* mittig */
+}
+
+/* Mindestbreiten & Höhe für die Controls */
+.grid-filters select,
+.grid-filters input{
+  min-width: 160px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+
+.meta{ display:flex; justify-content:space-between; color:var(--text-2); font-size:12px; }
+.empty{ padding:24px; text-align:center; color:var(--text-2); }
+
+
+
+/* ========== Formulare ========== */
+.container{ max-width:960px; margin:0 auto; padding:16px; }
+.container.narrow{ max-width:420px; }
+.form{ display:grid; gap:12px; }
+.form label{ display:grid; gap:6px; font-weight:600; color:var(--text); }
+.form input,.form textarea,.form select{ width:100%; }
+
+/* Status-/Hinweisflächen (Farbe + Icon + Klartext) */
+.alert{ padding:12px 14px; border-radius:12px; border:1px solid var(--border); display:flex; gap:8px; align-items:flex-start; }
+.alert-info{ background:color-mix(in srgb, var(--info) 12%, transparent); color:var(--on-info); border-color:var(--info); }
+.alert-success{ background:color-mix(in srgb, var(--success) 12%, transparent); color:var(--on-success); border-color:var(--success); }
+.alert-warning{ background:color-mix(in srgb, var(--warning) 22%, transparent); color:var(--on-warning); border-color:var(--warning); }
+.alert-danger{ background:color-mix(in srgb, var(--danger) 14%, transparent); color:var(--on-danger); border-color:var(--danger); }
+
+/* Reduzierte Bewegung respektieren */
+@media (prefers-reduced-motion:no-preference){
+  .card{ transition:transform .08s ease; }
+  .card:hover{ transform:translateY(-2px); }
+}
+.skip{
+  position:absolute; left:-9999px; top:auto; background:var(--primary);
+  color:var(--on-primary); padding:8px 12px; border-radius:10px; z-index:1000;
+}
+.skip:focus{ left:12px; top:12px; outline:3px solid var(--focus); }
+
+.alert-info   { background: rgba(0,114,178,.12);  } /* Fallback */
+.alert-success{ background: rgba(0,158,115,.12);  }
+.alert-warning{ background: rgba(230,159,0,.22);  }
+.alert-danger { background: rgba(213,94,0,.14);   }
+
+/* bleibt wie bei dir: die color-mix()-Zeilen direkt danach */
+input[type="file"]{
+  display:block;
+  padding:10px 0;
+}
+.img-preview-wrap{ margin-top:4px; }
+/* ✨ Sicherstellen, dass hidden IMMER ausblendet – auch bei inline display */
+[hidden] { display: none !important; }
