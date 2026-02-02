@@ -19,8 +19,8 @@
 	if(action == null)
 		action = "";
 	
-	if(action.equals("")){
-		
+	if(action.equals("Registrieren")){
+		myAccount.saveAccount(email, vorname, nachname, passwort);
 	}
 	else{
 		response.sendRedirect("./LoginView.jsp");
