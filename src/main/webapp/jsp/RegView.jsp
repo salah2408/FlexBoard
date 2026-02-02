@@ -58,7 +58,7 @@
           </div>
 
           <div class="d-grid">
-            <button type="submit" class="btn btn-primary">Registrieren</button>
+            <input class="btn btn-primary" type="submit" name="action" value="Registrieren"/>
           </div>
         </form>
       </div>
