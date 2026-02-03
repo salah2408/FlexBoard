@@ -1,3 +1,4 @@
+<%@page import="de.hwg_lu.bwi520.messages.RegMessage"%>
 <%@page import="de.hwg_lu.bwi520.beans.AccountBean"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
@@ -9,21 +10,33 @@
 </head>
 <body>
 <jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
+<jsp:useBean id="myMsg" class="de.hwg_lu.bwi520.messages.RegMessage" scope="session" />
 <%
-	String vorname = request.getParameter("");
-	String nachname = request.getParameter("");
-	String email = request.getParameter("");
-	String passwort = request.getParameter("");
-	String action = request.getParameter("");
+	String vorname = request.getParameter("vorname");
+	String nachname = request.getParameter("nachname");
+	String email = request.getParameter("email");
+	String passwort = request.getParameter("passwort");
+	String action = request.getParameter("action");
 	
 	if(action == null)
 		action = "";
 	
 	if(action.equals("Registrieren")){
-		myAccount.saveAccount(email, vorname, nachname, passwort);
+		if(myAccount.saveAccount(email, vorname, nachname, passwort)){
+			myMsg.setRegMessage();
+			response.sendRedirect("./MainPageView.jsp");
+		}
+		else{
+			myMsg.setAccountExists(email);
+			response.sendRedirect("./RegView.jsp");
+		}
+	}
+	else if(action.equals("zumLogin")){
+		response.sendRedirect("./LoginView.jsp");
 	}
 	else{
-		response.sendRedirect("./LoginView.jsp");
+		myMsg.setError();
+		response.sendRedirect("./RegView.jsp");
 	}
 %>
 </body>
