@@ -24,11 +24,11 @@ public class AccountTest {
 	
 	public void createTableAccount() throws ClassNotFoundException, SQLException {
 		String sql = "CREATE TABLE IF NOT EXISTS account("
-				+ "email VARCHAR(64) PRIMARY KEY "
-				+ "vorname VARCHAR(32) NOT NULL "
-				+ "nachname VARCHAR(32) NOT NULL "
-				+ "passwort VARCHAR(32) NOT NULL "
-				+ "active VARCHAR(3) NOT NULL "
+				+ "email VARCHAR(64) PRIMARY KEY, "
+				+ "vorname VARCHAR(32) NOT NULL, "
+				+ "nachname VARCHAR(32) NOT NULL, "
+				+ "passwort VARCHAR(32) NOT NULL, "
+				+ "active VARCHAR(3) NOT NULL, "
 				+ "admin VARCHAR(3) NOT NULL);";
 		
 		PreparedStatement prep = dbConn.prepareStatement(sql);

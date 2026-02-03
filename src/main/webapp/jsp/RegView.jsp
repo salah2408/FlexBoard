@@ -1,3 +1,4 @@
+<%@page import="de.hwg_lu.bwi520.messages.RegMessage"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html>
@@ -5,10 +6,12 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>FlexBoard – Registrieren</title>
+  <title>FlexBoard - Registrieren</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+<jsp:useBean id="myMsg" class="de.hwg_lu.bwi520.messages.RegMessage" scope="session" />
+
 
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
   <div class="container-fluid">
@@ -29,17 +32,19 @@
 <main class="container mt-5">
   <div class="row justify-content-center">
     <div class="col-md-6">
-      <div class="card shadow-sm p-4"> <h2 class="mb-4">Konto erstellen</h2>
+      <div class="card shadow-sm p-4"> 
+      	<h2 class="mb-4"><jsp:getProperty name="myMsg" property="msg" /></h2>
+      	<h4 class="mb-4"><jsp:getProperty name="myMsg" property="action" /></h4>
         
         <form action="./RegAppl.jsp" method="get">
           <div class="mb-3">
             <label for="regFirstName" class="form-label">Vorname</label>
-            <input type="text" name="firstname" class="form-control" id="regFirstName" required>
+            <input type="text" name="vorname" class="form-control" id="regFirstName" required>
           </div>
 
           <div class="mb-3">
             <label for="regLastName" class="form-label">Nachname</label>
-            <input type="text" name="lastname" class="form-control" id="regLastName" required>
+            <input type="text" name="nachname" class="form-control" id="regLastName" required>
           </div>
 
           <div class="mb-3">
@@ -49,7 +54,7 @@
 
           <div class="mb-3">
             <label for="exampleInputPassword1" class="form-label">Password</label>
-            <input type="password" name="password" class="form-control" id="exampleInputPassword1" required>
+            <input type="password" name="passwort" class="form-control" id="exampleInputPassword1" required>
           </div>
 
           <div class="mb-3 form-check">
@@ -60,6 +65,11 @@
           <div class="d-grid">
             <input class="btn btn-primary" type="submit" name="action" value="Registrieren"/>
           </div>
+          
+          <br>
+          <p class="mt-3">
+          	Schon Registriert? Melden sie sich <a href="./RegAppl.jsp?action=zumLogin">hier</a> an
+          </p>
         </form>
       </div>
     </div>
