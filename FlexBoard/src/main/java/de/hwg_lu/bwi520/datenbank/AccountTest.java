@@ -20,6 +20,7 @@ public class AccountTest {
 		this.dbConn = new PostgreSQLAccess().getConnection();
 		this.createTableAccount();
 		this.showAllAccounts();
+//		this.deleteAllAccounts();
 	}
 	
 	public void createTableAccount() throws ClassNotFoundException, SQLException {
@@ -52,5 +53,12 @@ public class AccountTest {
 			
 			System.out.println(email + "||" + vorname + "||" + nachname + "||" + passwort + "||" + active + "||" + admin + "||");
 		}
+	}
+	
+	public void deleteAllAccounts() throws SQLException {
+		String sql = "DELETE FROM account";
+		PreparedStatement prep = dbConn.prepareStatement(sql);
+		prep.executeUpdate();
+		System.out.println("Alle Accounts müssten geloescht sein");
 	}
 }

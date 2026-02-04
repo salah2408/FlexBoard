@@ -10,7 +10,7 @@
 </head>
 <body>
 <jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
-<jsp:useBean id="myMsg" class="de.hwg_lu.bwi520.messages.RegMessage" scope="session" />
+<jsp:useBean id="myRegMsg" class="de.hwg_lu.bwi520.messages.RegMessage" scope="session" />
 <%
 	String vorname = request.getParameter("vorname");
 	String nachname = request.getParameter("nachname");
@@ -23,11 +23,11 @@
 	
 	if(action.equals("Registrieren")){
 		if(myAccount.saveAccount(email, vorname, nachname, passwort)){
-			myMsg.setRegMessage();
-			response.sendRedirect("./MainPageView.jsp");
+			myRegMsg.setRegMessage();
+			response.sendRedirect("./RegView.jsp");
 		}
 		else{
-			myMsg.setAccountExists(email);
+			myRegMsg.setAccountExists(email);
 			response.sendRedirect("./RegView.jsp");
 		}
 	}
@@ -35,8 +35,7 @@
 		response.sendRedirect("./LoginView.jsp");
 	}
 	else{
-		myMsg.setError();
-		response.sendRedirect("./RegView.jsp");
+		response.sendRedirect("./HomepageView.jsp");
 	}
 %>
 </body>

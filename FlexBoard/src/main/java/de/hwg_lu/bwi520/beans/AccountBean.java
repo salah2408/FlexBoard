@@ -74,12 +74,13 @@ public class AccountBean {
 	}
 	
 	public boolean login(String email, String passwort) throws SQLException {
-		String sql = "select email, vorname, nachname, active, admin from account where email = ?";
+		String sql = "select email, vorname, nachname, passwort, active, admin "
+				+ "from account where email = ?";
 		System.out.println(sql);
 		PreparedStatement prep = this.dbConn.prepareStatement(sql);
 		prep.setString(1, email);
 		ResultSet dbRes = prep.executeQuery();
-		if(dbRes.next()) {
+		if(dbRes.next()) {		
 			if(dbRes.getString("passwort").equals(passwort)) {
 				this.email = email;
 				this.vorname = dbRes.getString("vorname");
@@ -98,7 +99,38 @@ public class AccountBean {
 	}
 
 	
-	
+	public String getNavbarHtml() {
+		String html = "<nav class='navbar navbar-expand-lg bg-body-tertiary'>"
+				+ "  <div class='container-fluid'>"
+				+ "    <a class='navbar-brand' href='./NavbarAppl.jsp?action=zurHomepage'>FlexBoard</a>";
+				
+		
+		if(!this.logedIn) {
+			html += "    <div class='d-flex align-items-center ms-auto me-2 order-lg-3'>"
+					+ "      <a class='nav-link px-2' href='./NavbarAppl.jsp?action=zumLogin'>Login</a>"
+					+ "      <span class='text-muted'>|</span>"
+					+ "      <a class='nav-link px-2' href='./NavbarAppl.jsp?action=zurReg'>Registrieren</a>"
+					+ "    </div>";
+		}
+			html += "    <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarSupportedContent'>"
+				+ "      <span class='navbar-toggler-icon'></span>"
+				+ "    </button>"
+				+ "    <div class='collapse navbar-collapse' id='navbarSupportedContent'>"
+				+ "      <ul class='navbar-nav me-auto mb-2 mb-lg-0'>"
+				+ "        <li class='nav-item'>"
+				+ "          <a class='nav-link active' href='./NavbarAppl.jsp?action=zumInserieren'>Inserieren</a>"
+				+ "        </li>"
+				+ "        <li class='nav-item'>"
+				+ "          <a class='nav-link active' href='./NavbarAppl.jsp?action=zurSuche'>Jetzt finden</a>"
+				+ "        </li>"
+				+ "      </ul>"
+				+ "    </div>"
+				+ "  </div>"
+				+ "</nav>";
+		
+		
+		return html;
+	}
 	
 	
 	
@@ -133,5 +165,11 @@ public class AccountBean {
 	}
 	public void setAdmin(String admin) {
 		this.admin = admin;
+	}
+	public boolean getLogedIn() {
+		return logedIn;
+	}
+	public void setLogedIn(boolean logedIn) {
+		this.logedIn = logedIn;
 	}
 }

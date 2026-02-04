@@ -1,3 +1,4 @@
+<%@page import="de.hwg_lu.bwi520.beans.AccountBean"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html>
@@ -6,55 +7,36 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>FlexBoard - Login</title>
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-	rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
+<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
 
-	<nav class="navbar navbar-expand-lg bg-body-tertiary">
-		<div class="container-fluid">
-			<a class="navbar-brand" href="index.html">FlexBoard</a>
-			<button class="navbar-toggler" type="button"
-				data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-					<li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
-					<li class="nav-item"><a class="nav-link active"
-						href="login.html">Login</a></li>
-					<li class="nav-item"><a class="nav-link" href="register.html">Registrieren</a></li>
-				</ul>
-			</div>
-		</div>
-	</nav>
-
+	<jsp:getProperty property="navbarHtml" name="myAccount"/>
+	
 	<main class="container mt-5">
 		<div class="row justify-content-center">
 			<div class="col-md-6">
 				<h1>Anmelden</h1>
-				<form action="LoginServlet" method="post">
+				<form action="./LoginAppl.jsp" method="get">
 					<div class="mb-3">
-						<label for="exampleInputEmail1" class="form-label">Email
-							address</label> <input type="email" name="email" class="form-control"
-							id="exampleInputEmail1" required>
+						<label for="exampleInputEmail1" class="form-label">Email</label> 
+						<input type="email" name="email" class="form-control" id="exampleInputEmail1" required>
 					</div>
 					<div class="mb-3">
 						<label for="exampleInputPassword1" class="form-label">Password</label>
-						<input type="password" name="password" class="form-control"
-							id="exampleInputPassword1" required>
+						<input type="password" name="passwort" class="form-control" id="exampleInputPassword1" required>
 					</div>
-					<input class="btn btn-primary" type="submit" name="action" value="Einloggen" />
+						<input class="btn btn-primary" type="submit" name="action" value="Einloggen" />
 				</form>
+				<br>
 				<p class="mt-3">
-					Noch kein Konto? <a href="RegView.jsp">Registrieren</a>
+					Noch kein Konto? <a href="./LoginAppl.jsp?action=zurReg">Registrieren</a>
 				</p>
 			</div>
 		</div>
 	</main>
-
-	<script
-		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	
 </body>
 </html>

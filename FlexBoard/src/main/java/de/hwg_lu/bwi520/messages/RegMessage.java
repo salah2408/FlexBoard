@@ -20,10 +20,10 @@ public class RegMessage {
 		this.action = "Bitte melden sie sich an";
 	}
 	
-	public void setError() {
-		this.msg = "Ein Fehler ist aufgetreten";
-		this.action = "Bitte versuchen sie es erneut";
-	}
+	
+	
+	
+	
 	
 	
 	public String getMsg() {

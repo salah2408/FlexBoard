@@ -8,6 +8,7 @@
 </head>
 <body>
 <jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
+<jsp:useBean id="myRegMsg" class="de.hwg_lu.bwi520.messages.RegMessage" scope="session" />
 <%
 	String email = request.getParameter("email");
 	String passwort = request.getParameter("passwort");
@@ -17,11 +18,18 @@
 		action = "";
 	
 	if(action.equals("Einloggen")){
-		myAccount.login(email, passwort);
-		response.sendRedirect("./MainPageView.jsp");
+		if(myAccount.login(email, passwort)) {
+			response.sendRedirect("./HomepageView.jsp");
+		}
+		else
+			response.sendRedirect("./LoginView.jsp");
+	}
+	else if(action.equals("zurReg")){
+		myRegMsg.setRegMessage();
+		response.sendRedirect("./RegView.jsp");
 	}
 	else{
-		
+		response.sendRedirect("./HomepageView.jsp");
 	}
 	
 %>
