@@ -20,7 +20,10 @@ public class RegMessage {
 		this.action = "Bitte melden sie sich an";
 	}
 	
-	
+	public void setRegSuccess() {
+		this.msg = "Der Account wurde erfolgreich angelegt";
+		this.action = "Bitte melden sie sich nun an";
+	}
 	
 	
 	

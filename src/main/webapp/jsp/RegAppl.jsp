@@ -23,7 +23,7 @@
 	
 	if(action.equals("Registrieren")){
 		if(myAccount.saveAccount(email, vorname, nachname, passwort)){
-			myRegMsg.setRegMessage();
+			myRegMsg.setRegSuccess();
 			response.sendRedirect("./RegView.jsp");
 		}
 		else{

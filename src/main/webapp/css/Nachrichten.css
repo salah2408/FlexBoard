@@ -1,0 +1,19 @@
+@charset "UTF-8";
+.chat-container {
+      height: calc(100vh - 56px); /* Navbar-Höhe */
+    }
+    .chat-list {
+      border-right: 1px solid #dee2e6;
+      overflow-y: auto;
+    }
+    .chat-messages {
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    .message-left {
+      max-width: 70%;
+    }
+    .message-right {
+      max-width: 70%;
+      margin-left: auto;
+    }
