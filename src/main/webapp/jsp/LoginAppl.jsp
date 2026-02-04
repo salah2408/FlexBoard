@@ -1,3 +1,6 @@
+<%@page import="de.hwg_lu.bwi520.messages.RegMessage"%>
+<%@page import="de.hwg_lu.bwi520.beans.AccountBean"%>
+<%@page import="de.hwg_lu.bwi520.beans.WeiterleitungsBean"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -7,6 +10,7 @@
 <title>Insert title here</title>
 </head>
 <body>
+<jsp:useBean id="myWeiter" class="de.hwg_lu.bwi520.beans.WeiterleitungsBean" scope="session" />
 <jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
 <jsp:useBean id="myRegMsg" class="de.hwg_lu.bwi520.messages.RegMessage" scope="session" />
 <%
@@ -19,7 +23,7 @@
 	
 	if(action.equals("Einloggen")){
 		if(myAccount.login(email, passwort)) {
-			response.sendRedirect("./HomepageView.jsp");
+			response.sendRedirect(myWeiter.getLink());
 		}
 		else
 			response.sendRedirect("./LoginView.jsp");
