@@ -149,7 +149,7 @@ public class AccountBean {
 	
 	
 	
-	// Methode um vom aktuell eingelogten User alle Chatverläufe zu lesen (in Reihenfolge: Alt -> neu) und in eine Hashmap zu spiechern mit allen wichtigen informationen
+	// Methode um vom aktuell eingelogten User alle Chatverläufe zu lesen (in Reihenfolge: Alt -> neu) und in eine Hashmap zu speichern mit allen wichtigen informationen
 	public void readAlleNachrichtenFromDB() throws SQLException {
 		String sql = "SELECT sender_email, empfaenger_email, datum, uhrzeit, nachricht FROM chatlog WHERE sender_email = ? OR empfaenger_email = ? "
 				+ "ORDER BY datum ASC, uhrzeit ASC";
@@ -167,7 +167,6 @@ public class AccountBean {
 	            LocalDateTime zeitpunkt = LocalDateTime.of(datum, uhrzeit);
 
 
-	            System.out.println(sender + " -> " + empfaenger + " || " + datum + uhrzeit + " || " + nachricht);
 	            
 	            // Erstmal überprüfen ob der aktuelle user der sender oder der empfaenger der Nachricht ist
 	            // User ist sender 
