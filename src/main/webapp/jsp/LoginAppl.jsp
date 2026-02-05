@@ -23,6 +23,7 @@
 	
 	if(action.equals("Einloggen")){
 		if(myAccount.login(email, passwort)) {
+			myAccount.readAlleNachrichtenFromDB();
 			response.sendRedirect(myWeiter.getLink());
 		}
 		else

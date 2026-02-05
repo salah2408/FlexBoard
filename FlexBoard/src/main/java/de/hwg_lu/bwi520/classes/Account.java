@@ -4,28 +4,38 @@ public class Account {
 	String vorname;
 	String nachname;
 	String email;
-	String passwort;
+	String active;
+	String admin;
+	boolean logedIn;
 	
+	
+	public Account(String vorname, String nachname, String email, String active, String admin, boolean logedIn) {
+		this.vorname = vorname;
+		this.nachname = nachname;
+		this.email = email;
+		this.active = active;
+		this.admin = admin;
+		this.logedIn = logedIn;
+	}
 	
 	public Account() {
 		this.vorname = "";
 		this.nachname = "";
 		this.email = "";
-		this.passwort = "";
+		this.active = "";
+		this.admin = "";
+		this.logedIn = false;
 	}
 	
-	public Account(String vorname, String nachname, String email, String passwort) {
-		super();
+	
+	public Account(String vorname, String nachname, String email, String active, String admin) {
 		this.vorname = vorname;
 		this.nachname = nachname;
 		this.email = email;
-		this.passwort = passwort;
+		this.active = active;
+		this.admin = admin;
 	}
 
-	
-	
-	
-	
 	public String getVorname() {
 		return vorname;
 	}
@@ -44,10 +54,22 @@ public class Account {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	public String getPasswort() {
-		return passwort;
+	public String getActive() {
+		return active;
 	}
-	public void setPasswort(String passwort) {
-		this.passwort = passwort;
+	public void setActive(String active) {
+		this.active = active;
+	}
+	public String getAdmin() {
+		return admin;
+	}
+	public void setAdmin(String admin) {
+		this.admin = admin;
+	}
+	public boolean isLogedIn() {
+		return logedIn;
+	}
+	public void setLogedIn(boolean logedIn) {
+		this.logedIn = logedIn;
 	}
 }
