@@ -261,7 +261,8 @@ public class AccountBean {
 		String html = "<nav class='navbar navbar-expand-lg bg-body-tertiary'>"
 				+ "  <div class='container-fluid'>"
 				+ "    <a class='navbar-brand' href='./NavbarAppl.jsp?action=zurHomepage'>FlexBoard</a>";
-				
+				  
+		
 		
 		if(!user.isLogedIn()) {
 			html += "    <div class='d-flex align-items-center ms-auto me-2 order-lg-3'>"

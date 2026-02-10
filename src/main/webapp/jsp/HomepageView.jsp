@@ -14,22 +14,12 @@
 </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
+<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
 <!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">FlexBoard</a>
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Profil</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Logout</a></li>
-      </ul>
-    </div>
-  </div>
-</nav>
+<jsp:getProperty property="navbarHtml" name="myAccount"/>
 <main class="flex-fill">
 <div class="container">
-<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
+
 
 <section class="py-5">
   <div class="container">
