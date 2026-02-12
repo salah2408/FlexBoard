@@ -21,6 +21,7 @@ public class AccountBean {
 	Account user;
 	HashMap<String, Vector<Nachricht>> alleNachrichten;
 	
+	String[] aktChatReihenfolge;
 	String aktChatPartner;
 	
 	public AccountBean() throws ClassNotFoundException, SQLException {
@@ -30,8 +31,9 @@ public class AccountBean {
 		this.user = new Account();
 		this.alleNachrichten = new HashMap<String, Vector<Nachricht>>();
 		
-		this.aktChatPartner = "";
 		this.readAllAccountsFromDB();
+		this.aktChatReihenfolge = new String[0];
+		this.aktChatPartner = "";
 	}
 	
 	
@@ -195,38 +197,65 @@ public class AccountBean {
 	            	}
 	            }
 	        }
-	       this.setAktChatPartner(this.searchAktuellsterChat()); 
+	       this.sortChats();
 	}
 	
-	//Methode um den aktuellsten CHat zu identifizieren. Dieser soll später automatisch geöffnet sein beim Laden des Posteingangs
-	public String searchAktuellsterChat() {
-		String aktChat = "";
+	// Methode um die Reihenfolge der Chats festzulegen. Dadurch soll beim öffnen des Posteingagns die aktuellsten Nachrichten immer oben stehen.
+	public void sortChats() {
+		this.aktChatReihenfolge = new String[this.alleNachrichten.size()];
+		int counter = 0;
 		
-		// Einen zufälligen Chat als aktChat auswählen, da HashMaps nicht nach der Reihe gespeichert werden
+		// Chats in das Array speichern
 		for(String user: this.alleNachrichten.keySet()) {
-			aktChat = user;
-			break;
+			this.aktChatReihenfolge[counter] = user;
+			counter++;
 		}
 		
-		// Suche nach aktuellstem Chat
-		for(String user : this.alleNachrichten.keySet()) {
-			Vector<Nachricht> nachrichten = this.alleNachrichten.get(user);
-			Vector<Nachricht> nachrichtenAktChat = this.alleNachrichten.get(aktChat);
-			// Die aktuellsten Nachrichten werden raus genommen um verglichen zu werden
-			LocalDateTime zeitUser = nachrichten.get(nachrichten.size()-1).getZeitpunkt();
-			LocalDateTime zeitAktChat = nachrichtenAktChat.get(nachrichtenAktChat.size()-1).getZeitpunkt();
-			
-			// Die Nachricht des aktuellen User ist aktueller
-			if(zeitAktChat.isBefore(zeitUser)) {
-				aktChat = user;
+		
+		// Sortieren des Chats mit Bubble Sort
+		int n = this.aktChatReihenfolge.length;
+		boolean swapped;
+		for (int i = 0; i < n - 1; i++) {
+			swapped = false; // Track if any swap happens in this pass
+			for (int j = 0; j < n - 1 - i; j++) {
+				Vector<Nachricht> nachrichten1 = this.alleNachrichten.get(this.aktChatReihenfolge[j]);
+				Vector<Nachricht> nachrichten2 = this.alleNachrichten.get(this.aktChatReihenfolge[j+1]);
+				// Die aktuellsten Nachrichten werden raus genommen um verglichen zu werden
+				LocalDateTime zeitUser1 = nachrichten1.get(nachrichten1.size()-1).getZeitpunkt();
+				LocalDateTime zeitUser2 = nachrichten2.get(nachrichten2.size()-1).getZeitpunkt();
+				
+				System.out.println("user1: " + this.aktChatReihenfolge[j] + "||" + "user2: " + this.aktChatReihenfolge[j+1]);
+				System.out.println("User1: " + zeitUser1 + "|| User2: " + zeitUser2);
+				System.out.println("Zeitpunkt 2 größer 1 ? " + zeitUser2.isAfter(zeitUser1));
+				
+				if (zeitUser2.isAfter(zeitUser1)) { 
+					String temp = this.aktChatReihenfolge[j];
+					this.aktChatReihenfolge[j] = this.aktChatReihenfolge[j + 1];
+					this.aktChatReihenfolge[j + 1] = temp; 
+					swapped = true;
+				}
 			}
-			
+			if (!swapped)
+				break;
 		}
-		System.out.println(aktChat);
 		
 		
-		return aktChat;
+		
+		for(int i = 0; i < this.aktChatReihenfolge.length; i++) {
+			String user = this.aktChatReihenfolge[i];
+			System.out.println(i+1 + ". User: " + user);
+			Vector<Nachricht> nachrichten = this.alleNachrichten.get(user);
+			for(Nachricht nachricht : nachrichten) {
+				System.out.println(nachricht.getSender() + " -> " + nachricht.getEmpfaenger() + " || " + nachricht.getDatum() + " " + nachricht.getUhrzeit() + " || " + nachricht.getText());
+			}
+		}
+		
+		if(this.aktChatReihenfolge.length > 0) {
+			this.aktChatPartner = this.aktChatReihenfolge[0];
+		}
+		
 	}
+	
 
 	
 	
@@ -302,20 +331,35 @@ public class AccountBean {
 			    + "<div class='list-group list-group-flush'>";
 			    
 		
-			    html += "<a href='#' class='list-group-item list-group-item-action active'>Max Mustermann</a>"
-			    + "<a href='#' class='list-group-item list-group-item-action'>Anna Schmidt</a>"
-			    + "<a href='#' class='list-group-item list-group-item-action'>Peter Müller</a>"
-			    + "<a href='#' class='list-group-item list-group-item-action'>Julia Weber</a>";
 			    
-			    html += "</div>"
-			    + "</div>"
-			    + "<div class='col-12 col-md-8 col-lg-9 d-flex flex-column p-0'>"
-			    + "<div class='border-bottom p-3 fw-bold'>Max Mustermann</div>"
-			    + "<div class='chat-messages flex-grow-1'>"
-			    + "<div class='bg-light rounded p-2 mb-2 message-left'>Hallo! Wie geht’s?</div>"
-			    + "<div class='bg-primary text-white rounded p-2 mb-2 message-right'>Alles gut 😊 und bei dir?</div>"
-			    + "<div class='bg-light rounded p-2 mb-2 message-left'>Super! Hast du kurz Zeit?</div>"
-			    + "</div>"
+		for(int i = 0; i < this.aktChatReihenfolge.length; i++) {
+			if(this.aktChatPartner.equals(this.aktChatReihenfolge[i]))
+				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action active'>" 
+					 + this.aktChatReihenfolge[i] + "</a>";
+			else
+				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action'>" 
+						 + this.aktChatReihenfolge[i] + "</a>";
+				
+		}
+			    
+			   html += "</div>"
+			    + "</div>";
+			    		
+			    
+			   html += "<div class='col-12 col-md-8 col-lg-9 d-flex flex-column p-0'>"
+			    + "<div class='border-bottom p-3 fw-bold'>" + this.aktChatPartner +"</div>"
+			    + "<div class='chat-messages flex-grow-1'>";
+			   
+			   
+			   
+			   for(Nachricht nachricht : this.alleNachrichten.get(this.aktChatPartner)) {
+				   if(this.aktChatPartner.equals(nachricht.getSender()))
+					   html += "<div class='bg-light rounded p-2 mb-2 message-left'>" + nachricht.getText() + "</div>";
+				   else
+					   html += "<div class='bg-primary text-white rounded p-2 mb-2 message-right'>" + nachricht.getText() + "</div>";
+			   }
+			    
+			   html += "</div>"
 			    + "<div class='border-top p-3'>"
 			    + "<div class='input-group'>"
 			    + "<form action='./NachrichtenAppl.jsp' method='get'>"
@@ -346,8 +390,10 @@ public class AccountBean {
 	
 	
 	
-	public String getAktChatPartner(){
-		return this.aktChatPartner;
+
+
+	public String getAktChatPartner() {
+		return aktChatPartner;
 	}
 	public void setAktChatPartner(String aktChatPartner) {
 		this.aktChatPartner = aktChatPartner;
