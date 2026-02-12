@@ -277,7 +277,9 @@ public class AccountBean {
 	
 	
 	
-	
+	public void testus() {
+		System.out.println("WAS GEHT");
+	}
 	
 	
 	
