@@ -263,9 +263,11 @@ public class AccountBean {
 	
 	
 	
+
 	
-	
-	
+	public void test() {
+		System.out.println();
+	}
 	
 	
 	
