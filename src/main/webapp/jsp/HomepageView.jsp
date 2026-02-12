@@ -21,44 +21,48 @@
 <div class="container">
 
 
-<section class="py-5">
-  <div class="container">
-    <div class="row align-items-center">
+<main class="flex-fill">
 
-      <!-- LEFT: TEXT -->
-      <div class="col-lg-6 mb-4 mb-lg-0">
-        <h1 class="display-5 fw-bold mb-3">
-          Inserate einfach <br>
-          <span class="text-primary">erstellen und finden</span>
-        </h1>
+  <section class="py-5">
+    <div class="container">
+      <div class="row align-items-center">
 
-        <p class="lead text-muted mb-4">
-          FlexBoard ist deine zentrale Plattform, um Angebote zu erstellen,
-          Inserate zu entdecken und Kontakte schnell herzustellen.
-        </p>
+        <!-- LEFT: TEXT -->
+        <div class="col-lg-6 mb-4 mb-lg-0">
+          <h1 class="display-5 fw-bold mb-3">
+            Inserate einfach <br>
+            <span class="text-primary">erstellen und finden</span>
+          </h1>
 
-        <div class="d-flex gap-3">
-          <a href="#" class="btn btn-primary btn-lg px-4">
-            Inserat erstellen
-          </a>
-          <a href="#" class="btn btn-outline-secondary btn-lg px-4">
-            Inserate ansehen
-          </a>
+          <p class="lead text-muted mb-4">
+            FlexBoard ist deine zentrale Plattform, um Angebote zu erstellen,
+            Inserate zu entdecken und Kontakte schnell herzustellen.
+          </p>
+
+          <div class="d-flex gap-3">
+            <a href="#" class="btn btn-primary btn-lg px-4">
+              Inserat erstellen
+            </a>
+            <a href="#" class="btn btn-outline-secondary btn-lg px-4">
+              Inserate ansehen
+            </a>
+          </div>
         </div>
-      </div>
 
-      <!-- RIGHT: VISUAL PLACEHOLDER -->
-      <div class="col-lg-6 text-center">
-        <div class="bg-light rounded-4 p-5 shadow-sm">
-          <span class="text-muted">
-            Platzhalter für Illustration / Screenshot
-          </span>
+        <!-- RIGHT: VISUAL PLACEHOLDER -->
+        <div class="col-lg-6 text-center">
+          <div class="bg-light rounded-4 p-5 shadow-sm">
+            <span class="text-muted">
+              Platzhalter für Illustration / Screenshot
+            </span>
+          </div>
         </div>
-      </div>
 
+      </div>
     </div>
-  </div>
-</section>
+  </section>
+
+</main>
 </div>
 
 	<section class="py-5 bg-light">
