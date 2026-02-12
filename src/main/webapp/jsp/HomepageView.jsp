@@ -17,11 +17,11 @@
 <jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
 <!-- Navbar -->
 <jsp:getProperty property="navbarHtml" name="myAccount"/>
-<main class="flex-fill">
+
 <div class="container">
 
 
-<main class="flex-fill">
+
 
   <section class="py-5">
     <div class="container">
@@ -62,7 +62,7 @@
     </div>
   </section>
 
-</main>
+
 </div>
 
 	<section class="py-5 bg-light">
@@ -171,7 +171,7 @@
 
   </div>
 </section>
-</main>
+
 <footer class="bg-dark text-light">
   <div class="container py-4">
     <div class="row">
