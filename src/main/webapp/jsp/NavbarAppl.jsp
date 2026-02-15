@@ -13,6 +13,8 @@
 <jsp:useBean id="myWeiter" class="de.hwg_lu.bwi520.beans.WeiterleitungsBean" scope="session" />
 <%
 	String action = request.getParameter("action");
+
+	
 	if(action == null)
 		action = "";
 	
@@ -42,6 +44,11 @@
 			myWeiter.setLink("./NachrichtenView.jsp");
 			response.sendRedirect("./LoginView.jsp");
 		}
+	}
+	else if(action.equals("abmelden")){
+		myAccount.abmelden();
+		response.sendRedirect("./HomepageView.jsp");
+		
 	}
 	else
 		response.sendRedirect("./HomepageView.jsp");
