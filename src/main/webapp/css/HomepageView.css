@@ -1,0 +1,25 @@
+@charset "UTF-8";
+
+/* Grundlayout */
+body {
+    background-color: #f8f9fa;
+    margin: 0;
+}
+
+/* Kartenabstand */
+.card {
+    margin-bottom: 20px;
+}
+
+/* Chat Layout (falls benötigt) */
+.chat-container {
+    height: 80vh;
+}
+
+.message-left {
+    text-align: left;
+}
+
+.message-right {
+    text-align: right;
+}
