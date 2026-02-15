@@ -17,6 +17,7 @@ import de.hwg_lu.bwi520.classes.Nachricht;
 public class AccountBean {
 	Vector<Account> allAccounts;
 	Connection dbConn;
+	private String aktuelleSeite = "";
 	
 	Account user;
 	HashMap<String, Vector<Nachricht>> alleNachrichten;
@@ -299,92 +300,136 @@ public class AccountBean {
 	
 	// Abschnitt getHtml
 	
-	
+	public String getProfilHtml() {
+	    if (!this.getLogedIn()) {
+	        return "";
+	    }
+
+	    String html = "<section class='py-5'>"
+	            + "<div class='container'>"
+	            + "<div class='row justify-content-center'>"
+	            + "<div class='col-md-6'>"
+	            + "<div class='card shadow-sm border-0'>"
+	            + "<div class='card-body'>"
+	            + "<h5 class='card-title fw-bold mb-3'>Mein Profil</h5>"
+	            + "<ul class='list-group list-group-flush'>"
+	            + "<li class='list-group-item'><strong>Name:</strong> "
+	            + this.getVorname() + " " + this.getNachname() + "</li>"
+	            + "<li class='list-group-item'><strong>E-Mail:</strong> "
+	            + this.getEmail() + "</li>"
+	            + "<li class='list-group-item'><strong>Status:</strong> "
+	            + "<span class='badge bg-success'>Aktiv</span></li>"
+	            + "</ul>"
+	            + "<div class='mt-3 text-end'>"
+	            + "<a href='./NavbarAppl.jsp?action=profilBearbeiten' class='btn btn-sm btn-outline-secondary'>"
+	            + "Profil bearbeiten</a>"
+	            + "</div>"
+	            + "</div></div></div></div></div></section>";
+
+	    return html;
+	}
 	
 	public String getNavbarHtml() {
-		String html = "<nav class='navbar navbar-expand-lg bg-body-tertiary'>"
-				+ "  <div class='container-fluid'>"
-				+ "    <a class='navbar-brand' href='./NavbarAppl.jsp?action=zurHomepage'>FlexBoard</a>";
-				  
-		
-		
-		if(!this.user.isLogedIn()) {
-			html += "    <div class='d-flex align-items-center ms-auto me-2 order-lg-3'>"
-					+ "      <a class='nav-link px-2' href='./NavbarAppl.jsp?action=zumLogin'>Login</a>"
-					+ "      <span class='text-muted'>|</span>"
-					+ "      <a class='nav-link px-2' href='./NavbarAppl.jsp?action=zurReg'>Registrieren</a>"
-					+ "    </div>";
-		}
-		else {
-			html += "    <div class='d-flex align-items-center ms-auto me-2 order-lg-3'>"
-					+ "      <a class='nav-link px-2' href='./NavbarAppl.jsp?action=abmelden'>Abmelden</a>"
-					+ "    </div>";
-		}
-			html += "    <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarSupportedContent'>"
-				+ "      <span class='navbar-toggler-icon'></span>"
-				+ "    </button>"
-				+ "    <div class='collapse navbar-collapse' id='navbarSupportedContent'>"
-				+ "      <ul class='navbar-nav me-auto mb-2 mb-lg-0'>"
-				+ "        <li class='nav-item'>"
-				+ "          <a class='nav-link active' href='./NavbarAppl.jsp?action=zumInserieren'>Inserieren</a>"
-				+ "        </li>"
-				+ "        <li class='nav-item'>"
-				+ "          <a class='nav-link active' href='./NavbarAppl.jsp?action=zurSuche'>Jetzt finden</a>"
-				+ "        </li>"
-				+ "        <li class='nav-item'>"
-				+ "          <a class='nav-link active' href='./NavbarAppl.jsp?action=zurPost'>Posteingang</a>"
-				+ "        </li>"
-				+ "      </ul>"
-				+ "    </div>"
-				+ "  </div>"
-				+ "</nav>";
-		
-		
-		return html;
+
+	    String html = "<nav class='navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-2'>"
+	            + "<div class='container'>"
+	            + "<a class='navbar-brand d-flex align-items-center fw-semibold fs-4' "
+	            + "href='./NavbarAppl.jsp?action=zurHomepage'>"
+
+	            + "<img src='../img/flexboard-logo.jpg' "
+	            + "alt='FlexBoard Logo' "
+	            + "height='48' "
+	            + "class='me-3'>"
+
+	            + "FlexBoard"
+	            + "</a>"
+
+	            + "<button class='navbar-toggler' type='button' data-bs-toggle='collapse' "
+	            + "data-bs-target='#navbarNav'>"
+	            + "<span class='navbar-toggler-icon'></span>"
+	            + "</button>"
+
+	            + "<div class='collapse navbar-collapse' id='navbarNav'>"
+
+	            // Linke Navigation
+	            + "<ul class='navbar-nav me-auto'>";
+
+	    // NUR wenn eingeloggt → diese Links anzeigen
+	    if (this.getLogedIn()) {
+	        html += "<li class='nav-item'>"
+	              + "<a class='nav-link "
+	              + (this.aktuelleSeite.equals("inserieren") ? "active fw-bold" : "")
+	              + "' href='./NavbarAppl.jsp?action=zumInserieren'>Inserieren</a>"
+	              + "</li>"
+
+	              + "<li class='nav-item'>"
+	              + "<a class='nav-link "
+	              + (this.aktuelleSeite.equals("suche") ? "active fw-bold" : "")
+	              + "' href='./NavbarAppl.jsp?action=zurSuche'>Jetzt finden</a>"
+	              + "</li>"
+
+	              + "<li class='nav-item'>"
+	              + "<a class='nav-link "
+	              + (this.aktuelleSeite.equals("post") ? "active fw-bold" : "")
+	              + "' href='./NavbarAppl.jsp?action=zurPost'>Posteingang</a>"
+	              + "</li>";
+	    }
+
+	    html += "</ul>"
+
+	            // Rechte Navigation
+	            + "<ul class='navbar-nav ms-auto'>";
+
+	    if (!this.getLogedIn()) {
+	        html += "<li class='nav-item'>"
+	              + "<a class='nav-link' href='./NavbarAppl.jsp?action=zumLogin'>Login</a>"
+	              + "</li>"
+	              + "<li class='nav-item'>"
+	              + "<a class='nav-link' href='./NavbarAppl.jsp?action=zurReg'>Registrieren</a>"
+	              + "</li>";
+	    } else {
+	        html += "<li class='nav-item dropdown'>"
+	              + "<a class='nav-link dropdown-toggle' href='#' role='button' "
+	              + "data-bs-toggle='dropdown'>"
+	              + this.getVorname()
+	              + "</a>"
+	              + "<ul class='dropdown-menu dropdown-menu-end'>"
+	              + "<li><a class='dropdown-item' href='./NavbarAppl.jsp?action=profil'>Profil</a></li>"
+	              + "<li><hr class='dropdown-divider'></li>"
+	              + "<li><a class='dropdown-item text-danger' "
+	              + "href='./NavbarAppl.jsp?action=abmelden'>Abmelden</a></li>"
+	              + "</ul>"
+	              + "</li>";
+	    }
+
+	    html += "</ul></div></div></nav>";
+
+	    return html;
 	}
 	
 	
-	public String getNachrichtenHtml() throws SQLException {
-		String html = "<div class='container-fluid chat-container'>"
-			    + "<div class='row h-100'>"
-			    + "<div class='col-12 col-md-4 col-lg-3 chat-list p-0'>"
-			    + "<div class='list-group list-group-flush'>";
-			    
-		
-			    
-			   html += this.getChatSeitenanzeige();	
-			    
-			   html += "</div>"
-			    + "</div>";
-			    		
-			    
-			   html += "<div class='col-12 col-md-8 col-lg-9 d-flex flex-column p-0'>"
-			    + "<div class='border-bottom p-3 fw-bold'>" + this.getNameFromUser(this.aktChatPartner) +"</div>"
-			    + "<div class='chat-messages flex-grow-1'>";
-			   
-			   
-			   
-			   html += this.getChatverlauf();
-			    
-			   html += "</div>"
-			    + "<div class='border-top p-3'>"
-			    + "<div class='input-group'>"
-			    + "<form action='./NachrichtenAppl.jsp' method='get'>"
-			    + "<input class='form-control' type='text' name='text' value='' placeholder='Nachricht schreiben...'>"
-			    + "<input class='btn btn-primary' type='submit' name='action' value='Senden'>"
-			    + "</form>"
-			    + "</div>"
-			    + "</div>"
-			    + "</div>"
-			    + "</div>"
-			    + "</div>";
-		
-		
-		return html;
+	public String getSuchfeldHtml() {
+
+	    String html = "<div class='mt-4'>"
+	            + "<form action='./NavbarAppl.jsp' method='get'>"
+	            + "<input type='hidden' name='action' value='zurSuche'>"
+
+	            + "<div class='input-group input-group-lg shadow-sm'>"
+
+	            + "<input type='text' "
+	            + "class='form-control rounded-start-pill' "
+	            + "name='q' "
+	            + "placeholder='Wonach suchst du? (z.B. Fahrrad, Buch, Laptop)'>"
+
+	            + "<button class='btn btn-primary rounded-end-pill px-4' "
+	            + "type='submit'>Suchen</button>"
+
+	            + "</div>"
+	            + "</form>"
+	            + "</div>";
+
+	    return html;
 	}
-	
-	
-	
 	
 	
 	// Abschnitt Hilfsmethoden für getHtml
@@ -480,5 +525,14 @@ public class AccountBean {
 	}
 	public void setLogedIn(boolean logedIn) {
 		user.setLogedIn(logedIn);
+	}
+
+	public String getAktuelleSeite() {
+		return aktuelleSeite;
+	}
+
+
+	public void setAktuelleSeite(String aktuelleSeite) {
+		this.aktuelleSeite = aktuelleSeite;
 	}
 }
