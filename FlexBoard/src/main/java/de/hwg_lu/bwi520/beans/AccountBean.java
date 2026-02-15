@@ -131,7 +131,14 @@ public class AccountBean {
 	}
 
 	
-	
+	public void abmelden() {
+		this.allAccounts = new Vector<Account>();	
+		this.user = new Account();
+		this.alleNachrichten = new HashMap<String, Vector<Nachricht>>();
+		this.aktChatReihenfolge = new String[0];
+		this.aktChatPartner = "";
+		System.out.println("Erfolgreich abgemeldet");
+	}
 	
 	
 	
@@ -153,6 +160,7 @@ public class AccountBean {
 	
 	// Methode um vom aktuell eingelogten User alle Chatverläufe zu lesen (in Reihenfolge: Alt -> neu) und in eine Hashmap zu speichern mit allen wichtigen informationen
 	public void readAlleNachrichtenFromDB() throws SQLException {
+		this.alleNachrichten.clear();
 		String sql = "SELECT sender_email, empfaenger_email, datum, uhrzeit, nachricht FROM chatlog WHERE sender_email = ? OR empfaenger_email = ? "
 				+ "ORDER BY datum ASC, uhrzeit ASC";
 		PreparedStatement prep = this.dbConn.prepareStatement(sql);
@@ -256,33 +264,36 @@ public class AccountBean {
 		
 	}
 	
+	// Methode um eine neue Nachricht zu senden
+	public void sendMessage(String text) {
+		
+		LocalDate date = LocalDate.now();
+		LocalTime time = LocalTime.now();
+		
+		try {
+			String sql ="insert into chatlog (sender_email, empfaenger_email, datum, uhrzeit, nachricht) "
+					+ "values (?,?,?,?,?)";
+			System.out.println(sql);
+			PreparedStatement prep = this.dbConn.prepareStatement(sql);
+			prep.setString(1, this.getEmail());
+			prep.setString(2, this.aktChatPartner);
+			prep.setDate(3, java.sql.Date.valueOf(date));
+			prep.setTime(4, java.sql.Time.valueOf(time));
+			prep.setString(5, text);
+			prep.executeUpdate();
+			System.out.println("Nachricht erfolgreich eingefuegt");	
+			
+		}
+		catch(Exception e) {
+			System.out.println("Ein unerwarteter Fehler ist aufgetreten. Bitte wenden sie sich an einen Admin");
+			e.printStackTrace();
+		}
+	}
+	
 
 	
 	
-	
-	
-	
-	
 
-	
-	public void test() {
-		System.out.println();
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	public void testus() {
-		System.out.println("WAS GEHT");
-	}
-	
 	
 	
 	
@@ -297,11 +308,16 @@ public class AccountBean {
 				  
 		
 		
-		if(!user.isLogedIn()) {
+		if(!this.user.isLogedIn()) {
 			html += "    <div class='d-flex align-items-center ms-auto me-2 order-lg-3'>"
 					+ "      <a class='nav-link px-2' href='./NavbarAppl.jsp?action=zumLogin'>Login</a>"
 					+ "      <span class='text-muted'>|</span>"
 					+ "      <a class='nav-link px-2' href='./NavbarAppl.jsp?action=zurReg'>Registrieren</a>"
+					+ "    </div>";
+		}
+		else {
+			html += "    <div class='d-flex align-items-center ms-auto me-2 order-lg-3'>"
+					+ "      <a class='nav-link px-2' href='./NavbarAppl.jsp?action=abmelden'>Abmelden</a>"
 					+ "    </div>";
 		}
 			html += "    <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarSupportedContent'>"
@@ -328,7 +344,7 @@ public class AccountBean {
 	}
 	
 	
-	public String getNachrichtenHtml() {
+	public String getNachrichtenHtml() throws SQLException {
 		String html = "<div class='container-fluid chat-container'>"
 			    + "<div class='row h-100'>"
 			    + "<div class='col-12 col-md-4 col-lg-3 chat-list p-0'>"
@@ -336,32 +352,19 @@ public class AccountBean {
 			    
 		
 			    
-		for(int i = 0; i < this.aktChatReihenfolge.length; i++) {
-			if(this.aktChatPartner.equals(this.aktChatReihenfolge[i]))
-				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action active'>" 
-					 + this.aktChatReihenfolge[i] + "</a>";
-			else
-				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action'>" 
-						 + this.aktChatReihenfolge[i] + "</a>";
-				
-		}
+			   html += this.getChatSeitenanzeige();	
 			    
 			   html += "</div>"
 			    + "</div>";
 			    		
 			    
 			   html += "<div class='col-12 col-md-8 col-lg-9 d-flex flex-column p-0'>"
-			    + "<div class='border-bottom p-3 fw-bold'>" + this.aktChatPartner +"</div>"
+			    + "<div class='border-bottom p-3 fw-bold'>" + this.getNameFromUser(this.aktChatPartner) +"</div>"
 			    + "<div class='chat-messages flex-grow-1'>";
 			   
 			   
 			   
-			   for(Nachricht nachricht : this.alleNachrichten.get(this.aktChatPartner)) {
-				   if(this.aktChatPartner.equals(nachricht.getSender()))
-					   html += "<div class='bg-light rounded p-2 mb-2 message-left'>" + nachricht.getText() + "</div>";
-				   else
-					   html += "<div class='bg-primary text-white rounded p-2 mb-2 message-right'>" + nachricht.getText() + "</div>";
-			   }
+			   html += this.getChatverlauf();
 			    
 			   html += "</div>"
 			    + "<div class='border-top p-3'>"
@@ -384,11 +387,45 @@ public class AccountBean {
 	
 	
 	
+	// Abschnitt Hilfsmethoden für getHtml
 	
+	// Methode um den Vor- und Nachnamen der Chatpartner zu bekommen
+	public String getNameFromUser(String user) {
+		String name = "";
+		for(Account account : this.allAccounts) {
+			if(account.getEmail().equals(user))
+				name = account.getVorname() + " " + account.getNachname();
+		}
+		return name;
+	}
 	
+	// Methode um den Chatverlauf zwischen dem aktuellen ChatPartner zu erzeugen
+	public String getChatverlauf() {
+		String html = "";
+		for(Nachricht nachricht : this.alleNachrichten.get(this.aktChatPartner)) {
+			   if(this.aktChatPartner.equals(nachricht.getSender()))
+				   html += "<div class='bg-light rounded p-2 mb-2 message-left'>" + nachricht.getText() + "</div>";
+			   else
+				   html += "<div class='bg-primary text-white rounded p-2 mb-2 message-right'>" + nachricht.getText() + "</div>";
+		   }
+		return html;
+	}
 	
-	
-	
+	public String getChatSeitenanzeige() {
+		String html = "";
+		
+		for(int i = 0; i < this.aktChatReihenfolge.length; i++) {
+			if(this.aktChatPartner.equals(this.aktChatReihenfolge[i]))
+				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action active'>" 
+					 + this.getNameFromUser(this.aktChatReihenfolge[i]) + "</a>";
+			else
+				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action'>" 
+						 + this.getNameFromUser(this.aktChatReihenfolge[i]) + "</a>";
+				
+		}
+		
+		return html;
+	}
 	
 	// Abschnitt Getter und Setter
 	

@@ -12,11 +12,14 @@
 <%
 	String action = request.getParameter("action");
 	String user   = request.getParameter("user"); 
+	String text   = request.getParameter("text");
 	
 	if(action == null)
 		action = "";
 	
 	if(action.equals("Senden")){
+		myAccount.sendMessage(text);
+		myAccount.readAlleNachrichtenFromDB();
 		response.sendRedirect("./NachrichtenView.jsp");
 	}
 	else if(action.equals("switch")){
