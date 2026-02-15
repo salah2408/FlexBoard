@@ -35,7 +35,14 @@
 		}
 	}
 	else if(action.equals("zurSuche")){
-		response.sendRedirect("./SucheView.jsp");
+	    String q = request.getParameter("q");
+
+	    if(q == null){
+	        q = "";
+	    }
+
+	    response.sendRedirect("./SucheView.jsp?q=" 
+	        + java.net.URLEncoder.encode(q, "UTF-8"));
 	}
 	else if(action.equals("zurPost")){
 		if(myAccount.getLogedIn())
@@ -49,6 +56,13 @@
 		myAccount.abmelden();
 		response.sendRedirect("./HomepageView.jsp");
 		
+	}else if(action.equals("zurMeineInserate")){
+	    if(myAccount.getLogedIn())
+	        response.sendRedirect("./MeineInserateView.jsp");
+	    else{
+	        myWeiter.setLink("./MeineInserateView.jsp");
+	        response.sendRedirect("./LoginView.jsp");
+	    }
 	}
 	else
 		response.sendRedirect("./HomepageView.jsp");

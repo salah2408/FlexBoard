@@ -408,28 +408,6 @@ public class AccountBean {
 	}
 	
 	
-	public String getSuchfeldHtml() {
-
-	    String html = "<div class='mt-4'>"
-	            + "<form action='./NavbarAppl.jsp' method='get'>"
-	            + "<input type='hidden' name='action' value='zurSuche'>"
-
-	            + "<div class='input-group input-group-lg shadow-sm'>"
-
-	            + "<input type='text' "
-	            + "class='form-control rounded-start-pill' "
-	            + "name='q' "
-	            + "placeholder='Wonach suchst du? (z.B. Fahrrad, Buch, Laptop)'>"
-
-	            + "<button class='btn btn-primary rounded-end-pill px-4' "
-	            + "type='submit'>Suchen</button>"
-
-	            + "</div>"
-	            + "</form>"
-	            + "</div>";
-
-	    return html;
-	}
 	
 	
 	// Abschnitt Hilfsmethoden für getHtml
