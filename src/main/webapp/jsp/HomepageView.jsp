@@ -5,6 +5,7 @@
 <html lang="de">
 
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -30,11 +31,12 @@
 	<jsp:useBean id="home" class="de.hwg_lu.bwi520.beans.HomeBean"
 		scope="request" />
 	<!-- Navbar -->
-	<jsp:getProperty property="navbarHtml" name="myAccount" />
+
 
 	<%
 	myAccount.setAktuelleSeite("home");
 	%>
+	<jsp:getProperty property="navbarHtml" name="myAccount" />
 
 	<main class="flex-fill">
 
@@ -52,15 +54,20 @@
 							Kontakte schnell herzustellen.</p>
 
 						<div class="d-flex gap-3">
-							<a href="#" class="btn btn-primary btn-lg px-4"> Inserat
-								erstellen </a> <a href="#"
+							<a
+								href="<jsp:getProperty name='myAccount' property='inserierenLink' />"
+								class="btn btn-primary btn-lg px-4"> Inserat erstellen </a> <a
+								href="./SucheView.jsp"
 								class="btn btn-outline-secondary btn-lg px-4"> Inserate
 								ansehen </a>
+
 						</div>
 					</div>
 
 					<!-- RIGHT: VISUAL PLACEHOLDER -->
+
 					<div class="col-lg-6">
+						<h6 class="fw-bold mb-3 text-muted">Beispielanzeigen</h6>
 						<div class="hero-mockup shadow-lg rounded-4 p-4 bg-white">
 							<div class="card border-0 shadow-sm mb-3">
 								<div class="card-body">
@@ -133,5 +140,17 @@
 	</footer>
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+		<script src="../js/ui.js"></script>
+	<%
+	if (myAccount.getLoginSuccess()) {
+	%>
+	<script>
+	showToast("Erfolgreich eingeloggt.");
+	</script>
+	<%
+	myAccount.setLoginSuccess(false);
+	}
+	%>
+
 </body>
 </html>

@@ -19,7 +19,7 @@ public class ListingTest {
         this.dbConn = new PostgreSQLAccess().getConnection();
 
         // Reihenfolge ist wichtig wegen Foreign Keys
-        this.createTableCategory();
+     
         this.createTableListing();
         this.createTableListingImage();
         this.createTableFavorite();
@@ -28,44 +28,33 @@ public class ListingTest {
         System.out.println("Alle Tabellen fuer Inserieren/Chat/Favoriten sollten jetzt existieren.");
     }
 
-    // 1) Kategorie
-    public void createTableCategory() throws SQLException {
-        String sql =
-            "CREATE TABLE IF NOT EXISTS category(" +
-            "catid INT PRIMARY KEY, " +
-            "catname VARCHAR(100) NOT NULL, " +
-            "parentid INT NOT NULL DEFAULT 0" +
-            ");";
+    
 
-        PreparedStatement prep = dbConn.prepareStatement(sql);
-        prep.executeUpdate();
-        System.out.println("Tabelle category müsste jetzt existieren");
-    }
-
-    // 2) Anzeige (Listing)
+    // 1) Anzeige (Listing)
     // userid = email aus account
     public void createTableListing() throws SQLException {
         String sql =
             "CREATE TABLE IF NOT EXISTS listing(" +
             "listingid INT PRIMARY KEY, " +
-            "userid VARCHAR(64) NOT NULL, " +              // account.email
-            "catid INT NOT NULL, " +                       // category.catid
+            "userid VARCHAR(64) NOT NULL, " +
+            "catid BIGINT NOT NULL, " +
             "title VARCHAR(150) NOT NULL, " +
             "descr VARCHAR(2000) NOT NULL DEFAULT '', " +
             "price INT NOT NULL DEFAULT 0, " +
             "zip VARCHAR(10) NOT NULL DEFAULT '', " +
             "city VARCHAR(120) NOT NULL DEFAULT '', " +
-            "status VARCHAR(3) NOT NULL DEFAULT 'A', " +   // A=active, D=draft, S=sold
+            "status VARCHAR(3) NOT NULL DEFAULT 'A', " +
             "createdat VARCHAR(25) NOT NULL DEFAULT '', " +
             "updatedat VARCHAR(25) NOT NULL DEFAULT '', " +
             "CONSTRAINT fk_listing_user FOREIGN KEY(userid) REFERENCES account(email), " +
-            "CONSTRAINT fk_listing_cat FOREIGN KEY(catid) REFERENCES category(catid)" +
+            "CONSTRAINT fk_listing_cat FOREIGN KEY(catid) REFERENCES category(id)" +
             ");";
 
         PreparedStatement prep = dbConn.prepareStatement(sql);
         prep.executeUpdate();
-        System.out.println("Tabelle listing müsste jetzt existieren");
+        System.out.println("Tabelle listing existiert jetzt (FK korrekt gesetzt)");
     }
+
 
     // 3) Bilder
     public void createTableListingImage() throws SQLException {
