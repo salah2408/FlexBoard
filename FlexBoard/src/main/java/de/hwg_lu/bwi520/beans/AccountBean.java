@@ -414,6 +414,45 @@ public class AccountBean {
 	    return html;
 	}
 	
+	public String getNachrichtenHtml() throws SQLException {
+		String html = "<div class='container-fluid chat-container'>"
+			    + "<div class='row h-100'>"
+			    + "<div class='col-12 col-md-4 col-lg-3 chat-list p-0'>"
+			    + "<div class='list-group list-group-flush'>";
+			    
+		
+			    
+			   html += this.getChatSeitenanzeige();	
+			    
+			   html += "</div>"
+			    + "</div>";
+			    		
+			    
+			   html += "<div class='col-12 col-md-8 col-lg-9 d-flex flex-column p-0'>"
+			    + "<div class='border-bottom p-3 fw-bold'>" + this.getNameFromUser(this.aktChatPartner) +"</div>"
+			    + "<div class='chat-messages flex-grow-1'>";
+			   
+			   
+			   
+			   html += this.getChatverlauf();
+			    
+			   html += "</div>"
+			    + "<div class='border-top p-3'>"
+			    + "<div class='input-group'>"
+			    + "<form action='./NachrichtenAppl.jsp' method='get'>"
+			    + "<input class='form-control' type='text' name='text' value='' placeholder='Nachricht schreiben...'>"
+			    + "<input class='btn btn-primary' type='submit' name='action' value='Senden'>"
+			    + "</form>"
+			    + "</div>"
+			    + "</div>"
+			    + "</div>"
+			    + "</div>"
+			    + "</div>";
+		
+		
+		return html;
+	}
+	
 	
 	
 	
