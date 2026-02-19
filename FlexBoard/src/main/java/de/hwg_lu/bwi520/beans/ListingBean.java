@@ -56,11 +56,11 @@ public class ListingBean {
             prep.setString(9, "A");         // A=active (oder D=draft)
             prep.setString(10, "");         // createdat (optional später)
             prep.setString(11, "");         // updatedat
+            
 
             prep.executeUpdate();
             System.out.println("Listing erfolgreich eingefuegt: " + listingid);
             return true;
-
         } catch (Exception e) {
             System.out.println("Fehler beim Inserieren der Anzeige");
             e.printStackTrace();

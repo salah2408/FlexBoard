@@ -17,13 +17,14 @@ import de.hwg_lu.bwi520.classes.Nachricht;
 public class AccountBean {
 	Vector<Account> allAccounts;
 	Connection dbConn;
-	private String aktuelleSeite = "";
+	public String aktuelleSeite = "";
 	
 	Account user;
 	HashMap<String, Vector<Nachricht>> alleNachrichten;
 	
 	String[] aktChatReihenfolge;
 	String aktChatPartner;
+	public boolean loginSuccess = false;
 	
 	public AccountBean() throws ClassNotFoundException, SQLException {
 		this.allAccounts = new Vector<Account>();
@@ -141,8 +142,14 @@ public class AccountBean {
 		System.out.println("Erfolgreich abgemeldet");
 	}
 	
+	public String getInserierenLink() {
+	    return "./NavbarAppl.jsp?action=zumInserieren";
+	}
+
 	
+
 	
+
 	
 	
 	
@@ -408,28 +415,6 @@ public class AccountBean {
 	}
 	
 	
-	public String getSuchfeldHtml() {
-
-	    String html = "<div class='mt-4'>"
-	            + "<form action='./NavbarAppl.jsp' method='get'>"
-	            + "<input type='hidden' name='action' value='zurSuche'>"
-
-	            + "<div class='input-group input-group-lg shadow-sm'>"
-
-	            + "<input type='text' "
-	            + "class='form-control rounded-start-pill' "
-	            + "name='q' "
-	            + "placeholder='Wonach suchst du? (z.B. Fahrrad, Buch, Laptop)'>"
-
-	            + "<button class='btn btn-primary rounded-end-pill px-4' "
-	            + "type='submit'>Suchen</button>"
-
-	            + "</div>"
-	            + "</form>"
-	            + "</div>";
-
-	    return html;
-	}
 	
 	
 	// Abschnitt Hilfsmethoden für getHtml
@@ -534,5 +519,12 @@ public class AccountBean {
 
 	public void setAktuelleSeite(String aktuelleSeite) {
 		this.aktuelleSeite = aktuelleSeite;
+	}
+	public void setLoginSuccess(boolean loginSuccess) {
+	    this.loginSuccess = loginSuccess;
+	}
+
+	public boolean getLoginSuccess() {
+	    return loginSuccess;
 	}
 }
