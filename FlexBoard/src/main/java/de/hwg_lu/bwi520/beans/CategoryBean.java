@@ -52,7 +52,7 @@ public class CategoryBean {
         String html = "";
 
         html += "<label class='form-label'>Kategorie</label>";
-        html += "<select name='catid' class='form-control' required>";
+        html += "<select id='category' name='catid' class='form-control' required onchange='getCategory()'>";
         html += "<option value=''>Bitte auswählen</option>";
 
         for (Category cat : this.allCategories) {

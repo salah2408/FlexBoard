@@ -5,63 +5,67 @@
 <head>
 <meta charset="UTF-8">
 <title>Flexboard - Inserieren</title>
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<script
-	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link type="text/css" rel="stylesheet" href="../css/Inserieren.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/Inserieren.js"></script>
 </head>
 <body>
 <jsp:useBean id="myWeiter" class="de.hwg_lu.bwi520.beans.WeiterleitungsBean" scope="session" />
-	<jsp:useBean id="accountBean"
-		class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
-	<jsp:useBean id="listingBean"
-		class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
-	<jsp:useBean id="categoryBean" 
-             class="de.hwg_lu.bwi520.beans.CategoryBean" 
-             scope="session" />
+	<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
+	<jsp:useBean id="listingBean" class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
+	<jsp:useBean id="categoryBean" class="de.hwg_lu.bwi520.beans.CategoryBean" scope="session" />
 		
+    <jsp:getProperty property="navbarHtml" name="myAccount" />
 
-	<%=accountBean.getNavbarHtml()%>
-
-	<div style="max-width: 700px; margin: 20px auto;">
-		<h2>Anzeige inserieren</h2>
+	<div class="form-container">
+		<h2 class="mb-4">Anzeige inserieren</h2>
 
 		<form action="./NavbarAppl.jsp" method="post">
 			<input type="hidden" name="action" value="saveListing" />
 
-			<div class="mb-3">
-				<label class="form-label">Titel</label> <input type="text"
-					class="form-control" name="title" required>
+			<div class="row-gap">
+				<label>Titel</label> <input type="text" class="form-control"
+					name="title" placeholder="Was bietest du an?" required>
 			</div>
 
-			<div style="margin-top: 10px;">
-				<label>Beschreibung</label><br>
-				<textarea name="descr" style="width: 100%; height: 120px;" required></textarea>
+			<div class="row-gap">
+				<label>Beschreibung</label>
+				<textarea class="form-control" name="descr" style="height: 150px;"
+					placeholder="Details zu deinem Inserat..." required></textarea>
 			</div>
 
-			<div style="margin-top: 10px;">
-				<jsp:getProperty name="categoryBean" property="categoriesDropdownHtml" />
-
+			<div class="row-gap">
+				<div class="custom-select-wrapper">
+					<jsp:getProperty name="categoryBean"
+						property="categoriesDropdownHtml" />
+				</div>
 			</div>
 
-			<div style="margin-top: 10px;">
-				<label>Preis</label><br> <input type="number" name="price"
-					style="width: 100%;" value="0" min="0" required>
+			<div id="categoryInput">
+			
 			</div>
 
-			<div style="margin-top: 10px;">
-				<label>PLZ</label><br> <input type="text" name="zip"
-					style="width: 100%;">
+			<div class="row row-gap">
+				<div class="col-md-8">
+					<label>Ort</label> <input type="text" class="form-control"
+						name="city" placeholder="Musterstadt">
+				</div>
+				<div class="col-md-4">
+					<label>PLZ</label> <input type="text" class="form-control"
+						name="zip" placeholder="12345">
+				</div>
 			</div>
 
-			<div style="margin-top: 10px;">
-				<label>Ort</label><br> <input type="text" name="city"
-					style="width: 100%;">
+			<div class="row row-gap">
+				<div class="col-md-4">
+					<label>Preis (€)</label> <input type="number" class="form-control"
+						name="price" value="0" min="0" required>
+				</div>
 			</div>
 
-			<div style="margin-top: 15px;">
-				<button type="submit" class="btn btn-success">Inserieren</button>
+			<div class="mt-4">
+				<input class="btn btn-primary btn-lg w-100" type="submit" name="action" value="Anzeige erstellen">
 			</div>
 		</form>
 	</div>
