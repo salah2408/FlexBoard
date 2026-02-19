@@ -30,12 +30,7 @@
 		scope="session" />
 	<jsp:useBean id="home" class="de.hwg_lu.bwi520.beans.HomeBean"
 		scope="request" />
-	<!-- Navbar -->
 
-
-	<%
-	myAccount.setAktuelleSeite("home");
-	%>
 	<jsp:getProperty property="navbarHtml" name="myAccount" />
 
 	<main class="flex-fill">
