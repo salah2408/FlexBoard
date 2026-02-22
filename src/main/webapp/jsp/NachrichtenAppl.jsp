@@ -24,6 +24,7 @@
 	}
 	else if(action.equals("switch")){
 		myAccount.setAktChatPartner(user);
+		 myAccount.readAlleNachrichtenFromDB();
 		response.sendRedirect("./NachrichtenView.jsp");
 	}
 	else{

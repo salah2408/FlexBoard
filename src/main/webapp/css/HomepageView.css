@@ -70,7 +70,7 @@ body {
 }
 
 .card:hover {
-    transform: translateY(-6px);
+    transform: translateY(-3px);
     box-shadow: 0 20px 40px rgba(0,0,0,0.08) !important;
 }
 
@@ -146,4 +146,26 @@ body {
 
 .app-toast.success {
     background-color: #198754;
+}
+
+/* ============================= */
+/* Homepage Listing Cards */
+/* ============================= */
+
+.home-listing-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-listing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+}
+.home-listing-card .card-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.home-listing-card .listing-content {
+    flex-grow: 1;
 }

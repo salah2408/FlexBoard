@@ -15,6 +15,8 @@
 		scope="session" />
 	<jsp:useBean id="myWeiter"
 		class="de.hwg_lu.bwi520.beans.WeiterleitungsBean" scope="session" />
+	<jsp:useBean id="MyListing" class="de.hwg_lu.bwi520.beans.ListingBean"
+		scope="session"></jsp:useBean>
 	<%
 	String action = request.getParameter("action");
 	String title = request.getParameter("title");
@@ -42,8 +44,7 @@
 			response.sendRedirect("./InserierenView.jsp");
 
 		return;
-	}
-	else if (action.equals("zurHomepage"))
+	} else if (action.equals("zurHomepage"))
 		response.sendRedirect("./HomepageView.jsp");
 	else if (action.equals("zumLogin")) {
 		response.sendRedirect("./LoginView.jsp");
@@ -83,6 +84,13 @@
 			myWeiter.setLink("./MeineInserateView.jsp");
 			response.sendRedirect("./LoginView.jsp");
 		}
+	} else if (action.equals("zumListing")) {
+
+		int listingid = Integer.parseInt(request.getParameter("id"));
+
+		listingBean.setAktListingId(listingid);
+
+		response.sendRedirect("./InseratDetailView.jsp");
 	} else
 		response.sendRedirect("./HomepageView.jsp");
 	%>

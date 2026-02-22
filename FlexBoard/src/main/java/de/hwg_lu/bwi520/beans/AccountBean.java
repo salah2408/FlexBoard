@@ -452,6 +452,84 @@ public class AccountBean {
 		
 		return html;
 	}
+	public String getHomepageListingsHtml() {
+
+	    String html = "";
+	    String sql = "SELECT l.listingid, l.title, l.city, l.price, c.name AS category_name " +
+	    	    "FROM listing l " +
+	    	    "JOIN category c ON l.catid = c.id " +
+	    	    "WHERE l.status = 'A' " +
+	    	    "ORDER BY RANDOM() LIMIT 3";
+
+	    try {
+	        PreparedStatement prep = this.dbConn.prepareStatement(sql);
+	        ResultSet rs = prep.executeQuery();
+
+	        html += "<section class='py-5 bg-white'>";
+	        html += "<div class='container'>";
+	        html += "<div class='text-center mb-4'>";
+	        html += "<h2 class='fw-bold'>Entdecke Inserate</h2>";
+	        html += "<p class='text-muted'>Zufällige aktive Angebote auf FlexBoard</p>";
+	        html += "</div>";
+	        html += "<div class='row g-4 justify-content-center'>";
+
+	        boolean hasResults = false;
+
+	        while (rs.next()) {
+	            hasResults = true;
+
+	            String title = rs.getString("title");
+	            String category = rs.getString("category_name");
+	            String city = rs.getString("city");
+	            int price = rs.getInt("price");
+
+	            html += "<div class='col-md-4'>";
+	            html += "<div class='card h-100 shadow-sm border-0 rounded-4 home-listing-card'>";
+	            html += "<div class='card-body p-4 d-flex flex-column'>";
+	            html += "<a href='./NavbarAppl.jsp?action=zumListing&id=" 
+	            	      + rs.getInt("listingid") 
+	            	      + "' class='stretched-link'></a>";
+	            html += "<div class='mb-4 text-center fs-2'>";
+	            html += "<i class='bi bi-box-seam text-primary opacity-75'></i>";
+	            html += "</div>";
+	            html += "<div class='listing-content'>";
+	            html += "<h5 class='fw-bold fs-4 mb-2'>" + title + "</h5>";
+	            html += "<div class='mb-2'>";
+	            html += "<span class='badge bg-primary bg-opacity-10 text-primary fw-semibold'>"
+	                  + category + "</span>";
+	            html += "</div>";
+
+	            if (city != null && !city.isEmpty()) {
+	                html += "<p class='text-muted small'>" + city + "</p>";
+	            } else {
+	                html += "<p class='text-muted small'>Ort nicht angegeben</p>";
+	            }
+	            html += "</div>";
+	            if (price > 0) {
+	                html += "<span class='badge bg-primary fs-6 px-3 py-2 mt-3'>"
+	                      + price + " €</span>";
+	            } else {
+	                html += "<span class='badge bg-dark bg-opacity-75 fs-6 px-3 py-2 mt-3'>"
+	                      + "Preis auf Anfrage</span>";
+	            }
+
+	            html += "</div></div></div>";
+	        }
+
+	        if (!hasResults) {
+	            html += "<div class='col-12 text-center text-muted'>"
+	                  + "Derzeit sind keine aktiven Inserate vorhanden."
+	                  + "</div>";
+	        }
+
+	        html += "</div></div></section>";
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return html;
+	}
 	
 	
 	
