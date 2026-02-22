@@ -110,6 +110,8 @@
 		</section>
 
 		<%-- Das ist für das Mein Profil, wenn man eingeloggt ist --%>
+		
+		<jsp:getProperty name="myAccount" property="homepageListingsHtml" />
 
 		<jsp:getProperty name="myAccount" property="profilHtml" />
 

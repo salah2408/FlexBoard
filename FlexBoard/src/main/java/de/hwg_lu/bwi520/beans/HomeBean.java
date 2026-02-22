@@ -1,11 +1,26 @@
 package de.hwg_lu.bwi520.beans;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import de.hwg_lu.bwi.jdbc.PostgreSQLAccess;
 
 public class HomeBean {
 	private String suchbegriff = "";
+	Connection dbConn;
 
-    public HomeBean() {
+    public HomeBean() throws ClassNotFoundException, SQLException {
+    	
+    	this.dbConn = new PostgreSQLAccess().getConnection();
+    	
+    	
+    	
+    	
     }
-
+    
+ // Abschnitt getHtml
+    
     // Hero + Suchbereich der Startseite
     public String getSearchCardHtml() {
 
@@ -81,6 +96,9 @@ public class HomeBean {
 
         return html;
     }
+    
+    
+    
     
     
 	public String getSuchbegriff() {
