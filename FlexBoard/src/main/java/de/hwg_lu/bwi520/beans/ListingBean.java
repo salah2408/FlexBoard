@@ -114,9 +114,10 @@ public class ListingBean {
                 	      + "</a>";
 
                 html += "<h2 class='fw-bold mb-3'>" + title + "</h2>";
-
-                html += "<span class='badge bg-primary bg-opacity-10 text-primary mb-3'>"
+                html += "<div class='mb-3'>";
+                html += "<span class='badge bg-primary fs-6 px-3 py-2'>"
                       + category + "</span>";
+                html += "</div>";
 
                 html += "<p class='text-muted mb-2'>";
                 html += (zip != null ? zip : "") + " " + (city != null ? city : "");
@@ -127,13 +128,22 @@ public class ListingBean {
                 html += "<p class='mb-4'>" + descr + "</p>";
 
                 if (price > 0) {
-                    html += "<h4 class='fw-bold text-primary'>" + price + " €</h4>";
+                    html += "<div class='my-4'>";
+                    html += "<span class='display-6 fw-bold text-primary'>"
+                          + price + " €</span>";
+                    html += "</div>";
                 } else {
-                    html += "<h4 class='fw-bold text-secondary'>Preis auf Anfrage</h4>";
+                    html += "<div class='my-4'>";
+                    html += "<span class='display-6 fw-bold text-secondary'>"
+                          + "Preis auf Anfrage</span>";
+                    html += "</div>";
                 }
-
-                html += "<p class='text-muted mt-3'>Anbieter: " + userid + "</p>";
-
+                html += "<div class='border-top pt-4 mt-4'>";
+                html += "<div class='d-flex align-items-center gap-2 text-muted'>";
+                html += "<i class='bi bi-person-circle fs-5'></i>";
+                html += "<span>Anbieter: <strong>" + userid + "</strong></span>";
+                html += "</div>";
+                html += "</div>";
                 html += "</div></div></div></div></div>";
 
             } else {
@@ -149,6 +159,8 @@ public class ListingBean {
         return html;
     }
     
+   
+    
     public String getKontaktButtonHtml() {
 
         if (account == null) return "";
@@ -159,7 +171,7 @@ public class ListingBean {
 
             html += "<div class='text-center mt-4'>";
             html += "<a href='./NavbarAppl.jsp?action=zumLogin' "
-                  + "class='btn btn-primary'>"
+                  + "class='btn btn-primary btn-lg px-4 shadow rounded-3'>"
                   + "Zum Login, um Kontakt aufzunehmen"
                   + "</a></div>";
 
@@ -169,7 +181,7 @@ public class ListingBean {
             html += "<div class='text-center mt-4'>";
             html += "<a href='./NachrichtenAppl.jsp?action=switch&user="
                   + this.anbieterEmail
-                  + "' class='btn btn-success'>"
+                  + "' class='btn btn-success btn-lg px-4 shadow rounded-3'>"
                   + "<i class='bi bi-chat-dots'></i> Nachricht senden"
                   + "</a></div>";
 
