@@ -35,14 +35,6 @@
 
 		catid = Integer.parseInt(request.getParameter("catid"));
 		price = Integer.parseInt(request.getParameter("price"));
-
-		boolean ok = listingBean.saveListing(userid, catid, title, descr, price, zip, city);
-
-		if (ok)
-			response.sendRedirect("./HomepageView.jsp");
-		else
-			response.sendRedirect("./InserierenView.jsp");
-
 		return;
 	} else if (action.equals("zurHomepage"))
 		response.sendRedirect("./HomepageView.jsp");

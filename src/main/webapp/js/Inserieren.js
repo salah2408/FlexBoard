@@ -30,7 +30,7 @@ function checkEventPreis() {
         preisBlock.hidden = false;
     } else {
         preisBlock.hidden = true;
-        preisInput.value = ''; // Wichtig für die Blank Space Übertragung
+        preisInput.value = '';
     }
 }
 
@@ -42,9 +42,8 @@ function checkJobVerguetung() {
 
     if (auswahl === 'Suche') {
         verguetungBlock.hidden = true;
-        verguetungInput.value = ''; // Wichtig für die Blank Space Übertragung
+        verguetungInput.value = '';
     } else {
-        // Bei "Biete" oder wenn noch nichts gewählt ist, anzeigen
         verguetungBlock.hidden = false;
     }
 }
@@ -59,7 +58,7 @@ function checkNachhilfePreis() {
         preisBlock.hidden = false;
     } else {
         preisBlock.hidden = true;
-        preisInput.value = ''; // Wichtig für die Blank Space Übertragung
+        preisInput.value = '';
     }
 }
 
@@ -87,13 +86,11 @@ document.addEventListener('DOMContentLoaded', function() {
         for (let i = 0; i < dateien.length; i++) {
             const datei = dateien[i];
             
-            // STRIKTE KONTROLLE: Ist es wirklich ein Bild?
             if (!datei.type.startsWith('image/')) {
                 ungueltigeDateiGefunden = true;
-                break; // Schleife sofort abbrechen
+                break;
             }
 
-            // VORSCHAU GENERIEREN
             const bildUrl = URL.createObjectURL(datei);
             const img = document.createElement('img');
             img.src = bildUrl;
@@ -106,11 +103,10 @@ document.addEventListener('DOMContentLoaded', function() {
             container.appendChild(img);
         }
 
-        // WENN EINE FALSCHE DATEI DABEI WAR: Alles löschen!
         if (ungueltigeDateiGefunden) {
             alert('Bitte wähle ausschließlich Bilddateien aus.');
-            fileInput.value = ''; // Leert das Feld sofort (wird als Blank Space übertragen)
-            container.innerHTML = ''; // Löscht eventuell schon generierte Vorschauen
+            fileInput.value = '';
+            container.innerHTML = ''; 
         }
     });
 });

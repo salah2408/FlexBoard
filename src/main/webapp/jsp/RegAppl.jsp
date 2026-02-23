@@ -24,7 +24,8 @@
 	if(action.equals("Registrieren")){
 		if(myAccount.saveAccount(email, vorname, nachname, passwort)){
 			myRegMsg.setRegSuccess();
-			response.sendRedirect("./RegView.jsp");
+			myAccount.login(email, passwort);
+			response.sendRedirect("./HomepageView.jsp");
 		}
 		else{
 			myRegMsg.setAccountExists(email);
