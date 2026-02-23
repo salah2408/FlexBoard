@@ -240,10 +240,6 @@ public class AccountBean {
 				LocalDateTime zeitUser1 = nachrichten1.get(nachrichten1.size()-1).getZeitpunkt();
 				LocalDateTime zeitUser2 = nachrichten2.get(nachrichten2.size()-1).getZeitpunkt();
 				
-				System.out.println("user1: " + this.aktChatReihenfolge[j] + "||" + "user2: " + this.aktChatReihenfolge[j+1]);
-				System.out.println("User1: " + zeitUser1 + "|| User2: " + zeitUser2);
-				System.out.println("Zeitpunkt 2 größer 1 ? " + zeitUser2.isAfter(zeitUser1));
-				
 				if (zeitUser2.isAfter(zeitUser1)) { 
 					String temp = this.aktChatReihenfolge[j];
 					this.aktChatReihenfolge[j] = this.aktChatReihenfolge[j + 1];
@@ -253,17 +249,6 @@ public class AccountBean {
 			}
 			if (!swapped)
 				break;
-		}
-		
-		
-		
-		for(int i = 0; i < this.aktChatReihenfolge.length; i++) {
-			String user = this.aktChatReihenfolge[i];
-			System.out.println(i+1 + ". User: " + user);
-			Vector<Nachricht> nachrichten = this.alleNachrichten.get(user);
-			for(Nachricht nachricht : nachrichten) {
-				System.out.println(nachricht.getSender() + " -> " + nachricht.getEmpfaenger() + " || " + nachricht.getDatum() + " " + nachricht.getUhrzeit() + " || " + nachricht.getText());
-			}
 		}
 		
 		if(this.aktChatReihenfolge.length > 0) {

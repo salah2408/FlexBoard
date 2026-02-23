@@ -26,10 +26,8 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
-	<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean"
-		scope="session" />
-	<jsp:useBean id="home" class="de.hwg_lu.bwi520.beans.HomeBean"
-		scope="request" />
+	<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
+	<jsp:useBean id="home" class="de.hwg_lu.bwi520.beans.HomeBean" scope="request" />
 
 	<jsp:getProperty property="navbarHtml" name="myAccount" />
 
