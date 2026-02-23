@@ -18,37 +18,31 @@ public class ListingTest {
     public void doSomething() throws ClassNotFoundException, SQLException {
         this.dbConn = new PostgreSQLAccess().getConnection();
 
-        // Reihenfolge ist wichtig wegen Foreign Keys
      
         this.createTableListing();
-        this.createTableListingImage();
-        this.createTableFavorite();
-        this.createTableMessage();
+//        this.createTableListingImage();
+//        this.createTableFavorite();
+//        this.createTableMessage();
 
         System.out.println("Alle Tabellen fuer Inserieren/Chat/Favoriten sollten jetzt existieren.");
     }
 
     
-
-    // 1) Anzeige (Listing)
-    // userid = email aus account
     public void createTableListing() throws SQLException {
-        String sql =
-            "CREATE TABLE IF NOT EXISTS listing(" +
-            "listingid INT PRIMARY KEY, " +
-            "userid VARCHAR(64) NOT NULL, " +
-            "catid BIGINT NOT NULL, " +
-            "title VARCHAR(150) NOT NULL, " +
-            "descr VARCHAR(2000) NOT NULL DEFAULT '', " +
-            "price INT NOT NULL DEFAULT 0, " +
-            "zip VARCHAR(10) NOT NULL DEFAULT '', " +
-            "city VARCHAR(120) NOT NULL DEFAULT '', " +
-            "status VARCHAR(3) NOT NULL DEFAULT 'A', " +
-            "createdat VARCHAR(25) NOT NULL DEFAULT '', " +
-            "updatedat VARCHAR(25) NOT NULL DEFAULT '', " +
-            "CONSTRAINT fk_listing_user FOREIGN KEY(userid) REFERENCES account(email), " +
-            "CONSTRAINT fk_listing_cat FOREIGN KEY(catid) REFERENCES category(id)" +
-            ");";
+        String sql = "CREATE TABLE listing ("
+            + "    listingid SERIAL PRIMARY KEY,"
+            + "    userid VARCHAR(50) NOT NULL,"
+            + "    catid INT NOT NULL,"
+            + "    title VARCHAR(150) NOT NULL,"
+            + "    descr VARCHAR(3000) NOT NULL,"
+            + "    zip VARCHAR(20) NOT NULL,"
+            + "    city VARCHAR(100) NOT NULL,"
+            + "    status VARCHAR(3) NOT NULL,"
+            + "    date DATE NOT NULL,"
+            + "    details TEXT NOT NULL,"
+            + "    FOREIGN KEY (userid) REFERENCES account(email),"
+            + "    FOREIGN KEY (catid) REFERENCES category(id)"
+            + ")";
 
         PreparedStatement prep = dbConn.prepareStatement(sql);
         prep.executeUpdate();
