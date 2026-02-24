@@ -9,21 +9,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Inserat Details - FlexBoard</title>
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-	rel="stylesheet">
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" ></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="../css/HomepageView.css">
 </head>
 <body class="d-flex flex-column min-vh-100">
-
-	<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean"
-		scope="session"></jsp:useBean>
-	<jsp:useBean id="listingBean"
-		class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
+<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
+<jsp:useBean id="listingBean" class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
 
 	<%
 	listingBean.setAccount(myAccount);
@@ -34,7 +27,6 @@
 	<main class="flex-fill">
 
 		<jsp:getProperty name="listingBean" property="inseratDetailHtml" />
-
 		<jsp:getProperty name="listingBean" property="kontaktButtonHtml" />
 		<jsp:getProperty name="listingBean" property="eigentuemerButtonsHtml" />
 	</main>
@@ -44,10 +36,5 @@
 			<small>© 2026 FlexBoard · Praktikum Anwendungssysteme</small>
 		</div>
 	</footer>
-
-	<script
-		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-
 </body>
 </html>
