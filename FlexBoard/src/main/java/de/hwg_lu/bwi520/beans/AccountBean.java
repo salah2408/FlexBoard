@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Vector;
-
+import org.json.JSONObject;
 import de.hwg_lu.bwi.jdbc.PostgreSQLAccess;
 import de.hwg_lu.bwi520.classes.Account;
 import de.hwg_lu.bwi520.classes.Nachricht;
@@ -440,11 +440,11 @@ public class AccountBean {
 	public String getHomepageListingsHtml() {
 
 	    String html = "";
-	    String sql = "SELECT l.listingid, l.title, l.city, l.price, c.name AS category_name " +
-	    	    "FROM listing l " +
-	    	    "JOIN category c ON l.catid = c.id " +
-	    	    "WHERE l.status = 'A' " +
-	    	    "ORDER BY RANDOM() LIMIT 3";
+	    String sql = "SELECT l.listingid, l.title, l.city, l.details, c.name AS category_name " +
+	             "FROM listing l " +
+	             "JOIN category c ON l.catid = c.id " +
+	             "WHERE l.status = 'A' " +
+	             "ORDER BY RANDOM() LIMIT 3";
 
 	    try {
 	        PreparedStatement prep = this.dbConn.prepareStatement(sql);
@@ -466,7 +466,21 @@ public class AccountBean {
 	            String title = rs.getString("title");
 	            String category = rs.getString("category_name");
 	            String city = rs.getString("city");
-	            int price = rs.getInt("price");
+	            String detailsJsonString = rs.getString("details");
+	            JSONObject detailsJson = new JSONObject(detailsJsonString);
+
+	            // Wir prüfen mehrere mögliche Preisfelder:
+	            int price = 0;
+
+	            if (detailsJson.has("price")) {
+	                price = detailsJson.optInt("price", 0);
+	            } else if (detailsJson.has("technikPreis")) {
+	                price = detailsJson.optInt("technikPreis", 0);
+	            } else if (detailsJson.has("eventPreis")) {
+	                price = detailsJson.optInt("eventPreis", 0);
+	            } else if (detailsJson.has("dienstleistungPreis")) {
+	                price = detailsJson.optInt("dienstleistungPreis", 0);
+	            }
 
 	            html += "<div class='col-md-4'>";
 	            html += "<div class='card h-100 shadow-sm border-0 rounded-4 home-listing-card'>";

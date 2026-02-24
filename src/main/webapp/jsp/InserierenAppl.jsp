@@ -141,7 +141,15 @@ if(action.equals("Anzeige erstellen")){
 		detailsJson.put("referenzen", referenzen);
 	} 
 	
-	myListing.saveListing(myAccount.getEmail(), title, descr, categoryID, city, zip, detailsJson);
+	myListing.saveListing(
+		    myAccount.getEmail(),
+		    title,
+		    descr,
+		    Integer.parseInt(categoryID),
+		    city,
+		    zip,
+		    detailsJson
+		);
 	response.sendRedirect("./HomepageView.jsp");
 } else {
 	response.sendRedirect("./HomepageView.jsp");
