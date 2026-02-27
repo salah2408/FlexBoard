@@ -16,6 +16,15 @@ public class ListingBean {
 	private int aktListingId;
 	public AccountBean account;
 	public String anbieterEmail;
+	
+	// ===== NEU FÜR EDIT =====
+		private String editTitle;
+		private String editDescr;
+		private String editCity;
+		private String editZip;
+		private int editCatId;
+		private JSONObject editDetails;
+		private boolean editMode = false;
 
 	public ListingBean() throws ClassNotFoundException, SQLException {
 		this.dbConn = new PostgreSQLAccess().getConnection();
@@ -54,6 +63,90 @@ public class ListingBean {
 			return false;
 		}
 	}
+	
+	// =============================
+		// UPDATE
+		// =============================
+		public boolean updateListing(String userid, String title, String descr,
+				int catid, String city, String zip, JSONObject detailsJson)  {
+
+			try {
+
+				String sql = "UPDATE listing SET catid=?, title=?, descr=?, zip=?, city=?, details=? "
+						+ "WHERE listingid=? AND userid=?";
+
+				PreparedStatement prep = this.dbConn.prepareStatement(sql);
+
+				prep.setInt(1, catid);
+				prep.setString(2, title);
+				prep.setString(3, descr);
+				prep.setString(4, zip);
+				prep.setString(5, city);
+				prep.setString(6, detailsJson.toString());
+				prep.setInt(7, this.aktListingId);
+				prep.setString(8, userid);
+
+				int rows = prep.executeUpdate();
+
+				this.editMode = false; // nach Update verlassen wir Edit-Mode
+				return rows == 1;
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			return false;
+		}
+		
+		
+		// =============================
+		// LOAD FOR EDIT: Für das Laden zum Bearbeiten
+		// =============================
+		public boolean loadListingForEdit(int listingId, String userid) {
+
+			try {
+
+				String sql = "SELECT * FROM listing WHERE listingid=? AND userid=?";
+				PreparedStatement prep = this.dbConn.prepareStatement(sql);
+				prep.setInt(1, listingId);
+				prep.setString(2, userid);
+
+				ResultSet rs = prep.executeQuery();
+
+				if (rs.next()) {
+
+					this.aktListingId = listingId;
+					this.editTitle = rs.getString("title");
+					this.editDescr = rs.getString("descr");
+					this.editCity = rs.getString("city");
+					this.editZip = rs.getString("zip");
+					this.editCatId = rs.getInt("catid");
+					this.editDetails = new JSONObject(rs.getString("details"));
+
+					this.editMode = true;
+
+					return true;
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			return false;
+		}
+		// =============================
+				// Um aus dem Bearbeitungsmodus rauszukommen
+				// =============================
+		public void resetEditMode() {
+		    this.editMode = false;
+		    this.editTitle = null;
+		    this.editDescr = null;
+		    this.editCity = null;
+		    this.editZip = null;
+		    this.editCatId = 0;
+		    this.editDetails = null;
+		}
+		
 
 	// gethtml
 	public String getInseratDetailHtml() {
@@ -381,4 +474,30 @@ public class ListingBean {
 	public void setAccount(AccountBean account) {
 		this.account = account;
 	}
+	public boolean isEditMode() {
+		return editMode;
+	}
+	public String getEditTitle() {
+		return editTitle != null ? editTitle : "";
+	}
+	public String getEditDescr() {
+		return editDescr != null ? editDescr : "";
+	}
+	public String getEditCity() {
+		return editCity != null ? editCity : "";
+	}
+	public String getEditZip() {
+		return editZip != null ? editZip : "";
+	}
+	public int getEditCatId() {
+		return editCatId;
+	}
+	public JSONObject getEditDetails() {
+	    return editDetails;
+	}
+	public String getEditDetailValue(String key) {
+	    if (this.editDetails == null) return "";
+	    return this.editDetails.optString(key, "");
+	}
+	
 }
