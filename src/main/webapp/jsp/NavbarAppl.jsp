@@ -99,8 +99,21 @@
 		listingBean.deaktiviereListing();
 
 		response.sendRedirect("./MeineInserateView.jsp");
+		return;
+	}
+	else if (action.equals("loescheListing")) {
 
-	} else if (action.equals("aktiviereListing")) {
+	    int listingid = Integer.parseInt(request.getParameter("id"));
+
+	    listingBean.setAktListingId(listingid);
+	    listingBean.setAccount(myAccount);
+
+	    listingBean.loescheListing();
+
+	    response.sendRedirect("./MeineInserateView.jsp");
+	    return;
+	
+	}else if (action.equals("aktiviereListing")) {
 
 		int listingid = Integer.parseInt(request.getParameter("id"));
 

@@ -154,7 +154,7 @@ public class ListingBean {
 		String html = "";
 		String sql = "SELECT l.title, l.descr, l.city, l.zip, l.date, l.details, "
 				+ "c.name AS category_name, l.userid " + "FROM listing l " + "JOIN category c ON l.catid = c.id "
-				+ "WHERE l.listingid = ?";
+				+ "WHERE l.listingid = ? AND l.status <> 'X'";
 
 		try {
 			PreparedStatement prep = this.dbConn.prepareStatement(sql);
@@ -338,8 +338,10 @@ public class ListingBean {
 
 		String html = "";
 
-		String sql = "SELECT listingid, title, city, date, status, details " + "FROM listing " + "WHERE userid = ? "
-				+ "ORDER BY listingid DESC";
+		String sql ="SELECT listingid, title, city, date, status, details "
+		        + "FROM listing "
+		        + "WHERE userid = ? AND status <> 'X' "
+		        + "ORDER BY listingid DESC";
 
 		try {
 
@@ -406,10 +408,15 @@ public class ListingBean {
 				if (status.equals("A")) {
 					html += "<a href='./NavbarAppl.jsp?action=deaktiviereListing&id=" + listingid
 							+ "' class='btn btn-sm btn-outline-danger d-block'>Deaktivieren</a>";
-				} else {
+				}
+				else {
 					html += "<a href='./NavbarAppl.jsp?action=aktiviereListing&id=" + listingid
 							+ "' class='btn btn-sm btn-outline-success d-block'>Reaktivieren</a>";
 				}
+				html += "<a href='./NavbarAppl.jsp?action=loescheListing&id=" + listingid
+				        + "' class='btn btn-sm btn-danger d-block mt-2' "
+				        + "onclick=\"return confirm('Inserat wirklich endgültig löschen?');\">"
+				        + "Löschen</a>";
 				html += "</div>";
 				html += "</div>"; // flex
 				html += "</div>"; // card-body
@@ -447,6 +454,39 @@ public class ListingBean {
 	        if (!account.getEmail().equals(owner)) return false;
 
 	        String sqlUpdate = "UPDATE listing SET status = 'A' WHERE listingid = ?";
+	        PreparedStatement prepUpdate = this.dbConn.prepareStatement(sqlUpdate);
+	        prepUpdate.setInt(1, this.aktListingId);
+
+	        int rows = prepUpdate.executeUpdate();
+
+	        return rows == 1;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return false;
+	}
+	
+	public boolean loescheListing() {
+
+	    if (account == null) return false;
+	    if (!account.getLogedIn()) return false;
+
+	    try {
+
+	        String sqlCheck = "SELECT userid FROM listing WHERE listingid = ?";
+	        PreparedStatement prepCheck = this.dbConn.prepareStatement(sqlCheck);
+	        prepCheck.setInt(1, this.aktListingId);
+	        ResultSet rs = prepCheck.executeQuery();
+
+	        if (!rs.next()) return false;
+
+	        String owner = rs.getString("userid");
+
+	        if (!account.getEmail().equals(owner)) return false;
+
+	        String sqlUpdate = "UPDATE listing SET status = 'X' WHERE listingid = ?";
 	        PreparedStatement prepUpdate = this.dbConn.prepareStatement(sqlUpdate);
 	        prepUpdate.setInt(1, this.aktListingId);
 
