@@ -1,3 +1,4 @@
+
 function zeigeZusatzFelder() {
     // 1. Zuerst alle potenziellen Blöcke (1 bis 8) verstecken
     for (let i = 1; i <= 8; i++) {
@@ -63,6 +64,11 @@ function checkNachhilfePreis() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+	// Beim Laden sofort ausführen
+	   zeigeZusatzFelder();
+	   checkEventPreis();
+	   checkJobVerguetung();
+	   checkNachhilfePreis();
     
     const fileInput = document.getElementById('bildUpload');
     const container = document.getElementById('vorschauContainer');
