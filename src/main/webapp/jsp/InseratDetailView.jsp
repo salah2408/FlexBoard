@@ -27,8 +27,7 @@
 	<main class="flex-fill">
 
 		<jsp:getProperty name="listingBean" property="inseratDetailHtml" />
-		<jsp:getProperty name="listingBean" property="kontaktButtonHtml" />
-		<jsp:getProperty name="listingBean" property="eigentuemerButtonsHtml" />
+
 	</main>
 
 	<footer class="custom-footer mt-auto">
