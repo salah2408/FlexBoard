@@ -74,14 +74,14 @@ String anmeldung = request.getParameter("anmeldung");
 String eventPreis = request.getParameter("event_preis");
 
 // Tauschen catid 7
-String tauschGegen = request.getParameter("tausch_gegen");
+String tauschGegen = request.getParameter("tauschGegen");
 String zustandTauschen = request.getParameter("zustandTauschen");
 String abholung = request.getParameter("abholung");
 
 // Dienstleistungen catid 8
-String dienstleistungKat = request.getParameter("dienstleistung_kat");
+String dienstleistungKat = request.getParameter("dienstleistungKat");
 String preismodell = request.getParameter("preismodell");
-String dienstleistungPreis = request.getParameter("dienstleistung_preis");
+String dienstleistungPreis = request.getParameter("dienstleistungPreis");
 String referenzen = request.getParameter("referenzen");
 
 
@@ -92,65 +92,96 @@ if(action == null)
 if(categoryID == null)
 	categoryID = "";
 
-if(action.equals("Anzeige erstellen")){
-	JSONObject detailsJson = new JSONObject();
-	
-	if(categoryID.equals("1")){
-		detailsJson.put("studiengang", studiengang);
-		detailsJson.put("modul", modul);
-		detailsJson.put("hochschule", hochschule);
-		detailsJson.put("semester", semester);
-		detailsJson.put("format", format);
-	} else if (categoryID.equals("2")) {
-		detailsJson.put("fach", fach);
-		detailsJson.put("nachhilfeTyp", nachhilfeTyp);
-		detailsJson.put("preisProStunde", preisProStunde != null ? preisProStunde : "");
-		detailsJson.put("nachhilfeOrt", nachhilfeOrt);
-		detailsJson.put("nachhilfeNiveau", nachhilfeNiveau);
-	} else if (categoryID.equals("3")) {
-		detailsJson.put("zimmergroesse", zimmergroesse);
-		detailsJson.put("gesamtmiete", gesamtmiete);
-		detailsJson.put("einzugsdatum", einzugsdatum);
-		detailsJson.put("befristung", befristung);
-		detailsJson.put("wgDetails", wgDetails != null ? wgDetails : "");
-	} else if (categoryID.equals("4")) {
-		detailsJson.put("jobTypSelect", jobTypSelect);
-		detailsJson.put("anstellungsart", anstellungsart);
-		detailsJson.put("wochenstunden", wochenstunden);
-		detailsJson.put("verguetung", verguetung != null ? verguetung : "");
-	} else if (categoryID.equals("5")) {
-		detailsJson.put("geraetetyp", geraetetyp);
-		detailsJson.put("marke", marke);
-		detailsJson.put("zustandTechnik", zustandTechnik);
-		detailsJson.put("garantie", garantie);
-		detailsJson.put("technikPreis", technikPreis);
-	} else if (categoryID.equals("6")) {
-		detailsJson.put("eventDatum", eventDatum);
-		detailsJson.put("veranstalter", veranstalter);
-		detailsJson.put("eintritt", eintritt);
-		detailsJson.put("anmeldung", anmeldung);
-		detailsJson.put("eventPreis", eventPreis != null ? eventPreis : "");
-	} else if (categoryID.equals("7")) {
-		detailsJson.put("tauschGegen", tauschGegen);
-		detailsJson.put("zustandTauschen", zustandTauschen);
-		detailsJson.put("abholung", abholung);
-	} else if (categoryID.equals("8")) {
-		detailsJson.put("dienstleistungKat", dienstleistungKat);
-		detailsJson.put("preismodell", preismodell);
-		detailsJson.put("dienstleistungPreis", dienstleistungPreis);
-		detailsJson.put("referenzen", referenzen);
-	} 
-	
-	myListing.saveListing(
-		    myAccount.getEmail(),
-		    title,
-		    descr,
-		    Integer.parseInt(categoryID),
-		    city,
-		    zip,
-		    detailsJson
-		);
-	response.sendRedirect("./HomepageView.jsp");
+if(action.equals("Anzeige erstellen") || action.equals("Anzeige aktualisieren")){
+    JSONObject detailsJson = new JSONObject();
+
+    if(categoryID.equals("1")){
+        detailsJson.put("studiengang", studiengang);
+        detailsJson.put("modul", modul);
+        detailsJson.put("hochschule", hochschule);
+        detailsJson.put("semester", semester);
+        detailsJson.put("format", format);
+
+    } else if (categoryID.equals("2")) {
+        detailsJson.put("fach", fach);
+        detailsJson.put("nachhilfeTyp", nachhilfeTyp);
+        detailsJson.put("preisProStunde", preisProStunde != null ? preisProStunde : "");
+        detailsJson.put("nachhilfeOrt", nachhilfeOrt);
+        detailsJson.put("nachhilfeNiveau", nachhilfeNiveau);
+
+    } else if (categoryID.equals("3")) {
+        detailsJson.put("zimmergroesse", zimmergroesse);
+        detailsJson.put("gesamtmiete", gesamtmiete);
+        detailsJson.put("einzugsdatum", einzugsdatum);
+        detailsJson.put("befristung", befristung);
+        detailsJson.put("wgDetails", wgDetails != null ? wgDetails : "");
+
+    } else if (categoryID.equals("4")) {
+        detailsJson.put("jobTypSelect", jobTypSelect);
+        detailsJson.put("anstellungsart", anstellungsart);
+        detailsJson.put("wochenstunden", wochenstunden);
+        detailsJson.put("verguetung", verguetung != null ? verguetung : "");
+
+    } else if (categoryID.equals("5")) {
+        detailsJson.put("geraetetyp", geraetetyp);
+        detailsJson.put("marke", marke);
+        detailsJson.put("zustandTechnik", zustandTechnik);
+        detailsJson.put("garantie", garantie);
+        detailsJson.put("technikPreis", technikPreis);
+
+    } else if (categoryID.equals("6")) {
+        detailsJson.put("eventDatum", eventDatum);
+        detailsJson.put("veranstalter", veranstalter);
+        detailsJson.put("eintritt", eintritt);
+        detailsJson.put("anmeldung", anmeldung);
+        detailsJson.put("eventPreis", eventPreis != null ? eventPreis : "");
+
+    } else if (categoryID.equals("7")) {
+        detailsJson.put("tauschGegen", tauschGegen);
+        detailsJson.put("zustandTauschen", zustandTauschen);
+        detailsJson.put("abholung", abholung);
+
+    } else if (categoryID.equals("8")) {
+        detailsJson.put("dienstleistungKat", dienstleistungKat);
+        detailsJson.put("preismodell", preismodell);
+        detailsJson.put("dienstleistungPreis", dienstleistungPreis);
+        detailsJson.put("referenzen", referenzen);
+    }
+
+    String listingIdParam = request.getParameter("listingid");
+
+    boolean success;
+
+    if(listingIdParam != null && !listingIdParam.isEmpty()) {
+
+        myListing.setAktListingId(Integer.parseInt(listingIdParam));
+
+        success = myListing.updateListing(
+            myAccount.getEmail(),
+            title,
+            descr,
+            Integer.parseInt(categoryID),
+            city,
+            zip,
+            detailsJson
+        );
+
+    } else {
+
+        success = myListing.saveListing(
+            myAccount.getEmail(),
+            title,
+            descr,
+            Integer.parseInt(categoryID),
+            city,
+            zip,
+            detailsJson
+        );
+    }
+
+    myListing.resetEditMode();
+
+    response.sendRedirect("./HomepageView.jsp");
 } else {
 	response.sendRedirect("./HomepageView.jsp");
 }

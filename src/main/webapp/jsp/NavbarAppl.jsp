@@ -1,3 +1,4 @@
+<%@page import="de.hwg_lu.bwi520.beans.CategoryBean"%>
 <%@page import="de.hwg_lu.bwi520.beans.WeiterleitungsBean"%>
 <%@page import="de.hwg_lu.bwi520.beans.AccountBean"%>
 
@@ -14,8 +15,10 @@
 		scope="session" />
 	<jsp:useBean id="myWeiter"
 		class="de.hwg_lu.bwi520.beans.WeiterleitungsBean" scope="session" />
-	<jsp:useBean id="listingBean" class="de.hwg_lu.bwi520.beans.ListingBean"
-	scope="session" />
+	<jsp:useBean id="listingBean"
+		class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
+	<jsp:useBean id="categoryBean"
+		class="de.hwg_lu.bwi520.beans.CategoryBean" scope="session"></jsp:useBean>
 	<%
 	String action = request.getParameter("action");
 	String title = request.getParameter("title");
@@ -42,7 +45,11 @@
 	} else if (action.equals("zurReg")) {
 		response.sendRedirect("./RegView.jsp");
 	} else if (action.equals("zumInserieren")) {
-
+		CategoryBean cBean = (CategoryBean) session.getAttribute("categoryBean");
+		if (cBean != null) {
+			cBean.setSelectedCategoryId(-1);
+		}
+		listingBean.resetEditMode();
 		if (myAccount.getLogedIn())
 			response.sendRedirect("./InserierenView.jsp");
 		else {
@@ -92,8 +99,21 @@
 		listingBean.deaktiviereListing();
 
 		response.sendRedirect("./MeineInserateView.jsp");
+		return;
+	}
+	else if (action.equals("loescheListing")) {
 
-	} else if (action.equals("aktiviereListing")) {
+	    int listingid = Integer.parseInt(request.getParameter("id"));
+
+	    listingBean.setAktListingId(listingid);
+	    listingBean.setAccount(myAccount);
+
+	    listingBean.loescheListing();
+
+	    response.sendRedirect("./MeineInserateView.jsp");
+	    return;
+	
+	}else if (action.equals("aktiviereListing")) {
 
 		int listingid = Integer.parseInt(request.getParameter("id"));
 
@@ -103,6 +123,34 @@
 		listingBean.aktiviereListing();
 
 		response.sendRedirect("./MeineInserateView.jsp");
+	} else if (action.equals("bearbeiteListing")) {
+
+		String idParam = request.getParameter("id");
+
+		if (idParam != null && myAccount.getLogedIn()) {
+
+			int listingId = Integer.parseInt(idParam);
+
+			listingBean.setAccount(myAccount);
+
+			boolean loaded = listingBean.loadListingForEdit(listingId, myAccount.getEmail());
+
+			if (loaded) {
+		// Kategorie an CategoryBean übergeben
+		CategoryBean cBean = (CategoryBean) session.getAttribute("categoryBean");
+
+		if (cBean != null) {
+			cBean.setSelectedCategoryId(listingBean.getEditCatId());
+		}
+
+		response.sendRedirect("./InserierenView.jsp");
+		return;
+			}
+		}
+
+		response.sendRedirect("./HomepageView.jsp");
+		return;
+
 	} else
 		response.sendRedirect("./HomepageView.jsp");
 	%>
