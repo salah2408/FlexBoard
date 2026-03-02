@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,12 +23,12 @@ public class ListingBean {
 	String anbieterEmail;
 	ArrayList<Listing> anzeigen;
 	
-  String editTitle;
-  String editDescr;
-  String editCity;
-  String editZip;
-  int editCatId;
-  JSONObject editDetails;
+	String editTitle;
+  	String editDescr;
+  	String editCity;
+  	String editZip;
+  	int editCatId;
+  	JSONObject editDetails;
 	boolean editMode = false;
 
 
