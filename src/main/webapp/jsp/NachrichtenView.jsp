@@ -13,7 +13,9 @@
 <jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
 
 	<jsp:getProperty property="navbarHtml" name="myAccount"/>
-	<jsp:getProperty property="nachrichtenHtml" name="myAccount"/>
-	
+	<main class="flex-fill">
+		<jsp:getProperty property="nachrichtenHtml" name="myAccount"/>
+	</main>
+	<jsp:getProperty name="myAccount" property="footer" />
 </body>
 </html>

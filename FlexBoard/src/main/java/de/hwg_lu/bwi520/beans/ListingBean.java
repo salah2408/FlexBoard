@@ -216,10 +216,17 @@ public class ListingBean {
 
 				this.anbieterEmail = userid;
 
-				html += "<div class='container py-5'>";
-				html += "<div class='row g-4'>";
+				boolean isOwner = this.account.getEmail().equals(userid);
 
-				html += "<div class='col-lg-8'>";
+				html += "<div class='container py-5'>";
+				html += "<div class='row g-4'>"; // Die row bleibt hier ganz normal
+
+				// HIER IST DER TRICK: Wenn es dein Inserat ist, bekommt die Spalte "mx-auto"
+				if (isOwner) {
+				    html += "<div class='col-lg-8 offset-lg-2'>";
+				} else {
+				    html += "<div class='col-lg-8'>";
+				}
 
 				html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
 				html += "<div class='card-body p-4'>";
@@ -233,7 +240,7 @@ public class ListingBean {
 				if(this.isPrice(detailsJson))
 				    html += "<div class='display-6 fw-bold text-primary'>" + this.getPreisHtml(detailsJson) + "</div>";
 				else
-				    html += "<div class='display-6 fw-bold text-primary'>GRATIS / VB</div>";
+				    html += "<div class='display-6 fw-bold text-primary'>" + this.getGratisHtml(catid, detailsJson) + "</div>";
 				html += "</div>";
 				html += "</div>";
 
@@ -259,24 +266,28 @@ public class ListingBean {
 				html += "</div>";
 
 				html += "<div class='col-lg-4'>";
+				
+				// Nachricht schreiben soll nur erscheinen wenn der Inhaber der Anzeige nicht der User selbst ist
+				if(!isOwner) {
+					html += "<div class='card shadow-sm border-0 rounded-4 sticky-sidebar'>";
+					html += "<div class='card-body p-4 text-center'>";
+					html += "<div class='mb-3'>";
+					html += "<i class='bi bi-person-circle text-secondary profile-icon-large'></i>";
+					html += "</div>";
+					html += "<h5 class='fw-bold mb-1'>" + userid + "</h5>";
 
-				html += "<div class='card shadow-sm border-0 rounded-4 sticky-sidebar'>";
-				html += "<div class='card-body p-4 text-center'>";
-				html += "<div class='mb-3'>";
-				html += "<i class='bi bi-person-circle text-secondary profile-icon-large'></i>";
-				html += "</div>";
-				html += "<h5 class='fw-bold mb-1'>" + userid + "</h5>";
 
-
-				if (this.account.getLogedIn()) {
-				    html += "<button class='btn btn-primary w-100 py-2 mb-2 mt-3' data-bs-toggle='offcanvas' data-bs-target='#chatOffcanvas'>";
-				    html += "<i class='bi bi-envelope me-2'></i> Nachricht schreiben";
-				    html += "</button>";
-				} else {
-				    html += "<a href='./LoginView.jsp' class='btn btn-primary w-100 py-2 mb-2 mt-3'>";
-				    html += "<i class='bi bi-box-arrow-in-right me-2'></i> Zum Schreiben einloggen";
-				    html += "</a>";
+					if (this.account.getLogedIn()) {
+					    html += "<button class='btn btn-primary w-100 py-2 mb-2 mt-3' data-bs-toggle='offcanvas' data-bs-target='#chatOffcanvas'>";
+					    html += "<i class='bi bi-envelope me-2'></i> Nachricht schreiben";
+					    html += "</button>";
+					} else {
+					    html += "<a href='./LoginView.jsp' class='btn btn-primary w-100 py-2 mb-2 mt-3'>";
+					    html += "<i class='bi bi-box-arrow-in-right me-2'></i> Zum Schreiben einloggen";
+					    html += "</a>";
+					}
 				}
+
 				html += "</div>";
 				html += "</div>";
 				html += "</div>";
@@ -328,10 +339,10 @@ public class ListingBean {
 				html += "</div>";
 
 				html += "<div class='offcanvas-body p-4'>";
-				html += "<form action='./NachrichtSendenAppl.jsp' method='post'>"; 
+				html += "<form action='./InseratDetailAppl.jsp' method='post'>"; 
 
-				html += "<input type='hidden' name='empfaengerId' value='" + userid + "'>";
-				html += "<input type='hidden' name='listingId' value='" + this.aktListingId + "'>";
+				html += "<input type='hidden' name='empfaengerid' value='" + userid + "'>";
+				html += "<input type='hidden' name='listingid' value='" + this.aktListingId + "'>";
 
 				html += "<div class='mb-3'>";
 				html += "<label class='form-label text-muted small'>Deine Nachricht:</label>";
@@ -385,7 +396,7 @@ public class ListingBean {
 	    } else if (catid == 2) {
 	        String fach = detailsJson.optString("fach");
 	        String nachhilfeTyp = detailsJson.optString("nachhilfeTyp");
-	        String preisProStunde = detailsJson.optString("preisProStunde");
+	        int preisProStunde = detailsJson.optInt("preisProStunde");
 	        String nachhilfeOrt = detailsJson.optString("nachhilfeOrt");
 	        String nachhilfeNiveau = detailsJson.optString("nachhilfeNiveau");
 
@@ -397,7 +408,7 @@ public class ListingBean {
 
 	    } else if (catid == 3) {
 	        String zimmergroesse = detailsJson.optString("zimmergroesse");
-	        String gesamtmiete = detailsJson.optString("gesamtmiete");
+	        int gesamtmiete = detailsJson.optInt("gesamtmiete");
 	        String einzugsdatum = detailsJson.optString("einzugsdatum");
 	        String befristung = detailsJson.optString("befristung");
 	        String wgDetails = detailsJson.optString("wgDetails");
@@ -412,7 +423,7 @@ public class ListingBean {
 	        String jobTypSelect = detailsJson.optString("jobTypSelect");
 	        String anstellungsart = detailsJson.optString("anstellungsart");
 	        String wochenstunden = detailsJson.optString("wochenstunden");
-	        String verguetung = detailsJson.optString("verguetung");
+	        int verguetung = detailsJson.optInt("verguetung");
 
 	        html += "<li class='mb-2'><strong>Job-Typ:</strong> " + jobTypSelect + "</li>";
 	        html += "<li class='mb-2'><strong>Anstellungsart:</strong> " + anstellungsart + "</li>";
@@ -424,7 +435,7 @@ public class ListingBean {
 	        String marke = detailsJson.optString("marke");
 	        String zustandTechnik = detailsJson.optString("zustandTechnik");
 	        String garantie = detailsJson.optString("garantie");
-	        String technikPreis = detailsJson.optString("technikPreis");
+	        int technikPreis = detailsJson.optInt("technikPreis");
 
 	        html += "<li class='mb-2'><strong>Gerätetyp:</strong> " + geraetetyp + "</li>";
 	        html += "<li class='mb-2'><strong>Marke:</strong> " + marke + "</li>";
@@ -437,7 +448,7 @@ public class ListingBean {
 	        String veranstalter = detailsJson.optString("veranstalter");
 	        String eintritt = detailsJson.optString("eintritt");
 	        String anmeldung = detailsJson.optString("anmeldung");
-	        String eventPreis = detailsJson.optString("eventPreis");
+	        int eventPreis = detailsJson.optInt("eventPreis");
 
 	        html += "<li class='mb-2'><strong>Datum:</strong> " + eventDatum + "</li>";
 	        html += "<li class='mb-2'><strong>Veranstalter:</strong> " + veranstalter + "</li>";
@@ -457,7 +468,7 @@ public class ListingBean {
 	    } else if (catid == 8) {
 	        String dienstleistungKat = detailsJson.optString("dienstleistungKat");
 	        String preismodell = detailsJson.optString("preismodell");
-	        String dienstleistungPreis = detailsJson.optString("dienstleistungPreis");
+	        int dienstleistungPreis = detailsJson.optInt("dienstleistungPreis");
 	        String referenzen = detailsJson.optString("referenzen");
 
 	        html += "<li class='mb-2'><strong>Kategorie:</strong> " + dienstleistungKat + "</li>";
@@ -474,15 +485,19 @@ public class ListingBean {
 	}
 	
 	// Hilfsmethode um zu finden, ob in der JSON ein preis vorhanden ist
-	public boolean isPrice(JSONObject detailsJson) {
+	public boolean isPrice(JSONObject detailsJson) throws JSONException {
 		if(detailsJson.has("dienstleistungPreis"))
-			return true;
+			return detailsJson.getInt("dienstleistungPreis") > 0;
 		else if(detailsJson.has("eventPreis"))
-			return true;
+			return detailsJson.getInt("eventPreis") > 0;
 		else if(detailsJson.has("technikPreis"))
-			return true;
+			return detailsJson.getInt("technikPreis") > 0;
 		else if(detailsJson.has("preisProStunde"))
-			return true;
+			return detailsJson.getInt("preisProStunde") > 0;
+		else if(detailsJson.has("gesamtmiete"))
+			return detailsJson.getInt("gesamtmiete") > 0;
+		else if(detailsJson.has("verguetung"))
+			return detailsJson.getInt("verguetung") > 0;
 		return false;
 	}
 	
@@ -491,17 +506,54 @@ public class ListingBean {
 		String html = "";
 		
 		if(detailsJson.has("dienstleistungPreis"))
-			return detailsJson.getString("dienstleistungPreis")  + "€";
+			return detailsJson.getInt("dienstleistungPreis")  + "€";
 		else if(detailsJson.has("eventPreis"))
-			return detailsJson.getString("eventPreis")  + "€";
+			return detailsJson.getInt("eventPreis")  + "€";
 		else if(detailsJson.has("technikPreis"))
-			return detailsJson.getString("technikPreis")  + "€";
+			return detailsJson.getInt("technikPreis")  + "€";
 		else if(detailsJson.has("preisProStunde"))
-			return detailsJson.getString("preisProStunde") + "€/h";
+			return detailsJson.getInt("preisProStunde") + "€/h";
+		else if(detailsJson.has("gesamtmiete"))
+			return detailsJson.getInt("gesamtmiete")  + "€";
+		else if(detailsJson.has("verguetung"))
+			return detailsJson.getInt("verguetung")  + "€";
 		
 		return html;
 	}
 	
+	// Hilfsmethode um zu prüfen ob eine Anzeige Gratis ist oder auf Anfrage
+	public String getGratisHtml(int catid, JSONObject detailsJson) throws JSONException {
+		String html = "";
+		
+		 if (catid == 1) {
+			 	html = "Gratis";
+		    } else if (catid == 2) {
+		    	if(detailsJson.getString("nachhilfeTyp").equals("Suche Nachhilfe"))
+		    		html = "Preis auf Anfrage";
+		    	else if(detailsJson.getString("nachhilfeTyp").equals("Suche Lerngruppe (Kostenlos)"))
+		    		html = "Gratis";
+		    	else if(detailsJson.getString("nachhilfeTyp").equals("Biete Nachhilfe"))
+		    		html = "Preis auf Anfrage";
+		    } else if (catid == 3) {
+		    	html = "Preis auf Anfrage";
+		    } else if (catid == 4) {
+		    	html = "Preis auf Anfrage";
+		    } else if (catid == 5) {
+		    	html = "Preis auf Anfrage";
+		    } else if (catid == 6) {
+		    	if(detailsJson.getString("eintritt").equals("Kostenlos"))
+		    		html = "Gratis";
+		    	else if(detailsJson.getString("eintritt").equals("Kostenpflichtig"))
+		    		html = "Preis auf Anfrage";
+		    } else if (catid == 7) {
+		    	html = "auf Anfrage";
+		    } else if (catid == 8) {
+		    	html = "Preis auf Anfrage";
+		    }
+
+		
+		return html;
+	}
 	
 	public String getKontaktButtonHtml() {
 

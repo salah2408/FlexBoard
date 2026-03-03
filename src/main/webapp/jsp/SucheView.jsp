@@ -28,7 +28,7 @@
 	%>
 	<jsp:getProperty property="navbarHtml" name="myAccount" />
 
-
+	<main class="flex-fill">
 	<form action="./SucheAppl.jsp">
 		<div class="container-fluid search-bar">
 			<div class="container">
@@ -105,6 +105,7 @@
 			</div>
 		</div>
 	</div>
-
+	</main>
+	<jsp:getProperty name="myAccount" property="footer" />
 </body>
 </html>

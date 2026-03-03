@@ -30,10 +30,6 @@
 
 	</main>
 
-	<footer class="custom-footer mt-auto">
-		<div class="container py-4 text-center">
-			<small>© 2026 FlexBoard · Praktikum Anwendungssysteme</small>
-		</div>
-	</footer>
+	<jsp:getProperty name="myAccount" property="footer" />
 </body>
 </html>
