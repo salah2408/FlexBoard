@@ -10,7 +10,6 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Vector;
 
-import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.json.JSONObject;
 import de.hwg_lu.bwi.jdbc.PostgreSQLAccess;
 import de.hwg_lu.bwi520.classes.Account;
@@ -56,7 +55,7 @@ public class AccountBean {
 	
 	
 	public void readAllAccountsFromDB() throws SQLException {
-		String sql = "SELECT email, vorname, nachname, passwort, active, admin FROM account";
+		String sql = "SELECT email, vorname, nachname, active, admin FROM account";
 		PreparedStatement prep = dbConn.prepareStatement(sql);
 		
 		ResultSet dbRes = prep.executeQuery();
@@ -64,7 +63,6 @@ public class AccountBean {
 			String email = dbRes.getString("email");
 			String vorname = dbRes.getString("vorname");
 			String nachname = dbRes.getString("nachname");
-			String passwort = dbRes.getString("passwort");
 			String active = dbRes.getString("active");
 			String admin = dbRes.getString("admin");
 			
@@ -404,23 +402,22 @@ public class AccountBean {
 	    return html;
 	}
 	
-	public String getFooter() {
-		String html = "	<footer class='custom-footer mt-auto'>"
-				+ "		<div class='container py-4'>"
-				+ "			<div class='row'>"
-				+ "				<div class='col-md-6'>"
-				+ "					<h6 class='fw-bold mb-2'>FlexBoard</h6>"
-				+ "					<p class='small text-muted mb-0'>Eine einfache Plattform zum"
-				+ "						Erstellen und Finden von Inseraten. ✓ Schnell erstellt &nbsp; ✓"
-				+ "						Kostenlos &nbsp; ✓ Lokal vernetzt</p>"
-				+ "				</div>"
-				+ "				<div class='col-md-6 text-md-end mt-3 mt-md-0'>"
-				+ "					<small> © 2026 FlexBoard · Praktikum Anwendungssysteme </small>"
-				+ "				</div>"
-				+ "			</div>"
-				+ "		</div>"
-				+ "	</footer>";
-		
+	public String getFooterHtml() {
+		// Wir nutzen Bootstrap-Klassen (bg-dark, text-white), um Konsistenz zu garantieren
+	    String html = "<footer class='bg-dark text-white mt-auto'>" 
+	            + "<div class='container py-4'>"
+	            + "<div class='row'>"
+	            + "<div class='col-md-6'>"
+	            + "<h6 class='fw-bold mb-2'>FlexBoard</h6>"
+	            + "<p class='small mb-0' style='opacity: 0.8;'>Eine einfache Plattform zum Erstellen und Finden von Inseraten. ✓ Schnell erstellt &nbsp; ✓ Kostenlos &nbsp; ✓ Lokal vernetzt</p>"
+	            + "</div>"
+	            + "<div class='col-md-6 text-md-end mt-3 mt-md-0'>"
+	            + "<small style='opacity: 0.8;'> © 2026 FlexBoard · Praktikum Anwendungssysteme </small>"
+	            + "</div>"
+	            + "</div>"
+	            + "</div>"
+	            + "</footer>";
+
 		return html;
 	}
 	
@@ -437,7 +434,7 @@ public class AccountBean {
 			html += "</div>" + "</div>";
 
 			html += "<div class='col-12 col-md-8 col-lg-9 d-flex flex-column p-0'>"
-					+ "<div class='border-bottom p-3 fw-bold'>" + this.getNameFromUser(this.aktAnzeigeID) + "</div>"
+					+ "<div class='border-bottom p-3 fw-bold'>" + this.getTitleFromUser(this.aktAnzeigeID) + "---" + this.getNameFromUser(this.aktAnzeigeID) + "</div>"
 					+ "<div class='chat-messages flex-grow-1'>";
 
 			html += this.getChatverlauf();
@@ -570,24 +567,7 @@ public class AccountBean {
 
 	    return html;
 	}
-	public String getFooterHtml() {
-		// Wir nutzen Bootstrap-Klassen (bg-dark, text-white), um Konsistenz zu garantieren
-	    String html = "<footer class='bg-dark text-white mt-auto'>" 
-	            + "<div class='container py-4'>"
-	            + "<div class='row'>"
-	            + "<div class='col-md-6'>"
-	            + "<h6 class='fw-bold mb-2'>FlexBoard</h6>"
-	            + "<p class='small mb-0' style='opacity: 0.8;'>Eine einfache Plattform zum Erstellen und Finden von Inseraten. ✓ Schnell erstellt &nbsp; ✓ Kostenlos &nbsp; ✓ Lokal vernetzt</p>"
-	            + "</div>"
-	            + "<div class='col-md-6 text-md-end mt-3 mt-md-0'>"
-	            + "<small style='opacity: 0.8;'> © 2026 FlexBoard · Praktikum Anwendungssysteme </small>"
-	            + "</div>"
-	            + "</div>"
-	            + "</div>"
-	            + "</footer>";
 
-		return html;
-	}
 	
 	
 	
@@ -616,6 +596,18 @@ public class AccountBean {
 		return name;
 	}
 	
+	// Methode um den Titel der Anzeige anhand der Anzeige ID herauszufinden
+	public String getTitleFromUser(int listingid) throws SQLException {
+		String sql = "SELECT title FROM listing WHERE listingid = ?";
+		PreparedStatement prep = this.dbConn.prepareStatement(sql);
+		prep.setInt(1, listingid);
+		ResultSet dbRes = prep.executeQuery();
+		if(dbRes.next())
+			return dbRes.getString("title");
+		else
+			return "FEHLER";
+	}
+	
 	// Methode um den Chatverlauf zwischen dem aktuellen ChatPartner zu erzeugen
 	public String getChatverlauf() {
 		String html = "";
@@ -628,16 +620,16 @@ public class AccountBean {
 		return html;
 	}
 	
-	public String getChatSeitenanzeige() {
+	public String getChatSeitenanzeige() throws SQLException {
 		String html = "";
 		
 		for(int i = 0; i < this.aktChatReihenfolge.length; i++) {
 			if(this.aktChatPartner.equals(this.getEmailChatpartner(aktChatReihenfolge[i])))
-				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action active'>" 
-					 + this.getNameFromUser(this.aktChatReihenfolge[i]) + "</a>";
+				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "&listingid=" + aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action active'>" 
+					 + this.getTitleFromUser(this.aktChatReihenfolge[i]) + "</a>";
 			else
 				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action'>" 
-						 + this.getNameFromUser(this.aktChatReihenfolge[i]) + "</a>";
+						 + this.getTitleFromUser(this.aktChatReihenfolge[i]) + "</a>";
 				
 		}
 		

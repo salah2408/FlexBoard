@@ -11,6 +11,7 @@
 <jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
 <%
 	String action = request.getParameter("action");
+	String listingid   = request.getParameter("listingid");
 	String user   = request.getParameter("user"); 
 	String text   = request.getParameter("text");
 	
@@ -24,7 +25,8 @@
 	}
 	else if(action.equals("switch")){
 		myAccount.setAktChatPartner(user);
-		 myAccount.readAlleNachrichtenFromDB();
+		myAccount.setAktAnzeigeID(Integer.parseInt(listingid));
+		myAccount.readAlleNachrichtenFromDB();
 		response.sendRedirect("./NachrichtenView.jsp");
 	}
 	else{
