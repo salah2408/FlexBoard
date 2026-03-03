@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public class Nachricht {
+	int listingid;
 	String text;
 	LocalDate datum;
 	LocalTime uhrzeit;
@@ -12,7 +13,8 @@ public class Nachricht {
 	String sender;
 	String empfaenger;
 	
-	public Nachricht(String text, LocalDate datum, LocalTime uhrzeit, LocalDateTime zeitpunkt, String sender, String empfaenger) {
+	public Nachricht(int listingid, String text, LocalDate datum, LocalTime uhrzeit, LocalDateTime zeitpunkt, String sender, String empfaenger) {
+		this.listingid = listingid;
 		this.text = text;
 		this.datum = datum;
 		this.uhrzeit = uhrzeit;
