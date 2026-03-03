@@ -463,11 +463,19 @@ public class AccountBean {
 	    String sql = "SELECT l.listingid, l.title, l.city, l.details, c.name AS category_name " +
 	             "FROM listing l " +
 	             "JOIN category c ON l.catid = c.id " +
-	             "WHERE l.status = 'A' " +
-	             "ORDER BY RANDOM() LIMIT 3";
+	             "WHERE l.status = 'A' ";
+
+	if (this.getLogedIn()) {
+	    sql += "AND l.userid <> ? ";
+	}
+
+	sql += "ORDER BY RANDOM() LIMIT 3";
 
 	    try {
 	        PreparedStatement prep = this.dbConn.prepareStatement(sql);
+	        if (this.getLogedIn()) {
+	            prep.setString(1, this.getEmail());
+	        }
 	        ResultSet rs = prep.executeQuery();
 
 	        html += "<section class='py-5 bg-white'>";
@@ -488,6 +496,7 @@ public class AccountBean {
 	            String city = rs.getString("city");
 	            String detailsJsonString = rs.getString("details");
 	            JSONObject detailsJson = new JSONObject(detailsJsonString);
+	            String imageBase64 = detailsJson.optString("imageBase64", null);
 
 	            // Wir prüfen mehrere mögliche Preisfelder:
 	            int price = 0;
@@ -514,9 +523,15 @@ public class AccountBean {
 	            html += "<a href='./NavbarAppl.jsp?action=zumListing&id=" 
 	            	      + rs.getInt("listingid") 
 	            	      + "' class='stretched-link'></a>";
-	            html += "<div class='mb-4 text-center fs-2'>";
-	            html += "<i class='bi bi-box-seam text-primary opacity-75'></i>";
-	            html += "</div>";
+	            if (imageBase64 != null && !imageBase64.isEmpty()) {
+	                html += "<img src='" + imageBase64 + "' "
+	                      + "class='card-img-top rounded-top' "
+	                      + "style='height:200px; object-fit:cover;'>";
+	            } else {
+	                html += "<div class='mb-4 text-center fs-2'>";
+	                html += "<i class='bi bi-box-seam text-primary opacity-75'></i>";
+	                html += "</div>";
+	            }
 	            html += "<div class='listing-content'>";
 	            html += "<h5 class='fw-bold fs-4 mb-2'>" + title + "</h5>";
 	            html += "<div class='mb-2'>";
@@ -555,7 +570,24 @@ public class AccountBean {
 
 	    return html;
 	}
-	
+	public String getFooterHtml() {
+		// Wir nutzen Bootstrap-Klassen (bg-dark, text-white), um Konsistenz zu garantieren
+	    String html = "<footer class='bg-dark text-white mt-auto'>" 
+	            + "<div class='container py-4'>"
+	            + "<div class='row'>"
+	            + "<div class='col-md-6'>"
+	            + "<h6 class='fw-bold mb-2'>FlexBoard</h6>"
+	            + "<p class='small mb-0' style='opacity: 0.8;'>Eine einfache Plattform zum Erstellen und Finden von Inseraten. ✓ Schnell erstellt &nbsp; ✓ Kostenlos &nbsp; ✓ Lokal vernetzt</p>"
+	            + "</div>"
+	            + "<div class='col-md-6 text-md-end mt-3 mt-md-0'>"
+	            + "<small style='opacity: 0.8;'> © 2026 FlexBoard · Praktikum Anwendungssysteme </small>"
+	            + "</div>"
+	            + "</div>"
+	            + "</div>"
+	            + "</footer>";
+
+		return html;
+	}
 	
 	
 	

@@ -22,32 +22,31 @@ public class ListingBean {
 	AccountBean account;
 	String anbieterEmail;
 	ArrayList<Listing> anzeigen;
-	
-	String editTitle;
-  	String editDescr;
-  	String editCity;
-  	String editZip;
-  	int editCatId;
-  	JSONObject editDetails;
-	boolean editMode = false;
 
+	String editTitle;
+	String editDescr;
+	String editCity;
+	String editZip;
+	int editCatId;
+	JSONObject editDetails;
+	boolean editMode = false;
 
 	public ListingBean() throws ClassNotFoundException, SQLException {
 		this.dbConn = new PostgreSQLAccess().getConnection();
 		this.anzeigen = new ArrayList<Listing>();
 		this.readAlleAnzeigenFromDB();
 	}
-	
+
 	// Anzeigen auslesen
 	public void readAlleAnzeigenFromDB() {
+		this.anzeigen.clear();
 		String sql = "SELECT listingid, userid, catid, title, descr, city, zip, status, date, details FROM listing";
 
 		try {
 			PreparedStatement prep = this.dbConn.prepareStatement(sql);
-			prep.setInt(1, this.aktListingId);
 			ResultSet dbRes = prep.executeQuery();
-			
-			while(dbRes.next()) {
+
+			while (dbRes.next()) {
 				int listingid = dbRes.getInt("listingid");
 				String userid = dbRes.getString("userid");
 				int catid = dbRes.getInt("catid");
@@ -59,17 +58,14 @@ public class ListingBean {
 				Date date = dbRes.getDate("date");
 				String details = dbRes.getString("details");
 				JSONObject detailsJson = new JSONObject(details);
-				
+
 				this.anzeigen.add(new Listing(userid, catid, title, descr, city, status, date, detailsJson));
 			}
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
-	
-	
+
 	// Anzeige speichern
 	public boolean saveListing(String userid, String title, String descr, int catid, String city, String zip,
 			JSONObject detailsJson) throws SQLException {
@@ -103,90 +99,110 @@ public class ListingBean {
 			return false;
 		}
 	}
-	
+
 	// =============================
-		// UPDATE
-		// =============================
-		public boolean updateListing(String userid, String title, String descr,
-				int catid, String city, String zip, JSONObject detailsJson)  {
+	// UPDATE
+	// =============================
+	public boolean updateListing(String userid, String title, String descr, int catid, String city, String zip,
+			JSONObject detailsJson) {
 
-			try {
+		try {
 
-				String sql = "UPDATE listing SET catid=?, title=?, descr=?, zip=?, city=?, details=? "
-						+ "WHERE listingid=? AND userid=?";
+			String sql = "UPDATE listing SET catid=?, title=?, descr=?, zip=?, city=?, details=? "
+					+ "WHERE listingid=? AND userid=?";
 
-				PreparedStatement prep = this.dbConn.prepareStatement(sql);
+			PreparedStatement prep = this.dbConn.prepareStatement(sql);
 
-				prep.setInt(1, catid);
-				prep.setString(2, title);
-				prep.setString(3, descr);
-				prep.setString(4, zip);
-				prep.setString(5, city);
-				prep.setString(6, detailsJson.toString());
-				prep.setInt(7, this.aktListingId);
-				prep.setString(8, userid);
+			prep.setInt(1, catid);
+			prep.setString(2, title);
+			prep.setString(3, descr);
+			prep.setString(4, zip);
+			prep.setString(5, city);
+			prep.setString(6, detailsJson.toString());
+			prep.setInt(7, this.aktListingId);
+			prep.setString(8, userid);
 
-				int rows = prep.executeUpdate();
+			int rows = prep.executeUpdate();
 
-				this.editMode = false; // nach Update verlassen wir Edit-Mode
-				return rows == 1;
+			this.editMode = false; // nach Update verlassen wir Edit-Mode
+			return rows == 1;
 
-			} catch (Exception e) {
-				e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return false;
+	}
+
+	// =============================
+	// LOAD FOR EDIT: Für das Laden zum Bearbeiten
+	// =============================
+	public boolean loadListingForEdit(int listingId, String userid) {
+
+		try {
+
+			String sql = "SELECT * FROM listing WHERE listingid=? AND userid=?";
+			PreparedStatement prep = this.dbConn.prepareStatement(sql);
+			prep.setInt(1, listingId);
+			prep.setString(2, userid);
+
+			ResultSet rs = prep.executeQuery();
+
+			if (rs.next()) {
+
+				this.aktListingId = listingId;
+				this.editTitle = rs.getString("title");
+				this.editDescr = rs.getString("descr");
+				this.editCity = rs.getString("city");
+				this.editZip = rs.getString("zip");
+				this.editCatId = rs.getInt("catid");
+				this.editDetails = new JSONObject(rs.getString("details"));
+
+				this.editMode = true;
+
+				return true;
 			}
 
-			return false;
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
-		
-		// =============================
-		// LOAD FOR EDIT: Für das Laden zum Bearbeiten
-		// =============================
-		public boolean loadListingForEdit(int listingId, String userid) {
 
+		return false;
+	}
+
+	// =============================
+	// Um aus dem Bearbeitungsmodus rauszukommen
+	// =============================
+	public void resetEditMode() {
+		this.editMode = false;
+		this.editTitle = null;
+		this.editDescr = null;
+		this.editCity = null;
+		this.editZip = null;
+		this.editCatId = 0;
+		this.editDetails = null;
+	}
+	// =============================
+		// GET DETAILS DIRECTLY FROM DB (Fuer Update)
+		// =============================
+		public JSONObject getDetailsForListing(int listingId) {
 			try {
-
-				String sql = "SELECT * FROM listing WHERE listingid=? AND userid=?";
+				String sql = "SELECT details FROM listing WHERE listingid = ?";
 				PreparedStatement prep = this.dbConn.prepareStatement(sql);
 				prep.setInt(1, listingId);
-				prep.setString(2, userid);
-
+				
 				ResultSet rs = prep.executeQuery();
-
 				if (rs.next()) {
-
-					this.aktListingId = listingId;
-					this.editTitle = rs.getString("title");
-					this.editDescr = rs.getString("descr");
-					this.editCity = rs.getString("city");
-					this.editZip = rs.getString("zip");
-					this.editCatId = rs.getInt("catid");
-					this.editDetails = new JSONObject(rs.getString("details"));
-
-					this.editMode = true;
-
-					return true;
+					String detailsStr = rs.getString("details");
+					if (detailsStr != null && !detailsStr.isEmpty()) {
+						return new JSONObject(detailsStr);
+					}
 				}
-
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
-			return false;
+			return null;
 		}
-		// =============================
-				// Um aus dem Bearbeitungsmodus rauszukommen
-				// =============================
-		public void resetEditMode() {
-		    this.editMode = false;
-		    this.editTitle = null;
-		    this.editDescr = null;
-		    this.editCity = null;
-		    this.editZip = null;
-		    this.editCatId = 0;
-		    this.editDetails = null;
-		}
-		
 
 	// gethtml
 	public String getInseratDetailHtml() {
@@ -237,18 +253,29 @@ public class ListingBean {
 				html += "</p>";
 				html += "<hr>";
 
-				if(this.isPrice(detailsJson))
-				    html += "<div class='display-6 fw-bold text-primary'>" + this.getPreisHtml(detailsJson) + "</div>";
+				if (this.isPrice(detailsJson))
+					html += "<div class='display-6 fw-bold text-primary'>" + this.getPreisHtml(detailsJson) + "</div>";
 				else
 				    html += "<div class='display-6 fw-bold text-primary'>" + this.getGratisHtml(catid, detailsJson) + "</div>";
 				html += "</div>";
 				html += "</div>";
 
+				String imageBase64 = detailsJson.optString("imageBase64", null);
+
 				html += "<div class='mb-4'>";
-				html += "<img src='../img/flexboard-logo.jpg' ";
-				html += "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' ";
-				html += "data-bs-toggle='modal' data-bs-target='#imageGalleryModal' ";
-				html += "alt='Hauptbild'>";
+
+				if (imageBase64 != null && !imageBase64.isEmpty()) {
+
+					html += "<img src='" + imageBase64 + "' "
+							+ "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' "
+							+ "data-bs-toggle='modal' data-bs-target='#imageGalleryModal' " + "alt='Hauptbild'>";
+
+				} else {
+
+					html += "<img src='../img/flexboard-logo.jpg' "
+							+ "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' "
+							+ "data-bs-toggle='modal' data-bs-target='#imageGalleryModal' " + "alt='Placeholder'>";
+				}
 				html += "<div class='text-end mt-2'>";
 				html += "<small class='text-muted'><i class='bi bi-images'></i> 1 / 2</small>";
 				html += "</div>";
@@ -329,7 +356,7 @@ public class ListingBean {
 				html += "</div>";
 				html += "</div>";
 				html += "</div>";
-				
+
 				html += "<div class='offcanvas offcanvas-bottom shadow-lg rounded-top-4' tabindex='-1' id='chatOffcanvas' style='height: auto; max-height: 50vh;'>";
 				html += "<div class='offcanvas-header border-bottom px-4 py-3'>";
 				html += "<h5 class='offcanvas-title fw-bold'>";
@@ -371,8 +398,9 @@ public class ListingBean {
 		return html;
 	}
 	// Hilfsmethoden für die DetailAnzeigenHtml
-	
-	// Hilfsmethode um für die aktuellen Details der Anzeige zu bekommen (von Kategorie abhängig)
+
+	// Hilfsmethode um für die aktuellen Details der Anzeige zu bekommen (von
+	// Kategorie abhängig)
 	public String getDetailsKategorie(int catid, JSONObject detailsJson) {
 	    String html = "";
 	    html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
@@ -483,7 +511,7 @@ public class ListingBean {
 
 	    return html;
 	}
-	
+
 	// Hilfsmethode um zu finden, ob in der JSON ein preis vorhanden ist
 	public boolean isPrice(JSONObject detailsJson) throws JSONException {
 		if(detailsJson.has("dienstleistungPreis"))
@@ -500,7 +528,7 @@ public class ListingBean {
 			return detailsJson.getInt("verguetung") > 0;
 		return false;
 	}
-	
+
 	// Hilfsmethode um den richtigen Preis zu Printen
 	public String getPreisHtml(JSONObject detailsJson) throws JSONException {
 		String html = "";
@@ -657,10 +685,8 @@ public class ListingBean {
 
 		String html = "";
 
-		String sql ="SELECT listingid, title, city, date, status, details "
-		        + "FROM listing "
-		        + "WHERE userid = ? AND status <> 'X' "
-		        + "ORDER BY listingid DESC";
+		String sql = "SELECT listingid, title, city, date, status, details " + "FROM listing "
+				+ "WHERE userid = ? AND status <> 'X' " + "ORDER BY listingid DESC";
 
 		try {
 
@@ -727,15 +753,13 @@ public class ListingBean {
 				if (status.equals("A")) {
 					html += "<a href='./NavbarAppl.jsp?action=deaktiviereListing&id=" + listingid
 							+ "' class='btn btn-sm btn-outline-danger d-block'>Deaktivieren</a>";
-				}
-				else {
+				} else {
 					html += "<a href='./NavbarAppl.jsp?action=aktiviereListing&id=" + listingid
 							+ "' class='btn btn-sm btn-outline-success d-block'>Reaktivieren</a>";
 				}
 				html += "<a href='./NavbarAppl.jsp?action=loescheListing&id=" + listingid
-				        + "' class='btn btn-sm btn-danger d-block mt-2' "
-				        + "onclick=\"return confirm('Inserat wirklich endgültig löschen?');\">"
-				        + "Löschen</a>";
+						+ "' class='btn btn-sm btn-danger d-block mt-2' "
+						+ "onclick=\"return confirm('Inserat wirklich endgültig löschen?');\">" + "Löschen</a>";
 				html += "</div>";
 				html += "</div>"; // flex
 				html += "</div>"; // card-body
@@ -754,70 +778,91 @@ public class ListingBean {
 
 		return html;
 	}
-	
+
 	public boolean aktiviereListing() {
-	    if (account == null) return false;
-	    if (!account.getLogedIn()) return false;
+		if (account == null)
+			return false;
+		if (!account.getLogedIn())
+			return false;
 
-	    try {
+		try {
 
-	        String sqlCheck = "SELECT userid FROM listing WHERE listingid = ?";
-	        PreparedStatement prepCheck = this.dbConn.prepareStatement(sqlCheck);
-	        prepCheck.setInt(1, this.aktListingId);
-	        ResultSet rs = prepCheck.executeQuery();
+			String sqlCheck = "SELECT userid FROM listing WHERE listingid = ?";
+			PreparedStatement prepCheck = this.dbConn.prepareStatement(sqlCheck);
+			prepCheck.setInt(1, this.aktListingId);
+			ResultSet rs = prepCheck.executeQuery();
 
-	        if (!rs.next()) return false;
+			if (!rs.next())
+				return false;
 
-	        String owner = rs.getString("userid");
+			String owner = rs.getString("userid");
 
-	        if (!account.getEmail().equals(owner)) return false;
+			if (!account.getEmail().equals(owner))
+				return false;
 
-	        String sqlUpdate = "UPDATE listing SET status = 'A' WHERE listingid = ?";
-	        PreparedStatement prepUpdate = this.dbConn.prepareStatement(sqlUpdate);
-	        prepUpdate.setInt(1, this.aktListingId);
+			String sqlUpdate = "UPDATE listing SET status = 'A' WHERE listingid = ?";
+			PreparedStatement prepUpdate = this.dbConn.prepareStatement(sqlUpdate);
+			prepUpdate.setInt(1, this.aktListingId);
 
-	        int rows = prepUpdate.executeUpdate();
+			int rows = prepUpdate.executeUpdate();
 
-	        return rows == 1;
+			return rows == 1;
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-	    return false;
+		return false;
 	}
-	
+
 	public boolean loescheListing() {
 
-	    if (account == null) return false;
-	    if (!account.getLogedIn()) return false;
+		if (account == null)
+			return false;
+		if (!account.getLogedIn())
+			return false;
 
-	    try {
+		try {
 
-	        String sqlCheck = "SELECT userid FROM listing WHERE listingid = ?";
-	        PreparedStatement prepCheck = this.dbConn.prepareStatement(sqlCheck);
-	        prepCheck.setInt(1, this.aktListingId);
-	        ResultSet rs = prepCheck.executeQuery();
+			String sqlCheck = "SELECT userid FROM listing WHERE listingid = ?";
+			PreparedStatement prepCheck = this.dbConn.prepareStatement(sqlCheck);
+			prepCheck.setInt(1, this.aktListingId);
+			ResultSet rs = prepCheck.executeQuery();
 
-	        if (!rs.next()) return false;
+			if (!rs.next())
+				return false;
 
-	        String owner = rs.getString("userid");
+			String owner = rs.getString("userid");
 
-	        if (!account.getEmail().equals(owner)) return false;
+			if (!account.getEmail().equals(owner))
+				return false;
 
-	        String sqlUpdate = "UPDATE listing SET status = 'X' WHERE listingid = ?";
-	        PreparedStatement prepUpdate = this.dbConn.prepareStatement(sqlUpdate);
-	        prepUpdate.setInt(1, this.aktListingId);
+			String sqlUpdate = "UPDATE listing SET status = 'X' WHERE listingid = ?";
+			PreparedStatement prepUpdate = this.dbConn.prepareStatement(sqlUpdate);
+			prepUpdate.setInt(1, this.aktListingId);
 
-	        int rows = prepUpdate.executeUpdate();
+			int rows = prepUpdate.executeUpdate();
 
-	        return rows == 1;
+			return rows == 1;
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-	    return false;
+		return false;
+	}
+	public String getEditImageHtml() {
+	    if (!this.editMode || this.editDetails == null)
+	        return "";
+
+	    String image = this.editDetails.optString("imageBase64", "");
+
+	    if (image.isEmpty())
+	        return "";
+
+	    return "<img src='" + image + "' " +
+	           "style='height:100px;width:100px;object-fit:cover;" +
+	           "border-radius:8px;border:1px solid #dee2e6;'>";
 	}
 
 	// Getter und Setter (Inserieren)
@@ -833,30 +878,44 @@ public class ListingBean {
 	public void setAccount(AccountBean account) {
 		this.account = account;
 	}
+
 	public boolean isEditMode() {
 		return editMode;
 	}
+
 	public String getEditTitle() {
 		return editTitle != null ? editTitle : "";
 	}
+
 	public String getEditDescr() {
 		return editDescr != null ? editDescr : "";
 	}
+
 	public String getEditCity() {
 		return editCity != null ? editCity : "";
 	}
+
 	public String getEditZip() {
 		return editZip != null ? editZip : "";
 	}
+
 	public int getEditCatId() {
 		return editCatId;
 	}
+
 	public JSONObject getEditDetails() {
-	    return editDetails;
+		return editDetails;
 	}
+
 	public String getEditDetailValue(String key) {
-	    if (this.editDetails == null) return "";
-	    return this.editDetails.optString(key, "");
+		if (this.editDetails == null)
+			return "";
+		return this.editDetails.optString(key, "");
 	}
-	
+	public String getEditImageBase64() {
+	    if (this.editDetails == null)
+	        return "";
+
+	    return this.editDetails.optString("imageBase64", "");
+	}
 }

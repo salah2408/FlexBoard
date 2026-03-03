@@ -26,8 +26,10 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
-	<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
-	<jsp:useBean id="home" class="de.hwg_lu.bwi520.beans.HomeBean" scope="request" />
+	<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean"
+		scope="session" />
+	<jsp:useBean id="home" class="de.hwg_lu.bwi520.beans.HomeBean"
+		scope="request" />
 
 	<jsp:getProperty property="navbarHtml" name="myAccount" />
 
@@ -108,22 +110,21 @@
 		</section>
 
 		<%-- Das ist für das Mein Profil, wenn man eingeloggt ist --%>
-		
+
 		<jsp:getProperty name="myAccount" property="homepageListingsHtml" />
 
 		<jsp:getProperty name="myAccount" property="profilHtml" />
 
 	</main>
-
-	<jsp:getProperty name="myAccount" property="footer" />
+	<jsp:getProperty name="myAccount" property="footerHtml" />
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-		<script src="../js/ui.js"></script>
+	<script src="../js/ui.js"></script>
 	<%
 	if (myAccount.getLoginSuccess()) {
 	%>
 	<script>
-	showToast("Erfolgreich eingeloggt.");
+		showToast("Erfolgreich eingeloggt.");
 	</script>
 	<%
 	myAccount.setLoginSuccess(false);

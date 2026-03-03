@@ -27,7 +27,7 @@
 		class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
 	<jsp:useBean id="categoryBean"
 		class="de.hwg_lu.bwi520.beans.CategoryBean" scope="session" />
-		<%
+	<%
 categoryBean.setListingBean(listingBean);
 %>
 
@@ -37,7 +37,7 @@ categoryBean.setListingBean(listingBean);
 	<div class="form-container">
 		<h2 class="mb-4">Anzeige inserieren</h2>
 
-		<form action="./InserierenAppl.jsp" method="get">
+		<form action="./InserierenAppl.jsp" method="post">
 			<%
 			if (listingBean.isEditMode()) {
 			%>
@@ -57,9 +57,12 @@ categoryBean.setListingBean(listingBean);
 				<div class='col-md-12'>
 					Bilder hochladen <input type='file' class='form-control'
 						name='listingImage' id='bildUpload' accept='image/*' multiple>
+					<input type="hidden" name="imageBase64" id="imageBase64Input">
 				</div>
 
-				<div id='vorschauContainer' class='d-flex flex-wrap gap-2 mt-3'></div>
+				<div id='vorschauContainer' class='d-flex flex-wrap gap-2 mt-3'>
+					<jsp:getProperty name="listingBean" property="editImageHtml" />
+				</div>
 			</div>
 
 			<div class="row-gap">

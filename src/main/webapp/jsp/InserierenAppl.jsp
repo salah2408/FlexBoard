@@ -23,14 +23,9 @@ String descr = request.getParameter("descr");
 String categoryID = request.getParameter("categoryID");
 String city = request.getParameter("city");
 String zip = request.getParameter("zip");
+String imageBase64 = request.getParameter("imageBase64");
+String listingIdParam = request.getParameter("listingid");
 
-// Bild einlesen nur falls eins Hochgeladen wurde
-Part listingImage = null;
-try {
- listingImage = request.getPart("listingImage");
-} catch (Exception e) {
-	System.out.println("Es wurden keine Bilder gefunden!!");
-}
 
 // Lernmaterial catid 1
 String studiengang = request.getParameter("studiengang");
@@ -147,8 +142,18 @@ if(action.equals("Anzeige erstellen") || action.equals("Anzeige aktualisieren"))
         detailsJson.put("dienstleistungPreis", dienstleistungPreis != null ? Integer.parseInt(dienstleistungPreis) : 0);
         detailsJson.put("referenzen", referenzen);
     }
+    if (imageBase64 != null && !imageBase64.isEmpty()) {
+        // Neues Bild wurde hochgeladen
+        detailsJson.put("imageBase64", imageBase64);
+    } 
+    else if (listingIdParam != null && !listingIdParam.isEmpty()) {
+        // Kein neues Bild → DB-basiert altes Bild direkt abfragen
+        JSONObject oldDetails = myListing.getDetailsForListing(Integer.parseInt(listingIdParam));
+        if (oldDetails != null && oldDetails.has("imageBase64")) {
+            detailsJson.put("imageBase64", oldDetails.getString("imageBase64"));
+        }
+    }
 
-    String listingIdParam = request.getParameter("listingid");
 
     boolean success;
 
@@ -178,7 +183,7 @@ if(action.equals("Anzeige erstellen") || action.equals("Anzeige aktualisieren"))
             detailsJson
         );
     }
-
+    myListing.readAlleAnzeigenFromDB();
     myListing.resetEditMode();
 
     response.sendRedirect("./HomepageView.jsp");
