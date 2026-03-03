@@ -22,32 +22,31 @@ public class ListingBean {
 	AccountBean account;
 	String anbieterEmail;
 	ArrayList<Listing> anzeigen;
-	
-	String editTitle;
-  	String editDescr;
-  	String editCity;
-  	String editZip;
-  	int editCatId;
-  	JSONObject editDetails;
-	boolean editMode = false;
 
+	String editTitle;
+	String editDescr;
+	String editCity;
+	String editZip;
+	int editCatId;
+	JSONObject editDetails;
+	boolean editMode = false;
 
 	public ListingBean() throws ClassNotFoundException, SQLException {
 		this.dbConn = new PostgreSQLAccess().getConnection();
 		this.anzeigen = new ArrayList<Listing>();
 		this.readAlleAnzeigenFromDB();
 	}
-	
+
 	// Anzeigen auslesen
 	public void readAlleAnzeigenFromDB() {
+		this.anzeigen.clear();
 		String sql = "SELECT listingid, userid, catid, title, descr, city, zip, status, date, details FROM listing";
 
 		try {
 			PreparedStatement prep = this.dbConn.prepareStatement(sql);
-			prep.setInt(1, this.aktListingId);
 			ResultSet dbRes = prep.executeQuery();
-			
-			while(dbRes.next()) {
+
+			while (dbRes.next()) {
 				int listingid = dbRes.getInt("listingid");
 				String userid = dbRes.getString("userid");
 				int catid = dbRes.getInt("catid");
@@ -59,17 +58,14 @@ public class ListingBean {
 				Date date = dbRes.getDate("date");
 				String details = dbRes.getString("details");
 				JSONObject detailsJson = new JSONObject(details);
-				
+
 				this.anzeigen.add(new Listing(userid, catid, title, descr, city, status, date, detailsJson));
 			}
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
-	
-	
+
 	// Anzeige speichern
 	public boolean saveListing(String userid, String title, String descr, int catid, String city, String zip,
 			JSONObject detailsJson) throws SQLException {
@@ -103,90 +99,110 @@ public class ListingBean {
 			return false;
 		}
 	}
-	
+
 	// =============================
-		// UPDATE
-		// =============================
-		public boolean updateListing(String userid, String title, String descr,
-				int catid, String city, String zip, JSONObject detailsJson)  {
+	// UPDATE
+	// =============================
+	public boolean updateListing(String userid, String title, String descr, int catid, String city, String zip,
+			JSONObject detailsJson) {
 
-			try {
+		try {
 
-				String sql = "UPDATE listing SET catid=?, title=?, descr=?, zip=?, city=?, details=? "
-						+ "WHERE listingid=? AND userid=?";
+			String sql = "UPDATE listing SET catid=?, title=?, descr=?, zip=?, city=?, details=? "
+					+ "WHERE listingid=? AND userid=?";
 
-				PreparedStatement prep = this.dbConn.prepareStatement(sql);
+			PreparedStatement prep = this.dbConn.prepareStatement(sql);
 
-				prep.setInt(1, catid);
-				prep.setString(2, title);
-				prep.setString(3, descr);
-				prep.setString(4, zip);
-				prep.setString(5, city);
-				prep.setString(6, detailsJson.toString());
-				prep.setInt(7, this.aktListingId);
-				prep.setString(8, userid);
+			prep.setInt(1, catid);
+			prep.setString(2, title);
+			prep.setString(3, descr);
+			prep.setString(4, zip);
+			prep.setString(5, city);
+			prep.setString(6, detailsJson.toString());
+			prep.setInt(7, this.aktListingId);
+			prep.setString(8, userid);
 
-				int rows = prep.executeUpdate();
+			int rows = prep.executeUpdate();
 
-				this.editMode = false; // nach Update verlassen wir Edit-Mode
-				return rows == 1;
+			this.editMode = false; // nach Update verlassen wir Edit-Mode
+			return rows == 1;
 
-			} catch (Exception e) {
-				e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return false;
+	}
+
+	// =============================
+	// LOAD FOR EDIT: Für das Laden zum Bearbeiten
+	// =============================
+	public boolean loadListingForEdit(int listingId, String userid) {
+
+		try {
+
+			String sql = "SELECT * FROM listing WHERE listingid=? AND userid=?";
+			PreparedStatement prep = this.dbConn.prepareStatement(sql);
+			prep.setInt(1, listingId);
+			prep.setString(2, userid);
+
+			ResultSet rs = prep.executeQuery();
+
+			if (rs.next()) {
+
+				this.aktListingId = listingId;
+				this.editTitle = rs.getString("title");
+				this.editDescr = rs.getString("descr");
+				this.editCity = rs.getString("city");
+				this.editZip = rs.getString("zip");
+				this.editCatId = rs.getInt("catid");
+				this.editDetails = new JSONObject(rs.getString("details"));
+
+				this.editMode = true;
+
+				return true;
 			}
 
-			return false;
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
-		
-		// =============================
-		// LOAD FOR EDIT: Für das Laden zum Bearbeiten
-		// =============================
-		public boolean loadListingForEdit(int listingId, String userid) {
 
+		return false;
+	}
+
+	// =============================
+	// Um aus dem Bearbeitungsmodus rauszukommen
+	// =============================
+	public void resetEditMode() {
+		this.editMode = false;
+		this.editTitle = null;
+		this.editDescr = null;
+		this.editCity = null;
+		this.editZip = null;
+		this.editCatId = 0;
+		this.editDetails = null;
+	}
+	// =============================
+		// GET DETAILS DIRECTLY FROM DB (Fuer Update)
+		// =============================
+		public JSONObject getDetailsForListing(int listingId) {
 			try {
-
-				String sql = "SELECT * FROM listing WHERE listingid=? AND userid=?";
+				String sql = "SELECT details FROM listing WHERE listingid = ?";
 				PreparedStatement prep = this.dbConn.prepareStatement(sql);
 				prep.setInt(1, listingId);
-				prep.setString(2, userid);
-
+				
 				ResultSet rs = prep.executeQuery();
-
 				if (rs.next()) {
-
-					this.aktListingId = listingId;
-					this.editTitle = rs.getString("title");
-					this.editDescr = rs.getString("descr");
-					this.editCity = rs.getString("city");
-					this.editZip = rs.getString("zip");
-					this.editCatId = rs.getInt("catid");
-					this.editDetails = new JSONObject(rs.getString("details"));
-
-					this.editMode = true;
-
-					return true;
+					String detailsStr = rs.getString("details");
+					if (detailsStr != null && !detailsStr.isEmpty()) {
+						return new JSONObject(detailsStr);
+					}
 				}
-
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
-			return false;
+			return null;
 		}
-		// =============================
-				// Um aus dem Bearbeitungsmodus rauszukommen
-				// =============================
-		public void resetEditMode() {
-		    this.editMode = false;
-		    this.editTitle = null;
-		    this.editDescr = null;
-		    this.editCity = null;
-		    this.editZip = null;
-		    this.editCatId = 0;
-		    this.editDetails = null;
-		}
-		
 
 	// gethtml
 	public String getInseratDetailHtml() {
@@ -230,18 +246,29 @@ public class ListingBean {
 				html += "</p>";
 				html += "<hr>";
 
-				if(this.isPrice(detailsJson))
-				    html += "<div class='display-6 fw-bold text-primary'>" + this.getPreisHtml(detailsJson) + "</div>";
+				if (this.isPrice(detailsJson))
+					html += "<div class='display-6 fw-bold text-primary'>" + this.getPreisHtml(detailsJson) + "</div>";
 				else
-				    html += "<div class='display-6 fw-bold text-primary'>GRATIS / VB</div>";
+					html += "<div class='display-6 fw-bold text-primary'>GRATIS / VB</div>";
 				html += "</div>";
 				html += "</div>";
 
+				String imageBase64 = detailsJson.optString("imageBase64", null);
+
 				html += "<div class='mb-4'>";
-				html += "<img src='../img/flexboard-logo.jpg' ";
-				html += "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' ";
-				html += "data-bs-toggle='modal' data-bs-target='#imageGalleryModal' ";
-				html += "alt='Hauptbild'>";
+
+				if (imageBase64 != null && !imageBase64.isEmpty()) {
+
+					html += "<img src='" + imageBase64 + "' "
+							+ "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' "
+							+ "data-bs-toggle='modal' data-bs-target='#imageGalleryModal' " + "alt='Hauptbild'>";
+
+				} else {
+
+					html += "<img src='../img/flexboard-logo.jpg' "
+							+ "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' "
+							+ "data-bs-toggle='modal' data-bs-target='#imageGalleryModal' " + "alt='Placeholder'>";
+				}
 				html += "<div class='text-end mt-2'>";
 				html += "<small class='text-muted'><i class='bi bi-images'></i> 1 / 2</small>";
 				html += "</div>";
@@ -267,15 +294,14 @@ public class ListingBean {
 				html += "</div>";
 				html += "<h5 class='fw-bold mb-1'>" + userid + "</h5>";
 
-
 				if (this.account.getLogedIn()) {
-				    html += "<button class='btn btn-primary w-100 py-2 mb-2 mt-3' data-bs-toggle='offcanvas' data-bs-target='#chatOffcanvas'>";
-				    html += "<i class='bi bi-envelope me-2'></i> Nachricht schreiben";
-				    html += "</button>";
+					html += "<button class='btn btn-primary w-100 py-2 mb-2 mt-3' data-bs-toggle='offcanvas' data-bs-target='#chatOffcanvas'>";
+					html += "<i class='bi bi-envelope me-2'></i> Nachricht schreiben";
+					html += "</button>";
 				} else {
-				    html += "<a href='./LoginView.jsp' class='btn btn-primary w-100 py-2 mb-2 mt-3'>";
-				    html += "<i class='bi bi-box-arrow-in-right me-2'></i> Zum Schreiben einloggen";
-				    html += "</a>";
+					html += "<a href='./LoginView.jsp' class='btn btn-primary w-100 py-2 mb-2 mt-3'>";
+					html += "<i class='bi bi-box-arrow-in-right me-2'></i> Zum Schreiben einloggen";
+					html += "</a>";
 				}
 				html += "</div>";
 				html += "</div>";
@@ -318,7 +344,7 @@ public class ListingBean {
 				html += "</div>";
 				html += "</div>";
 				html += "</div>";
-				
+
 				html += "<div class='offcanvas offcanvas-bottom shadow-lg rounded-top-4' tabindex='-1' id='chatOffcanvas' style='height: auto; max-height: 50vh;'>";
 				html += "<div class='offcanvas-header border-bottom px-4 py-3'>";
 				html += "<h5 class='offcanvas-title fw-bold'>";
@@ -328,7 +354,7 @@ public class ListingBean {
 				html += "</div>";
 
 				html += "<div class='offcanvas-body p-4'>";
-				html += "<form action='./NachrichtSendenAppl.jsp' method='post'>"; 
+				html += "<form action='./NachrichtSendenAppl.jsp' method='post'>";
 
 				html += "<input type='hidden' name='empfaengerId' value='" + userid + "'>";
 				html += "<input type='hidden' name='listingId' value='" + this.aktListingId + "'>";
@@ -360,149 +386,149 @@ public class ListingBean {
 		return html;
 	}
 	// Hilfsmethoden für die DetailAnzeigenHtml
-	
-	// Hilfsmethode um für die aktuellen Details der Anzeige zu bekommen (von Kategorie abhängig)
+
+	// Hilfsmethode um für die aktuellen Details der Anzeige zu bekommen (von
+	// Kategorie abhängig)
 	public String getDetailsKategorie(int catid, JSONObject detailsJson) {
-	    String html = "";
-	    html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
-	    html += "<div class='card-body p-4'>";
-	    html += "<h5 class='fw-bold mb-3'>Details</h5>";
-	    html += "<ul class='list-unstyled mb-0'>";
+		String html = "";
+		html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
+		html += "<div class='card-body p-4'>";
+		html += "<h5 class='fw-bold mb-3'>Details</h5>";
+		html += "<ul class='list-unstyled mb-0'>";
 
-	    if (catid == 1) {
-	        String studiengang = detailsJson.optString("studiengang");
-	        String modul = detailsJson.optString("modul");
-	        String hochschule = detailsJson.optString("hochschule");
-	        String semester = detailsJson.optString("semester");
-	        String format = detailsJson.optString("format");
+		if (catid == 1) {
+			String studiengang = detailsJson.optString("studiengang");
+			String modul = detailsJson.optString("modul");
+			String hochschule = detailsJson.optString("hochschule");
+			String semester = detailsJson.optString("semester");
+			String format = detailsJson.optString("format");
 
-	        html += "<li class='mb-2'><strong>Studiengang:</strong> " + studiengang + "</li>";
-	        html += "<li class='mb-2'><strong>Modul:</strong> " + modul + "</li>";
-	        html += "<li class='mb-2'><strong>Hochschule:</strong> " + hochschule + "</li>";
-	        html += "<li class='mb-2'><strong>Semester:</strong> " + semester + "</li>";
-	        html += "<li class='mb-2'><strong>Format:</strong> " + format + "</li>";
+			html += "<li class='mb-2'><strong>Studiengang:</strong> " + studiengang + "</li>";
+			html += "<li class='mb-2'><strong>Modul:</strong> " + modul + "</li>";
+			html += "<li class='mb-2'><strong>Hochschule:</strong> " + hochschule + "</li>";
+			html += "<li class='mb-2'><strong>Semester:</strong> " + semester + "</li>";
+			html += "<li class='mb-2'><strong>Format:</strong> " + format + "</li>";
 
-	    } else if (catid == 2) {
-	        String fach = detailsJson.optString("fach");
-	        String nachhilfeTyp = detailsJson.optString("nachhilfeTyp");
-	        String preisProStunde = detailsJson.optString("preisProStunde");
-	        String nachhilfeOrt = detailsJson.optString("nachhilfeOrt");
-	        String nachhilfeNiveau = detailsJson.optString("nachhilfeNiveau");
+		} else if (catid == 2) {
+			String fach = detailsJson.optString("fach");
+			String nachhilfeTyp = detailsJson.optString("nachhilfeTyp");
+			String preisProStunde = detailsJson.optString("preisProStunde");
+			String nachhilfeOrt = detailsJson.optString("nachhilfeOrt");
+			String nachhilfeNiveau = detailsJson.optString("nachhilfeNiveau");
 
-	        html += "<li class='mb-2'><strong>Fach:</strong> " + fach + "</li>";
-	        html += "<li class='mb-2'><strong>Typ:</strong> " + nachhilfeTyp + "</li>";
-	        html += "<li class='mb-2'><strong>Preis pro Stunde:</strong> " + preisProStunde + "</li>";
-	        html += "<li class='mb-2'><strong>Ort:</strong> " + nachhilfeOrt + "</li>";
-	        html += "<li class='mb-2'><strong>Niveau:</strong> " + nachhilfeNiveau + "</li>";
+			html += "<li class='mb-2'><strong>Fach:</strong> " + fach + "</li>";
+			html += "<li class='mb-2'><strong>Typ:</strong> " + nachhilfeTyp + "</li>";
+			html += "<li class='mb-2'><strong>Preis pro Stunde:</strong> " + preisProStunde + "</li>";
+			html += "<li class='mb-2'><strong>Ort:</strong> " + nachhilfeOrt + "</li>";
+			html += "<li class='mb-2'><strong>Niveau:</strong> " + nachhilfeNiveau + "</li>";
 
-	    } else if (catid == 3) {
-	        String zimmergroesse = detailsJson.optString("zimmergroesse");
-	        String gesamtmiete = detailsJson.optString("gesamtmiete");
-	        String einzugsdatum = detailsJson.optString("einzugsdatum");
-	        String befristung = detailsJson.optString("befristung");
-	        String wgDetails = detailsJson.optString("wgDetails");
+		} else if (catid == 3) {
+			String zimmergroesse = detailsJson.optString("zimmergroesse");
+			String gesamtmiete = detailsJson.optString("gesamtmiete");
+			String einzugsdatum = detailsJson.optString("einzugsdatum");
+			String befristung = detailsJson.optString("befristung");
+			String wgDetails = detailsJson.optString("wgDetails");
 
-	        html += "<li class='mb-2'><strong>Zimmergröße:</strong> " + zimmergroesse + "</li>";
-	        html += "<li class='mb-2'><strong>Gesamtmiete:</strong> " + gesamtmiete + "</li>";
-	        html += "<li class='mb-2'><strong>Einzugsdatum:</strong> " + einzugsdatum + "</li>";
-	        html += "<li class='mb-2'><strong>Befristung:</strong> " + befristung + "</li>";
-	        html += "<li class='mb-2'><strong>WG-Details:</strong> " + wgDetails + "</li>";
+			html += "<li class='mb-2'><strong>Zimmergröße:</strong> " + zimmergroesse + "</li>";
+			html += "<li class='mb-2'><strong>Gesamtmiete:</strong> " + gesamtmiete + "</li>";
+			html += "<li class='mb-2'><strong>Einzugsdatum:</strong> " + einzugsdatum + "</li>";
+			html += "<li class='mb-2'><strong>Befristung:</strong> " + befristung + "</li>";
+			html += "<li class='mb-2'><strong>WG-Details:</strong> " + wgDetails + "</li>";
 
-	    } else if (catid == 4) {
-	        String jobTypSelect = detailsJson.optString("jobTypSelect");
-	        String anstellungsart = detailsJson.optString("anstellungsart");
-	        String wochenstunden = detailsJson.optString("wochenstunden");
-	        String verguetung = detailsJson.optString("verguetung");
+		} else if (catid == 4) {
+			String jobTypSelect = detailsJson.optString("jobTypSelect");
+			String anstellungsart = detailsJson.optString("anstellungsart");
+			String wochenstunden = detailsJson.optString("wochenstunden");
+			String verguetung = detailsJson.optString("verguetung");
 
-	        html += "<li class='mb-2'><strong>Job-Typ:</strong> " + jobTypSelect + "</li>";
-	        html += "<li class='mb-2'><strong>Anstellungsart:</strong> " + anstellungsart + "</li>";
-	        html += "<li class='mb-2'><strong>Wochenstunden:</strong> " + wochenstunden + "</li>";
-	        html += "<li class='mb-2'><strong>Vergütung:</strong> " + verguetung + "</li>";
+			html += "<li class='mb-2'><strong>Job-Typ:</strong> " + jobTypSelect + "</li>";
+			html += "<li class='mb-2'><strong>Anstellungsart:</strong> " + anstellungsart + "</li>";
+			html += "<li class='mb-2'><strong>Wochenstunden:</strong> " + wochenstunden + "</li>";
+			html += "<li class='mb-2'><strong>Vergütung:</strong> " + verguetung + "</li>";
 
-	    } else if (catid == 5) {
-	        String geraetetyp = detailsJson.optString("geraetetyp");
-	        String marke = detailsJson.optString("marke");
-	        String zustandTechnik = detailsJson.optString("zustandTechnik");
-	        String garantie = detailsJson.optString("garantie");
-	        String technikPreis = detailsJson.optString("technikPreis");
+		} else if (catid == 5) {
+			String geraetetyp = detailsJson.optString("geraetetyp");
+			String marke = detailsJson.optString("marke");
+			String zustandTechnik = detailsJson.optString("zustandTechnik");
+			String garantie = detailsJson.optString("garantie");
+			String technikPreis = detailsJson.optString("technikPreis");
 
-	        html += "<li class='mb-2'><strong>Gerätetyp:</strong> " + geraetetyp + "</li>";
-	        html += "<li class='mb-2'><strong>Marke:</strong> " + marke + "</li>";
-	        html += "<li class='mb-2'><strong>Zustand:</strong> " + zustandTechnik + "</li>";
-	        html += "<li class='mb-2'><strong>Garantie:</strong> " + garantie + "</li>";
-	        html += "<li class='mb-2'><strong>Preis:</strong> " + technikPreis + "</li>";
+			html += "<li class='mb-2'><strong>Gerätetyp:</strong> " + geraetetyp + "</li>";
+			html += "<li class='mb-2'><strong>Marke:</strong> " + marke + "</li>";
+			html += "<li class='mb-2'><strong>Zustand:</strong> " + zustandTechnik + "</li>";
+			html += "<li class='mb-2'><strong>Garantie:</strong> " + garantie + "</li>";
+			html += "<li class='mb-2'><strong>Preis:</strong> " + technikPreis + "</li>";
 
-	    } else if (catid == 6) {
-	        String eventDatum = detailsJson.optString("eventDatum");
-	        String veranstalter = detailsJson.optString("veranstalter");
-	        String eintritt = detailsJson.optString("eintritt");
-	        String anmeldung = detailsJson.optString("anmeldung");
-	        String eventPreis = detailsJson.optString("eventPreis");
+		} else if (catid == 6) {
+			String eventDatum = detailsJson.optString("eventDatum");
+			String veranstalter = detailsJson.optString("veranstalter");
+			String eintritt = detailsJson.optString("eintritt");
+			String anmeldung = detailsJson.optString("anmeldung");
+			String eventPreis = detailsJson.optString("eventPreis");
 
-	        html += "<li class='mb-2'><strong>Datum:</strong> " + eventDatum + "</li>";
-	        html += "<li class='mb-2'><strong>Veranstalter:</strong> " + veranstalter + "</li>";
-	        html += "<li class='mb-2'><strong>Eintritt:</strong> " + eintritt + "</li>";
-	        html += "<li class='mb-2'><strong>Anmeldung:</strong> " + anmeldung + "</li>";
-	        html += "<li class='mb-2'><strong>Preis:</strong> " + eventPreis + "</li>";
+			html += "<li class='mb-2'><strong>Datum:</strong> " + eventDatum + "</li>";
+			html += "<li class='mb-2'><strong>Veranstalter:</strong> " + veranstalter + "</li>";
+			html += "<li class='mb-2'><strong>Eintritt:</strong> " + eintritt + "</li>";
+			html += "<li class='mb-2'><strong>Anmeldung:</strong> " + anmeldung + "</li>";
+			html += "<li class='mb-2'><strong>Preis:</strong> " + eventPreis + "</li>";
 
-	    } else if (catid == 7) {
-	        String tauschGegen = detailsJson.optString("tauschGegen");
-	        String zustandTauschen = detailsJson.optString("zustandTauschen");
-	        String abholung = detailsJson.optString("abholung");
+		} else if (catid == 7) {
+			String tauschGegen = detailsJson.optString("tauschGegen");
+			String zustandTauschen = detailsJson.optString("zustandTauschen");
+			String abholung = detailsJson.optString("abholung");
 
-	        html += "<li class='mb-2'><strong>Tausch gegen:</strong> " + tauschGegen + "</li>";
-	        html += "<li class='mb-2'><strong>Zustand:</strong> " + zustandTauschen + "</li>";
-	        html += "<li class='mb-2'><strong>Abholung:</strong> " + abholung + "</li>";
+			html += "<li class='mb-2'><strong>Tausch gegen:</strong> " + tauschGegen + "</li>";
+			html += "<li class='mb-2'><strong>Zustand:</strong> " + zustandTauschen + "</li>";
+			html += "<li class='mb-2'><strong>Abholung:</strong> " + abholung + "</li>";
 
-	    } else if (catid == 8) {
-	        String dienstleistungKat = detailsJson.optString("dienstleistungKat");
-	        String preismodell = detailsJson.optString("preismodell");
-	        String dienstleistungPreis = detailsJson.optString("dienstleistungPreis");
-	        String referenzen = detailsJson.optString("referenzen");
+		} else if (catid == 8) {
+			String dienstleistungKat = detailsJson.optString("dienstleistungKat");
+			String preismodell = detailsJson.optString("preismodell");
+			String dienstleistungPreis = detailsJson.optString("dienstleistungPreis");
+			String referenzen = detailsJson.optString("referenzen");
 
-	        html += "<li class='mb-2'><strong>Kategorie:</strong> " + dienstleistungKat + "</li>";
-	        html += "<li class='mb-2'><strong>Preismodell:</strong> " + preismodell + "</li>";
-	        html += "<li class='mb-2'><strong>Preis:</strong> " + dienstleistungPreis + "</li>";
-	        html += "<li class='mb-2'><strong>Referenzen:</strong> " + referenzen + "</li>";
-	    }
+			html += "<li class='mb-2'><strong>Kategorie:</strong> " + dienstleistungKat + "</li>";
+			html += "<li class='mb-2'><strong>Preismodell:</strong> " + preismodell + "</li>";
+			html += "<li class='mb-2'><strong>Preis:</strong> " + dienstleistungPreis + "</li>";
+			html += "<li class='mb-2'><strong>Referenzen:</strong> " + referenzen + "</li>";
+		}
 
-	    html += "</ul>";
-	    html += "</div>";
-	    html += "</div>";
+		html += "</ul>";
+		html += "</div>";
+		html += "</div>";
 
-	    return html;
+		return html;
 	}
-	
+
 	// Hilfsmethode um zu finden, ob in der JSON ein preis vorhanden ist
 	public boolean isPrice(JSONObject detailsJson) {
-		if(detailsJson.has("dienstleistungPreis"))
+		if (detailsJson.has("dienstleistungPreis"))
 			return true;
-		else if(detailsJson.has("eventPreis"))
+		else if (detailsJson.has("eventPreis"))
 			return true;
-		else if(detailsJson.has("technikPreis"))
+		else if (detailsJson.has("technikPreis"))
 			return true;
-		else if(detailsJson.has("preisProStunde"))
+		else if (detailsJson.has("preisProStunde"))
 			return true;
 		return false;
 	}
-	
+
 	// Hilfsmethode um den richtigen Preis zu Printen
 	public String getPreisHtml(JSONObject detailsJson) throws JSONException {
 		String html = "";
-		
-		if(detailsJson.has("dienstleistungPreis"))
-			return detailsJson.getString("dienstleistungPreis")  + "€";
-		else if(detailsJson.has("eventPreis"))
-			return detailsJson.getString("eventPreis")  + "€";
-		else if(detailsJson.has("technikPreis"))
-			return detailsJson.getString("technikPreis")  + "€";
-		else if(detailsJson.has("preisProStunde"))
+
+		if (detailsJson.has("dienstleistungPreis"))
+			return detailsJson.getString("dienstleistungPreis") + "€";
+		else if (detailsJson.has("eventPreis"))
+			return detailsJson.getString("eventPreis") + "€";
+		else if (detailsJson.has("technikPreis"))
+			return detailsJson.getString("technikPreis") + "€";
+		else if (detailsJson.has("preisProStunde"))
 			return detailsJson.getString("preisProStunde") + "€/h";
-		
+
 		return html;
 	}
-	
-	
+
 	public String getKontaktButtonHtml() {
 
 		if (account == null)
@@ -605,10 +631,8 @@ public class ListingBean {
 
 		String html = "";
 
-		String sql ="SELECT listingid, title, city, date, status, details "
-		        + "FROM listing "
-		        + "WHERE userid = ? AND status <> 'X' "
-		        + "ORDER BY listingid DESC";
+		String sql = "SELECT listingid, title, city, date, status, details " + "FROM listing "
+				+ "WHERE userid = ? AND status <> 'X' " + "ORDER BY listingid DESC";
 
 		try {
 
@@ -675,15 +699,13 @@ public class ListingBean {
 				if (status.equals("A")) {
 					html += "<a href='./NavbarAppl.jsp?action=deaktiviereListing&id=" + listingid
 							+ "' class='btn btn-sm btn-outline-danger d-block'>Deaktivieren</a>";
-				}
-				else {
+				} else {
 					html += "<a href='./NavbarAppl.jsp?action=aktiviereListing&id=" + listingid
 							+ "' class='btn btn-sm btn-outline-success d-block'>Reaktivieren</a>";
 				}
 				html += "<a href='./NavbarAppl.jsp?action=loescheListing&id=" + listingid
-				        + "' class='btn btn-sm btn-danger d-block mt-2' "
-				        + "onclick=\"return confirm('Inserat wirklich endgültig löschen?');\">"
-				        + "Löschen</a>";
+						+ "' class='btn btn-sm btn-danger d-block mt-2' "
+						+ "onclick=\"return confirm('Inserat wirklich endgültig löschen?');\">" + "Löschen</a>";
 				html += "</div>";
 				html += "</div>"; // flex
 				html += "</div>"; // card-body
@@ -702,70 +724,91 @@ public class ListingBean {
 
 		return html;
 	}
-	
+
 	public boolean aktiviereListing() {
-	    if (account == null) return false;
-	    if (!account.getLogedIn()) return false;
+		if (account == null)
+			return false;
+		if (!account.getLogedIn())
+			return false;
 
-	    try {
+		try {
 
-	        String sqlCheck = "SELECT userid FROM listing WHERE listingid = ?";
-	        PreparedStatement prepCheck = this.dbConn.prepareStatement(sqlCheck);
-	        prepCheck.setInt(1, this.aktListingId);
-	        ResultSet rs = prepCheck.executeQuery();
+			String sqlCheck = "SELECT userid FROM listing WHERE listingid = ?";
+			PreparedStatement prepCheck = this.dbConn.prepareStatement(sqlCheck);
+			prepCheck.setInt(1, this.aktListingId);
+			ResultSet rs = prepCheck.executeQuery();
 
-	        if (!rs.next()) return false;
+			if (!rs.next())
+				return false;
 
-	        String owner = rs.getString("userid");
+			String owner = rs.getString("userid");
 
-	        if (!account.getEmail().equals(owner)) return false;
+			if (!account.getEmail().equals(owner))
+				return false;
 
-	        String sqlUpdate = "UPDATE listing SET status = 'A' WHERE listingid = ?";
-	        PreparedStatement prepUpdate = this.dbConn.prepareStatement(sqlUpdate);
-	        prepUpdate.setInt(1, this.aktListingId);
+			String sqlUpdate = "UPDATE listing SET status = 'A' WHERE listingid = ?";
+			PreparedStatement prepUpdate = this.dbConn.prepareStatement(sqlUpdate);
+			prepUpdate.setInt(1, this.aktListingId);
 
-	        int rows = prepUpdate.executeUpdate();
+			int rows = prepUpdate.executeUpdate();
 
-	        return rows == 1;
+			return rows == 1;
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-	    return false;
+		return false;
 	}
-	
+
 	public boolean loescheListing() {
 
-	    if (account == null) return false;
-	    if (!account.getLogedIn()) return false;
+		if (account == null)
+			return false;
+		if (!account.getLogedIn())
+			return false;
 
-	    try {
+		try {
 
-	        String sqlCheck = "SELECT userid FROM listing WHERE listingid = ?";
-	        PreparedStatement prepCheck = this.dbConn.prepareStatement(sqlCheck);
-	        prepCheck.setInt(1, this.aktListingId);
-	        ResultSet rs = prepCheck.executeQuery();
+			String sqlCheck = "SELECT userid FROM listing WHERE listingid = ?";
+			PreparedStatement prepCheck = this.dbConn.prepareStatement(sqlCheck);
+			prepCheck.setInt(1, this.aktListingId);
+			ResultSet rs = prepCheck.executeQuery();
 
-	        if (!rs.next()) return false;
+			if (!rs.next())
+				return false;
 
-	        String owner = rs.getString("userid");
+			String owner = rs.getString("userid");
 
-	        if (!account.getEmail().equals(owner)) return false;
+			if (!account.getEmail().equals(owner))
+				return false;
 
-	        String sqlUpdate = "UPDATE listing SET status = 'X' WHERE listingid = ?";
-	        PreparedStatement prepUpdate = this.dbConn.prepareStatement(sqlUpdate);
-	        prepUpdate.setInt(1, this.aktListingId);
+			String sqlUpdate = "UPDATE listing SET status = 'X' WHERE listingid = ?";
+			PreparedStatement prepUpdate = this.dbConn.prepareStatement(sqlUpdate);
+			prepUpdate.setInt(1, this.aktListingId);
 
-	        int rows = prepUpdate.executeUpdate();
+			int rows = prepUpdate.executeUpdate();
 
-	        return rows == 1;
+			return rows == 1;
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-	    return false;
+		return false;
+	}
+	public String getEditImageHtml() {
+	    if (!this.editMode || this.editDetails == null)
+	        return "";
+
+	    String image = this.editDetails.optString("imageBase64", "");
+
+	    if (image.isEmpty())
+	        return "";
+
+	    return "<img src='" + image + "' " +
+	           "style='height:100px;width:100px;object-fit:cover;" +
+	           "border-radius:8px;border:1px solid #dee2e6;'>";
 	}
 
 	// Getter und Setter (Inserieren)
@@ -781,30 +824,44 @@ public class ListingBean {
 	public void setAccount(AccountBean account) {
 		this.account = account;
 	}
+
 	public boolean isEditMode() {
 		return editMode;
 	}
+
 	public String getEditTitle() {
 		return editTitle != null ? editTitle : "";
 	}
+
 	public String getEditDescr() {
 		return editDescr != null ? editDescr : "";
 	}
+
 	public String getEditCity() {
 		return editCity != null ? editCity : "";
 	}
+
 	public String getEditZip() {
 		return editZip != null ? editZip : "";
 	}
+
 	public int getEditCatId() {
 		return editCatId;
 	}
+
 	public JSONObject getEditDetails() {
-	    return editDetails;
+		return editDetails;
 	}
+
 	public String getEditDetailValue(String key) {
-	    if (this.editDetails == null) return "";
-	    return this.editDetails.optString(key, "");
+		if (this.editDetails == null)
+			return "";
+		return this.editDetails.optString(key, "");
 	}
-	
+	public String getEditImageBase64() {
+	    if (this.editDetails == null)
+	        return "";
+
+	    return this.editDetails.optString("imageBase64", "");
+	}
 }

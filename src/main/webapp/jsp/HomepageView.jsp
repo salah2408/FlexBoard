@@ -26,8 +26,10 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
-	<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
-	<jsp:useBean id="home" class="de.hwg_lu.bwi520.beans.HomeBean" scope="request" />
+	<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean"
+		scope="session" />
+	<jsp:useBean id="home" class="de.hwg_lu.bwi520.beans.HomeBean"
+		scope="request" />
 
 	<jsp:getProperty property="navbarHtml" name="myAccount" />
 
@@ -108,39 +110,21 @@
 		</section>
 
 		<%-- Das ist für das Mein Profil, wenn man eingeloggt ist --%>
-		
+
 		<jsp:getProperty name="myAccount" property="homepageListingsHtml" />
 
 		<jsp:getProperty name="myAccount" property="profilHtml" />
 
 	</main>
-
-	<footer class="custom-footer mt-auto">
-		<div class="container py-4">
-			<div class="row">
-
-				<div class="col-md-6">
-					<h6 class="fw-bold mb-2">FlexBoard</h6>
-					<p class="small text-muted mb-0">Eine einfache Plattform zum
-						Erstellen und Finden von Inseraten. ✓ Schnell erstellt &nbsp; ✓
-						Kostenlos &nbsp; ✓ Lokal vernetzt</p>
-				</div>
-
-				<div class="col-md-6 text-md-end mt-3 mt-md-0">
-					<small> © 2026 FlexBoard · Praktikum Anwendungssysteme </small>
-				</div>
-
-			</div>
-		</div>
-	</footer>
+	<jsp:getProperty name="myAccount" property="footerHtml" />
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-		<script src="../js/ui.js"></script>
+	<script src="../js/ui.js"></script>
 	<%
 	if (myAccount.getLoginSuccess()) {
 	%>
 	<script>
-	showToast("Erfolgreich eingeloggt.");
+		showToast("Erfolgreich eingeloggt.");
 	</script>
 	<%
 	myAccount.setLoginSuccess(false);
