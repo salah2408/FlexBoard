@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Vector;
+
+import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.json.JSONObject;
 import de.hwg_lu.bwi.jdbc.PostgreSQLAccess;
 import de.hwg_lu.bwi520.classes.Account;
@@ -20,10 +22,11 @@ public class AccountBean {
 	public String aktuelleSeite = "";
 	
 	Account user;
-	HashMap<String, Vector<Nachricht>> alleNachrichten;
+	HashMap<Integer, Vector<Nachricht>> alleNachrichten;
 	
-	String[] aktChatReihenfolge;
+	int[] aktChatReihenfolge;
 	String aktChatPartner;
+	int aktAnzeigeID;
 	public boolean loginSuccess = false;
 	
 	public AccountBean() throws ClassNotFoundException, SQLException {
@@ -31,10 +34,11 @@ public class AccountBean {
 		this.dbConn = new PostgreSQLAccess().getConnection(); 
 		
 		this.user = new Account();
-		this.alleNachrichten = new HashMap<String, Vector<Nachricht>>();
+		this.alleNachrichten = new HashMap<Integer, Vector<Nachricht>>();
 		
 		this.readAllAccountsFromDB();
-		this.aktChatReihenfolge = new String[0];
+		this.aktChatReihenfolge = new int[0];
+		
 		this.aktChatPartner = "";
 	}
 	
@@ -136,9 +140,10 @@ public class AccountBean {
 	public void abmelden() {
 		this.allAccounts = new Vector<Account>();	
 		this.user = new Account();
-		this.alleNachrichten = new HashMap<String, Vector<Nachricht>>();
-		this.aktChatReihenfolge = new String[0];
+		this.alleNachrichten = new HashMap<Integer, Vector<Nachricht>>();
+		this.aktChatReihenfolge = new int[0];
 		this.aktChatPartner = "";
+		
 		System.out.println("Erfolgreich abgemeldet");
 	}
 	
@@ -169,7 +174,7 @@ public class AccountBean {
 	// Methode um vom aktuell eingelogten User alle Chatverläufe zu lesen (in Reihenfolge: Alt -> neu) und in eine Hashmap zu speichern mit allen wichtigen informationen
 	public void readAlleNachrichtenFromDB() throws SQLException {
 		this.alleNachrichten.clear();
-		String sql = "SELECT sender_email, empfaenger_email, datum, uhrzeit, nachricht FROM chatlog WHERE sender_email = ? OR empfaenger_email = ? "
+		String sql = "SELECT listingid, sender_email, empfaenger_email, datum, uhrzeit, nachricht FROM chatlog WHERE sender_email = ? OR empfaenger_email = ? "
 				+ "ORDER BY datum ASC, uhrzeit ASC";
 		PreparedStatement prep = this.dbConn.prepareStatement(sql);
 		prep.setString(1, this.user.getEmail());
@@ -177,6 +182,7 @@ public class AccountBean {
 		
 		 ResultSet dbRes = prep.executeQuery();
 	        while (dbRes.next()) {
+	        	int listingid = dbRes.getInt("listingid");
 	            String sender = dbRes.getString("sender_email");
 	            String empfaenger = dbRes.getString("empfaenger_email");
 	            String nachricht = dbRes.getString("nachricht");
@@ -190,26 +196,26 @@ public class AccountBean {
 	            // User ist sender 
 	            if(this.user.getEmail().equals(sender)) {
 	            	// Überprüfen ob der andere User bereits in die HashMap gespeichert wurde falls nicht dann neuen Eintrag erstellen und neuen Vector
-	            	if(this.alleNachrichten.containsKey(empfaenger)) {
-	            		this.alleNachrichten.get(empfaenger).add(new Nachricht(nachricht, datum, uhrzeit, zeitpunkt, sender, empfaenger));
+	            	if(this.alleNachrichten.containsKey(listingid)) {
+	            		this.alleNachrichten.get(listingid).add(new Nachricht(listingid, nachricht, datum, uhrzeit, zeitpunkt, sender, empfaenger));
 	            	}
 	            	// ersten Eintrag vom anderen User erstellen
 	            	else {
 	            		Vector<Nachricht> nachrichten = new Vector<Nachricht>();
-	            		nachrichten.add(new Nachricht(nachricht, datum, uhrzeit, zeitpunkt, sender, empfaenger));
-	            		this.alleNachrichten.put(empfaenger, nachrichten);
+	            		nachrichten.add(new Nachricht(listingid, nachricht, datum, uhrzeit, zeitpunkt, sender, empfaenger));
+	            		this.alleNachrichten.put(listingid, nachrichten);
 	            	}
 	            }
 	            // User ist empfaenger
 	            else {
-	            	if(this.alleNachrichten.containsKey(sender)) {
-	            		this.alleNachrichten.get(sender).add(new Nachricht(nachricht, datum, uhrzeit, zeitpunkt, sender, empfaenger));
+	            	if(this.alleNachrichten.containsKey(listingid)) {
+	            		this.alleNachrichten.get(listingid).add(new Nachricht(listingid, nachricht, datum, uhrzeit, zeitpunkt, sender, empfaenger));
 	            	}
 	            	// ersten Eintrag vom anderen User erstellen
 	            	else {
 	            		Vector<Nachricht> nachrichten = new Vector<Nachricht>();
-	            		nachrichten.add(new Nachricht(nachricht, datum, uhrzeit, zeitpunkt, sender, empfaenger));
-	            		this.alleNachrichten.put(sender, nachrichten);
+	            		nachrichten.add(new Nachricht(listingid, nachricht, datum, uhrzeit, zeitpunkt, sender, empfaenger));
+	            		this.alleNachrichten.put(listingid, nachrichten);
 	            	}
 	            }
 	        }
@@ -218,12 +224,12 @@ public class AccountBean {
 	
 	// Methode um die Reihenfolge der Chats festzulegen. Dadurch soll beim öffnen des Posteingagns die aktuellsten Nachrichten immer oben stehen.
 	public void sortChats() {
-		this.aktChatReihenfolge = new String[this.alleNachrichten.size()];
+		this.aktChatReihenfolge = new int[this.alleNachrichten.size()];
 		int counter = 0;
 		
 		// Chats in das Array speichern
-		for(String user: this.alleNachrichten.keySet()) {
-			this.aktChatReihenfolge[counter] = user;
+		for(int listingid: this.alleNachrichten.keySet()) {
+			this.aktChatReihenfolge[counter] = listingid;
 			counter++;
 		}
 		
@@ -241,7 +247,7 @@ public class AccountBean {
 				LocalDateTime zeitUser2 = nachrichten2.get(nachrichten2.size()-1).getZeitpunkt();
 				
 				if (zeitUser2.isAfter(zeitUser1)) { 
-					String temp = this.aktChatReihenfolge[j];
+					int temp = this.aktChatReihenfolge[j];
 					this.aktChatReihenfolge[j] = this.aktChatReihenfolge[j + 1];
 					this.aktChatReihenfolge[j + 1] = temp; 
 					swapped = true;
@@ -252,7 +258,8 @@ public class AccountBean {
 		}
 		
 		if(this.aktChatReihenfolge.length > 0) {
-			this.aktChatPartner = this.aktChatReihenfolge[0];
+			this.aktAnzeigeID = this.aktChatReihenfolge[0];
+			this.aktChatPartner = this.getEmailChatpartner(this.aktAnzeigeID);
 		}
 		
 	}
@@ -263,16 +270,18 @@ public class AccountBean {
 		LocalDate date = LocalDate.now();
 		LocalTime time = LocalTime.now();
 		
+		
 		try {
-			String sql ="insert into chatlog (sender_email, empfaenger_email, datum, uhrzeit, nachricht) "
-					+ "values (?,?,?,?,?)";
+			String sql ="insert into chatlog (listingid, sender_email, empfaenger_email, datum, uhrzeit, nachricht) "
+					+ "values (?,?,?,?,?,?)";
 			System.out.println(sql);
 			PreparedStatement prep = this.dbConn.prepareStatement(sql);
-			prep.setString(1, this.getEmail());
-			prep.setString(2, this.aktChatPartner);
-			prep.setDate(3, java.sql.Date.valueOf(date));
-			prep.setTime(4, java.sql.Time.valueOf(time));
-			prep.setString(5, text);
+			prep.setInt(1, this.aktAnzeigeID);
+			prep.setString(2, this.getEmail());
+			prep.setString(3, this.aktChatPartner);
+			prep.setDate(4, java.sql.Date.valueOf(date));
+			prep.setTime(5, java.sql.Time.valueOf(time));
+			prep.setString(6, text);
 			prep.executeUpdate();
 			System.out.println("Nachricht erfolgreich eingefuegt");	
 			
@@ -358,13 +367,8 @@ public class AccountBean {
 	              + "<a class='nav-link "
 	              + (this.aktuelleSeite.equals("suche") ? "active fw-bold" : "")
 	              + "' href='./NavbarAppl.jsp?action=zurSuche'>Jetzt finden</a>"
-	              + "</li>"
-
-	              + "<li class='nav-item'>"
-	              + "<a class='nav-link "
-	              + (this.aktuelleSeite.equals("post") ? "active fw-bold" : "")
-	              + "' href='./NavbarAppl.jsp?action=zurPost'>Posteingang</a>"
 	              + "</li>";
+
 	    }
 
 	    html += "</ul>"
@@ -387,6 +391,7 @@ public class AccountBean {
 	              + "</a>"
 	              + "<ul class='dropdown-menu dropdown-menu-end'>"
 	              + "<li><a class='dropdown-item' href='./NavbarAppl.jsp?action=profil'>Profil</a></li>"
+	              + "<li><a class='dropdown-item' href='./NavbarAppl.jsp?action=zurPost'>Posteingang</a></li>"
 	              + "<li><hr class='dropdown-divider'></li>"
 	              + "<li><a class='dropdown-item text-danger' "
 	              + "href='./NavbarAppl.jsp?action=abmelden'>Abmelden</a></li>"
@@ -399,40 +404,55 @@ public class AccountBean {
 	    return html;
 	}
 	
-	public String getNachrichtenHtml() throws SQLException {
-		String html = "<div class='container-fluid chat-container'>"
-			    + "<div class='row h-100'>"
-			    + "<div class='col-12 col-md-4 col-lg-3 chat-list p-0'>"
-			    + "<div class='list-group list-group-flush'>";
-			    
+	public String getFooter() {
+		String html = "	<footer class='custom-footer mt-auto'>"
+				+ "		<div class='container py-4'>"
+				+ "			<div class='row'>"
+				+ "				<div class='col-md-6'>"
+				+ "					<h6 class='fw-bold mb-2'>FlexBoard</h6>"
+				+ "					<p class='small text-muted mb-0'>Eine einfache Plattform zum"
+				+ "						Erstellen und Finden von Inseraten. ✓ Schnell erstellt &nbsp; ✓"
+				+ "						Kostenlos &nbsp; ✓ Lokal vernetzt</p>"
+				+ "				</div>"
+				+ "				<div class='col-md-6 text-md-end mt-3 mt-md-0'>"
+				+ "					<small> © 2026 FlexBoard · Praktikum Anwendungssysteme </small>"
+				+ "				</div>"
+				+ "			</div>"
+				+ "		</div>"
+				+ "	</footer>";
 		
-			    
-			   html += this.getChatSeitenanzeige();	
-			    
-			   html += "</div>"
-			    + "</div>";
-			    		
-			    
-			   html += "<div class='col-12 col-md-8 col-lg-9 d-flex flex-column p-0'>"
-			    + "<div class='border-bottom p-3 fw-bold'>" + this.getNameFromUser(this.aktChatPartner) +"</div>"
-			    + "<div class='chat-messages flex-grow-1'>";
-			   
-			   
-			   
-			   html += this.getChatverlauf();
-			    
-			   html += "</div>"
-			    + "<div class='border-top p-3'>"
-			    + "<div class='input-group'>"
-			    + "<form action='./NachrichtenAppl.jsp' method='get'>"
-			    + "<input class='form-control' type='text' name='text' value='' placeholder='Nachricht schreiben...'>"
-			    + "<input class='btn btn-primary' type='submit' name='action' value='Senden'>"
-			    + "</form>"
-			    + "</div>"
-			    + "</div>"
-			    + "</div>"
-			    + "</div>"
-			    + "</div>";
+		return html;
+	}
+	
+	public String getNachrichtenHtml() throws SQLException {
+		String html = "";
+		if(this.aktChatReihenfolge.length > 0) {
+			html = "<div class='container-fluid chat-container'>" 
+				 + "<div class='row h-100'>"
+				 + "<div class='col-12 col-md-4 col-lg-3 chat-list p-0'>"
+				 + "<div class='list-group list-group-flush'>";
+
+			html += this.getChatSeitenanzeige();
+
+			html += "</div>" + "</div>";
+
+			html += "<div class='col-12 col-md-8 col-lg-9 d-flex flex-column p-0'>"
+					+ "<div class='border-bottom p-3 fw-bold'>" + this.getNameFromUser(this.aktAnzeigeID) + "</div>"
+					+ "<div class='chat-messages flex-grow-1'>";
+
+			html += this.getChatverlauf();
+
+			html += "</div>" + "<div class='border-top p-3'>" + "<div class='input-group'>"
+					+ "<form action='./NachrichtenAppl.jsp' method='get'>"
+					+ "<input class='form-control' type='text' name='text' value='' placeholder='Nachricht schreiben...'>"
+					+ "<input class='btn btn-primary' type='submit' name='action' value='Senden'>" + "</form>"
+					+ "</div>" + "</div>" + "</div>" + "</div>" + "</div>";
+		}
+		else {
+			html = "<div class='col-12 col-md-8 col-lg-9 d-flex flex-column p-0'>";
+			html += "<h2> Es wurden noch keine Chats angefangen</h2>";
+			html += "</div>";
+		}
 		
 		
 		return html;
@@ -481,15 +501,21 @@ public class AccountBean {
 	            // Wir prüfen mehrere mögliche Preisfelder:
 	            int price = 0;
 
-	            if (detailsJson.has("price")) {
+	            if (detailsJson.has("price")) 
 	                price = detailsJson.optInt("price", 0);
-	            } else if (detailsJson.has("technikPreis")) {
+	            else if (detailsJson.has("technikPreis")) 
 	                price = detailsJson.optInt("technikPreis", 0);
-	            } else if (detailsJson.has("eventPreis")) {
+	            else if (detailsJson.has("eventPreis")) 
 	                price = detailsJson.optInt("eventPreis", 0);
-	            } else if (detailsJson.has("dienstleistungPreis")) {
+	            else if (detailsJson.has("dienstleistungPreis")) 
 	                price = detailsJson.optInt("dienstleistungPreis", 0);
-	            }
+	            else if(detailsJson.has("preisProStunde"))
+	        		price = detailsJson.optInt("preisProStunde", 0);
+	            else if(detailsJson.has("gesamtmiete"))
+	        		price = detailsJson.optInt("gesamtmiete", 0);
+	        	else if(detailsJson.has("verguetung"))
+	        		price = detailsJson.optInt("verguetung", 0);
+	            
 
 	            html += "<div class='col-md-4'>";
 	            html += "<div class='card h-100 shadow-sm border-0 rounded-4 home-listing-card'>";
@@ -566,10 +592,23 @@ public class AccountBean {
 	
 	
 	// Abschnitt Hilfsmethoden für getHtml
+	// Methode um aus dem Listingid die email des chatpartners zu bekommen
+	public String getEmailChatpartner(int listingid) {
+		Vector<Nachricht> nachrichten = this.alleNachrichten.get(listingid);
+		for(Nachricht nachricht : nachrichten) {
+			if(nachricht.getSender().equals(this.getEmail()))
+				return nachricht.getEmpfaenger();
+			else if(nachricht.getEmpfaenger().equals(this.getEmail()))
+				return nachricht.getSender();
+		}
+		System.out.println("Keinen Chat mit der ID gefunden zwischen dem aktuellen User und dem Inhaber der Anzeige");
+		return "Keinen Chat mit der ID gefunden zwischen dem aktuellen User und dem Inhaber der Anzeige";
+	}
 	
 	// Methode um den Vor- und Nachnamen der Chatpartner zu bekommen
-	public String getNameFromUser(String user) {
+	public String getNameFromUser(int listinid) {
 		String name = "";
+		String user = this.getEmailChatpartner(listinid);
 		for(Account account : this.allAccounts) {
 			if(account.getEmail().equals(user))
 				name = account.getVorname() + " " + account.getNachname();
@@ -580,7 +619,7 @@ public class AccountBean {
 	// Methode um den Chatverlauf zwischen dem aktuellen ChatPartner zu erzeugen
 	public String getChatverlauf() {
 		String html = "";
-		for(Nachricht nachricht : this.alleNachrichten.get(this.aktChatPartner)) {
+		for(Nachricht nachricht : this.alleNachrichten.get(this.aktAnzeigeID)) {
 			   if(this.aktChatPartner.equals(nachricht.getSender()))
 				   html += "<div class='bg-light rounded p-2 mb-2 message-left'>" + nachricht.getText() + "</div>";
 			   else
@@ -593,7 +632,7 @@ public class AccountBean {
 		String html = "";
 		
 		for(int i = 0; i < this.aktChatReihenfolge.length; i++) {
-			if(this.aktChatPartner.equals(this.aktChatReihenfolge[i]))
+			if(this.aktChatPartner.equals(this.getEmailChatpartner(aktChatReihenfolge[i])))
 				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action active'>" 
 					 + this.getNameFromUser(this.aktChatReihenfolge[i]) + "</a>";
 			else
@@ -611,11 +650,18 @@ public class AccountBean {
 	
 
 
+	
 	public String getAktChatPartner() {
 		return aktChatPartner;
 	}
 	public void setAktChatPartner(String aktChatPartner) {
 		this.aktChatPartner = aktChatPartner;
+	}
+	public int getAktAnzeigeID() {
+		return aktAnzeigeID;
+	}
+	public void setAktAnzeigeID(int aktAnzeigeID) {
+		this.aktAnzeigeID = aktAnzeigeID;
 	}
 	public Account getUser() {
 		return this.user;

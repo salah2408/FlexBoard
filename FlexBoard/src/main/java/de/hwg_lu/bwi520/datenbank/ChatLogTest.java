@@ -29,11 +29,13 @@ public class ChatLogTest {
     public void createTableChatLog() throws SQLException {
         String sql = "CREATE TABLE IF NOT EXISTS chatlog ("
                 + "id SERIAL PRIMARY KEY, "
+                + "listingid INT NOT NULL, "
                 + "sender_email VARCHAR(64) NOT NULL, "
                 + "empfaenger_email VARCHAR(64) NOT NULL, "
                 + "datum DATE NOT NULL, "
                 + "uhrzeit TIME NOT NULL, "
                 + "nachricht TEXT NOT NULL, "
+                + "CONSTRAINT fk_listingid FOREIGN KEY (listingid) REFERENCES listing(listingid) ON DELETE CASCADE, "
                 + "CONSTRAINT fk_sender FOREIGN KEY (sender_email) REFERENCES account(email) ON DELETE CASCADE, "
                 + "CONSTRAINT fk_empfaenger FOREIGN KEY (empfaenger_email) REFERENCES account(email) ON DELETE CASCADE"
                 + ");";

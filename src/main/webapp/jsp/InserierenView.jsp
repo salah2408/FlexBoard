@@ -32,7 +32,8 @@ categoryBean.setListingBean(listingBean);
 %>
 
 	<jsp:getProperty property="navbarHtml" name="myAccount" />
-
+	
+	<main class="flex-fill">
 	<div class="form-container">
 		<h2 class="mb-4">Anzeige inserieren</h2>
 
@@ -104,6 +105,7 @@ categoryBean.setListingBean(listingBean);
 			</div>
 		</form>
 	</div>
-
+	</main>
+	<jsp:getProperty name="myAccount" property="footer" />
 </body>
 </html>

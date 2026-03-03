@@ -63,5 +63,6 @@
     </div>
   </div>
 </main>
+<jsp:getProperty name="myAccount" property="footer" />
 </body>
 </html>
