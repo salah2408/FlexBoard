@@ -2,6 +2,7 @@ package de.hwg_lu.bwi520.datenbank;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import de.hwg_lu.bwi.jdbc.PostgreSQLAccess;
@@ -18,8 +19,8 @@ public class ListingTest {
     public void doSomething() throws ClassNotFoundException, SQLException {
         this.dbConn = new PostgreSQLAccess().getConnection();
 
-     
-        this.createTableListing();
+        this.printAllListing();
+//        this.createTableListing();
 //        this.createTableListingImage();
 //        this.createTableFavorite();
 //        this.createTableMessage();
@@ -27,6 +28,21 @@ public class ListingTest {
         System.out.println("Alle Tabellen fuer Inserieren/Chat/Favoriten sollten jetzt existieren.");
     }
 
+    public void printAllListing() throws SQLException {
+    	String sql = "SELECT listingid, title FROM listing";
+    	
+    	PreparedStatement prep = this.dbConn.prepareStatement(sql);
+    	ResultSet dbRes = prep.executeQuery();
+    	
+    	System.out.println("Listingid || Titel");
+    	
+    	while(dbRes.next()) {
+    		int listingid = dbRes.getInt("listingid");
+    		String title = dbRes.getString("title");
+    		
+    		System.out.println(listingid + "||" + title);
+    	}
+    }
     
     public void createTableListing() throws SQLException {
         String sql = "CREATE TABLE listing ("

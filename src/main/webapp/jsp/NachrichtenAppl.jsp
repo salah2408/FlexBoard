@@ -11,7 +11,6 @@
 <jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
 <%
 	String action = request.getParameter("action");
-	String listingid   = request.getParameter("listingid");
 	String user   = request.getParameter("user"); 
 	String text   = request.getParameter("text");
 	
@@ -24,8 +23,9 @@
 		response.sendRedirect("./NachrichtenView.jsp");
 	}
 	else if(action.equals("switch")){
-		myAccount.setAktChatPartner(user);
-		myAccount.setAktAnzeigeID(Integer.parseInt(listingid));
+		System.out.println("Switch wurde gedrückt: " + Integer.parseInt(user));
+		myAccount.setAktAnzeigeID(Integer.parseInt(user));
+		myAccount.setAktChatPartner(Integer.parseInt(user));
 		myAccount.readAlleNachrichtenFromDB();
 		response.sendRedirect("./NachrichtenView.jsp");
 	}

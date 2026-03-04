@@ -39,6 +39,7 @@ public class AccountBean {
 		this.aktChatReihenfolge = new int[0];
 		
 		this.aktChatPartner = "";
+		this.aktAnzeigeID = -1;
 	}
 	
 	
@@ -141,6 +142,7 @@ public class AccountBean {
 		this.alleNachrichten = new HashMap<Integer, Vector<Nachricht>>();
 		this.aktChatReihenfolge = new int[0];
 		this.aktChatPartner = "";
+		this.aktAnzeigeID = -1;
 		
 		System.out.println("Erfolgreich abgemeldet");
 	}
@@ -255,9 +257,12 @@ public class AccountBean {
 				break;
 		}
 		
+		// Initiallisierung vom aktuellsten Chat (dies ist nur wichtig beim ersten mal laden auf die Seite)
 		if(this.aktChatReihenfolge.length > 0) {
-			this.aktAnzeigeID = this.aktChatReihenfolge[0];
-			this.aktChatPartner = this.getEmailChatpartner(this.aktAnzeigeID);
+			if(this.aktAnzeigeID == -1) {
+				this.aktAnzeigeID = this.aktChatReihenfolge[0];
+				this.aktChatPartner = this.getEmailChatpartner(this.aktAnzeigeID);
+			}
 		}
 		
 	}
@@ -436,6 +441,7 @@ public class AccountBean {
 			html += "<div class='col-12 col-md-8 col-lg-9 d-flex flex-column p-0'>"
 					+ "<div class='border-bottom p-3 fw-bold'>" + this.getTitleFromUser(this.aktAnzeigeID) + "---" + this.getNameFromUser(this.aktAnzeigeID) + "</div>"
 					+ "<div class='chat-messages flex-grow-1'>";
+			System.out.println("Aktuelle anzeigeID: " + this.aktAnzeigeID + " Und der ChatPartner: " + this.getAktChatPartner());
 
 			html += this.getChatverlauf();
 
@@ -645,8 +651,8 @@ public class AccountBean {
 		String html = "";
 		
 		for(int i = 0; i < this.aktChatReihenfolge.length; i++) {
-			if(this.aktChatPartner.equals(this.getEmailChatpartner(aktChatReihenfolge[i])))
-				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "&listingid=" + aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action active'>" 
+			if(this.aktAnzeigeID == this.aktChatReihenfolge[i])
+				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action active'>" 
 					 + this.getTitleFromUser(this.aktChatReihenfolge[i]) + "</a>";
 			else
 				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action'>" 
@@ -667,8 +673,9 @@ public class AccountBean {
 	public String getAktChatPartner() {
 		return aktChatPartner;
 	}
-	public void setAktChatPartner(String aktChatPartner) {
-		this.aktChatPartner = aktChatPartner;
+	// Der aktuelle Chat Partner wird mithilfe der Listingid geändert
+	public void setAktChatPartner(int listingid) {
+		this.aktChatPartner = this.getEmailChatpartner(listingid);
 	}
 	public int getAktAnzeigeID() {
 		return aktAnzeigeID;
