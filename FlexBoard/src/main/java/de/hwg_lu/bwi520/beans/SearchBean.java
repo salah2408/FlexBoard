@@ -1,5 +1,6 @@
 package de.hwg_lu.bwi520.beans;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,30 +11,29 @@ import java.util.List;
 import org.json.JSONObject;
 
 import de.hwg_lu.bwi.jdbc.PostgreSQLAccess;
+import de.hwg_lu.bwi520.classes.Category;
 
 public class SearchBean {
-
-    Connection dbConn;
+	
+	Connection dbConn;
+	
+    String suchbegriff;
+    String kategorie;
+    String plzOrt;
+    Integer minPreis;
+    Integer maxPreis;
     
-    // Filter-Parameter
-    private String suchbegriff;
-    private String kategorie;
-    private String plzOrt;
-    private Integer minPreis;
-    private Integer maxPreis;
-    private String anbieterTyp; // "Privat" oder "Gewerblich"
+    List<SearchResult> ergebnisse;
     
-    // Suchergebnisse
-    private List<SearchResult> ergebnisse;
+    CategoryBean categoryBean;
     
     public SearchBean() throws ClassNotFoundException, SQLException {
         this.dbConn = new PostgreSQLAccess().getConnection();
         this.ergebnisse = new ArrayList<>();
+        this.categoryBean = new CategoryBean();
     }
     
-    // =============================
-    // HAUPT-SUCHMETHODE
-    // =============================
+    
     public void suche() {
         this.ergebnisse.clear();
         
@@ -142,6 +142,103 @@ public class SearchBean {
     // =============================
     // HTML GENERIEREN
     // =============================
+    
+
+    public String getSuchleisteHtml() {
+    	String html = "";
+    	html += "<div class='container-fluid search-bar'>";
+    	html += "<div class='container'>";
+    	html += "<div class='row g-2 align-items-center'>";
+
+    	html += "<div class='col-md-4'>";
+    	html += "<input type='text' class='form-control' name='q' value='" + this.getSuchbegriff() + "' placeholder='Was suchst du?'>";
+    	html += "</div>";
+
+    	html += "<div class='col-md-3'>";
+    	html += "<select class='form-select' name='kategorie'>";
+    	html += "<option value=''>Alle Kategorien</option>";
+    	html += this.getKategorienHtml();
+    	html += "</select>";
+    	html += "</div>";
+
+    	html += "<div class='col-md-3'>";
+    	html += "<input type='text' class='form-control' name='plzOrt' value='" + this.getPlzOrt() + "' placeholder='PLZ oder Ort'>";
+    	html += "</div>";
+
+    	html += "<div class='col-md-2 d-grid'>";
+    	html += "<button class='btn btn-light' type='submit' name='action' value='Finden'>";
+    	html += "<i class='bi bi-search'></i> Finden";
+    	html += "</button>";
+    	html += "</div>";
+
+    	html += "</div>";
+    	html += "</div>";
+    	html += "</div>";
+    	
+    	return html;
+    }
+    
+   public String getSidebarHtml() throws UnsupportedEncodingException {
+	   String html = "";
+	   html += "<div class='col-md-3 col-lg-2 sidebar'>";
+
+	   html += "<div class='d-flex justify-content-between align-items-center mb-3'>";
+	   html += "<h5 class='mb-0'>Filter</h5>";
+	   html += "<a href='./SucheAppl.jsp?action=reset' class='btn btn-sm btn-outline-secondary'>";
+	   html += "Zurücksetzen";
+	   html += "</a>";
+	   html += "</div>";
+
+	   html += this.getKategorienSidebarHtml();
+
+	   html += "<h6>Preis</h6>";
+
+	   html += "<div class='mb-2'>";
+	   html += "<input id='minPreis' type='number' class='form-control mb-2' name='minPreis' placeholder='Min €' min='0' value='" + (this.getMinPreis() != null ? this.getMinPreis() : "") + "' onchange='checkMinMaxPreis()'>";
+	   html += "<input id='maxPreis' type='number' class='form-control mb-2' name='maxPreis' placeholder='Max €' min='0' value='" + (this.getMaxPreis() != null ? this.getMaxPreis() : "") + "' onchange='checkMinMaxPreis()'>";
+
+	   html += "<button type='submit' name='action' value='Finden' class='btn btn-sm btn-primary w-100'>";
+	   html += "Anwenden";
+	   html += "</button>";
+	   html += "</div>";
+
+	   html += "</div>";
+	   return html;
+   }
+   
+   public String getErgebnisseHtml() {
+	   String html = "";
+	   html += "<div class='col-md-9 col-lg-10 p-4'>";
+
+	   html += "<div class='d-flex justify-content-between align-items-center mb-4'>";
+
+	   // Singular/Plural für "Ergebnis(se)" direkt im String zusammenbauen
+	   html += "<h4>" + this.getAnzahlErgebnisse() + " " + (this.getAnzahlErgebnisse() == 1 ? "Ergebnis" : "Ergebnisse") + "</h4>";
+
+	   // Prüfen, ob Suchbegriff oder Kategorie ausgefüllt sind
+	   if (!this.getSuchbegriff().isEmpty() || !this.getKategorie().isEmpty()) {
+	       html += "<span class='text-muted'>";
+	       
+	       if (!this.getSuchbegriff().isEmpty()) {
+	           html += " für &quot;<strong>" + this.getSuchbegriff() + "</strong>&quot;";
+	       }
+	       
+	       if (!this.getKategorie().isEmpty()) {
+	           html += " in <strong>" + this.getKategorie() + "</strong>";
+	       }
+	       
+	       html += "</span>";
+	   }
+
+	   html += "</div>";
+
+	   // Suchergebnisse HTML einfügen (den HTML-Kommentar habe ich hier weggelassen)
+	   html += this.getSuchergebnisseHtml();
+
+	   html += "</div>";
+	   return html;
+   }
+    
     public String getSuchergebnisseHtml() {
         String html = "";
         
@@ -229,6 +326,56 @@ public class SearchBean {
         return html;
     }
     
+    // Methode um die Kategorien als Dropdown für die option select zu bekommen
+    public String getKategorienHtml() {
+    	String html = "";
+    	 for (Category cat : this.categoryBean.getAllCategories()) {
+             String selected = cat.getName().equals(this.getKategorie()) ? "selected" : "";
+
+             html += "<option value='" + cat.getName() + "'" + selected + ">"  + cat.getName() + "</option>";
+     
+         }
+    
+    	
+    	return html;
+    }
+    
+    public String getKategorienSidebarHtml() throws UnsupportedEncodingException {
+    	String html = "";
+    	html += "<h6>Kategorien</h6>";
+
+    	String[] icons = {
+    	    "bi-book",           // Lernmaterial
+    	    "bi-people",         // Nachhilfe
+    	    "bi-house",          // Wohnen
+    	    "bi-briefcase",      // Jobs
+    	    "bi-laptop",         // Technik
+    	    "bi-calendar-event", // Events
+    	    "bi-arrow-left-right", // Tauschen
+    	    "bi-tools"           // Dienstleistungen
+    	};
+
+    	int iconIndex = 0;
+    	for (Category cat : this.categoryBean.getAllCategories()) {
+    	    // Welches Icon und ob die Kategorie aktiv ist, ermitteln
+    	    String icon = iconIndex < icons.length ? icons[iconIndex] : "bi-circle";
+    	    String activeClass = cat.getName().equals(this.getKategorie()) ? "active" : "";
+    	    
+    	    // Den Kategorienamen für die URL sicher codieren (z.B. aus Leerzeichen ein %20 machen)
+    	    String encodedName = java.net.URLEncoder.encode(cat.getName(), "UTF-8");
+
+    	    // HTML zusammensetzen
+    	    html += "<div class='filter-item'>";
+    	    html += "<a class='sidebar-link " + activeClass + "' href='./SucheAppl.jsp?action=filterKategorie&kategorie=" + encodedName + "'>";
+    	    html += "<i class='bi " + icon + " me-2'></i>" + cat.getName();
+    	    html += "</a>";
+    	    html += "</div>";
+
+    	    iconIndex++;
+    	}
+    	return html;
+    }
+    
     public int getAnzahlErgebnisse() {
         return ergebnisse.size();
     }
@@ -277,13 +424,6 @@ public class SearchBean {
         return maxPreis;
     }
     
-    public void setAnbieterTyp(String anbieterTyp) {
-        this.anbieterTyp = anbieterTyp;
-    }
-    
-    public String getAnbieterTyp() {
-        return anbieterTyp;
-    }
     
     // =============================
     // INNER CLASS: SearchResult
