@@ -65,14 +65,18 @@
 
 		response.sendRedirect("./SucheView.jsp?q=" + java.net.URLEncoder.encode(q, "UTF-8"));
 	} else if (action.equals("zurPost")) {
-		if (myAccount.getLogedIn())
+		if (myAccount.getLogedIn()){
+			myAccount.readAlleNachrichtenFromDB();
 			response.sendRedirect("./NachrichtenView.jsp");
+		}
 		else {
 			myWeiter.setLink("./NachrichtenView.jsp");
+			myAccount.readAlleNachrichtenFromDB();
 			response.sendRedirect("./LoginView.jsp");
 		}
 	} else if (action.equals("abmelden")) {
 		myAccount.abmelden();
+		myWeiter.setLink("./HomepageView.jsp");
 		response.sendRedirect("./HomepageView.jsp");
 
 	} else if (action.equals("zurMeineInserate")) {

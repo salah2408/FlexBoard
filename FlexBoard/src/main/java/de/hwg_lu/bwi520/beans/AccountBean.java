@@ -673,6 +673,9 @@ public class AccountBean {
 	public String getAktChatPartner() {
 		return aktChatPartner;
 	}
+	public void setAktChatPartner(String aktChatpartner) {
+		this.aktChatPartner = aktChatpartner;
+	}
 	// Der aktuelle Chat Partner wird mithilfe der Listingid geändert
 	public void setAktChatPartner(int listingid) {
 		this.aktChatPartner = this.getEmailChatpartner(listingid);

@@ -19,7 +19,7 @@
 	
 	if(action.equals("Senden")){
 		myAccount.setAktAnzeigeID(Integer.parseInt(listingid));
-		myAccount.setAktChatPartner(Integer.parseInt(listingid));
+		myAccount.setAktChatPartner(empfaengerid);
 		myAccount.sendMessage(nachrichtText);
 		myAccount.readAlleNachrichtenFromDB();
 		response.sendRedirect("./NachrichtenView.jsp");
