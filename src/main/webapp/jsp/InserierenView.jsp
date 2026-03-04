@@ -18,7 +18,7 @@
 <script src="../js/Inserieren.js"></script>
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
 	<jsp:useBean id="myWeiter"
 		class="de.hwg_lu.bwi520.beans.WeiterleitungsBean" scope="session" />
 	<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean"

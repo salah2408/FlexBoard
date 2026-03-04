@@ -402,22 +402,22 @@ public class AccountBean {
 	    return html;
 	}
 	
-	public String getFooterHtml() {
-		// Wir nutzen Bootstrap-Klassen (bg-dark, text-white), um Konsistenz zu garantieren
-	    String html = "<footer class='bg-dark text-white mt-auto'>" 
+	public String getFooter() {
+		// Footer mit Inline-Styles, damit er auf JEDER Seite (auch ohne Homepage.css) exakt gleich aussieht
+	    String html = "<footer class='mt-auto' style='background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #e2e8f0; border-top: 1px solid rgba(255,255,255,0.05);'>" 
 	            + "<div class='container py-4'>"
 	            + "<div class='row'>"
 	            + "<div class='col-md-6'>"
-	            + "<h6 class='fw-bold mb-2'>FlexBoard</h6>"
-	            + "<p class='small mb-0' style='opacity: 0.8;'>Eine einfache Plattform zum Erstellen und Finden von Inseraten. ✓ Schnell erstellt &nbsp; ✓ Kostenlos &nbsp; ✓ Lokal vernetzt</p>"
+	            + "<h6 class='fw-bold mb-2' style='color: #ffffff; letter-spacing: 0.5px;'>FlexBoard</h6>"
+	            + "<p class='small mb-0' style='color: #94a3b8;'>Eine einfache Plattform zum Erstellen und Finden von Inseraten. ✓ Schnell erstellt &nbsp; ✓ Kostenlos &nbsp; ✓ Lokal vernetzt</p>"
 	            + "</div>"
 	            + "<div class='col-md-6 text-md-end mt-3 mt-md-0'>"
-	            + "<small style='opacity: 0.8;'> © 2026 FlexBoard · Praktikum Anwendungssysteme </small>"
+	            + "<small style='color: #94a3b8;'> © 2026 FlexBoard · Praktikum Anwendungssysteme </small>"
 	            + "</div>"
 	            + "</div>"
 	            + "</div>"
 	            + "</footer>";
-
+		
 		return html;
 	}
 	
@@ -567,6 +567,24 @@ public class AccountBean {
 
 	    return html;
 	}
+	
+	
+	
+	public String getFooterHtml() {
+		// Wir nutzen Bootstrap-Klassen (bg-dark, text-white), um Konsistenz zu garantieren
+	    String html = "<footer class='bg-dark text-white mt-auto'>" 
+	            + "<div class='container py-4'>"
+	            + "<div class='row'>"
+	            + "<div class='col-md-6'>"
+	            + "<h6 class='fw-bold mb-2'>FlexBoard</h6>"
+	            + "<p class='small mb-0' style='opacity: 0.8;'>Eine einfache Plattform zum Erstellen und Finden von Inseraten. ✓ Schnell erstellt &nbsp; ✓ Kostenlos &nbsp; ✓ Lokal vernetzt</p>"
+	            + "</div>"
+	            + "<div class='col-md-6 text-md-end mt-3 mt-md-0'>"
+	            + "<small style='opacity: 0.8;'> © 2026 FlexBoard · Praktikum Anwendungssysteme </small>"
+	            + "</div>"
+	            + "</div>"
+	            + "</div>"
+	            + "</footer>";
 
 	
 	

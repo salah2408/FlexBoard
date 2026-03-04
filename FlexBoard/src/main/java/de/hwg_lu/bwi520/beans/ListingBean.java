@@ -583,6 +583,32 @@ public class ListingBean {
 		return html;
 	}
 	
+	public String getPreisBadgeHtml(int catid, JSONObject detailsJson) {
+
+	    try {
+
+	        if (this.isPrice(detailsJson)) {
+	            return "<span class='badge bg-primary fs-6 px-3 py-2 mt-3'>"
+	                    + this.getPreisHtml(detailsJson)
+	                    + "</span>";
+	        } else {
+	            String gratisText = this.getGratisHtml(catid, detailsJson);
+
+	            if (gratisText.equals("Gratis")) {
+	                return "<span class='badge bg-success fs-6 px-3 py-2 mt-3'>Gratis</span>";
+	            } else {
+	                return "<span class='badge bg-dark bg-opacity-75 fs-6 px-3 py-2 mt-3'>"
+	                        + gratisText
+	                        + "</span>";
+	            }
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return "<span class='badge bg-dark bg-opacity-75 fs-6 px-3 py-2 mt-3'>Preis auf Anfrage</span>";
+	    }
+	}
+	
 	public String getKontaktButtonHtml() {
 
 		if (account == null)
