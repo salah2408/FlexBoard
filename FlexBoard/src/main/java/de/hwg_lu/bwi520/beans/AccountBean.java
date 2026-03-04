@@ -405,21 +405,20 @@ public class AccountBean {
 	}
 	
 	public String getFooter() {
-		String html = "	<footer class='custom-footer mt-auto'>"
-				+ "		<div class='container py-4'>"
-				+ "			<div class='row'>"
-				+ "				<div class='col-md-6'>"
-				+ "					<h6 class='fw-bold mb-2'>FlexBoard</h6>"
-				+ "					<p class='small text-muted mb-0'>Eine einfache Plattform zum"
-				+ "						Erstellen und Finden von Inseraten. ✓ Schnell erstellt &nbsp; ✓"
-				+ "						Kostenlos &nbsp; ✓ Lokal vernetzt</p>"
-				+ "				</div>"
-				+ "				<div class='col-md-6 text-md-end mt-3 mt-md-0'>"
-				+ "					<small> © 2026 FlexBoard · Praktikum Anwendungssysteme </small>"
-				+ "				</div>"
-				+ "			</div>"
-				+ "		</div>"
-				+ "	</footer>";
+		// Footer mit Inline-Styles, damit er auf JEDER Seite (auch ohne Homepage.css) exakt gleich aussieht
+	    String html = "<footer class='mt-auto' style='background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #e2e8f0; border-top: 1px solid rgba(255,255,255,0.05);'>" 
+	            + "<div class='container py-4'>"
+	            + "<div class='row'>"
+	            + "<div class='col-md-6'>"
+	            + "<h6 class='fw-bold mb-2' style='color: #ffffff; letter-spacing: 0.5px;'>FlexBoard</h6>"
+	            + "<p class='small mb-0' style='color: #94a3b8;'>Eine einfache Plattform zum Erstellen und Finden von Inseraten. ✓ Schnell erstellt &nbsp; ✓ Kostenlos &nbsp; ✓ Lokal vernetzt</p>"
+	            + "</div>"
+	            + "<div class='col-md-6 text-md-end mt-3 mt-md-0'>"
+	            + "<small style='color: #94a3b8;'> © 2026 FlexBoard · Praktikum Anwendungssysteme </small>"
+	            + "</div>"
+	            + "</div>"
+	            + "</div>"
+	            + "</footer>";
 		
 		return html;
 	}
@@ -457,119 +456,9 @@ public class AccountBean {
 		
 		return html;
 	}
-	public String getHomepageListingsHtml() {
-
-	    String html = "";
-	    String sql = "SELECT l.listingid, l.title, l.city, l.details, c.name AS category_name " +
-	             "FROM listing l " +
-	             "JOIN category c ON l.catid = c.id " +
-	             "WHERE l.status = 'A' ";
-
-	if (this.getLogedIn()) {
-	    sql += "AND l.userid <> ? ";
-	}
-
-	sql += "ORDER BY RANDOM() LIMIT 3";
-
-	    try {
-	        PreparedStatement prep = this.dbConn.prepareStatement(sql);
-	        if (this.getLogedIn()) {
-	            prep.setString(1, this.getEmail());
-	        }
-	        ResultSet rs = prep.executeQuery();
-
-	        html += "<section class='py-5 bg-white'>";
-	        html += "<div class='container'>";
-	        html += "<div class='text-center mb-4'>";
-	        html += "<h2 class='fw-bold'>Entdecke Inserate</h2>";
-	        html += "<p class='text-muted'>Zufällige aktive Angebote auf FlexBoard</p>";
-	        html += "</div>";
-	        html += "<div class='row g-4 justify-content-center'>";
-
-	        boolean hasResults = false;
-
-	        while (rs.next()) {
-	            hasResults = true;
-
-	            String title = rs.getString("title");
-	            String category = rs.getString("category_name");
-	            String city = rs.getString("city");
-	            String detailsJsonString = rs.getString("details");
-	            JSONObject detailsJson = new JSONObject(detailsJsonString);
-	            String imageBase64 = detailsJson.optString("imageBase64", null);
-
-	            // Wir prüfen mehrere mögliche Preisfelder:
-	            int price = 0;
-
-	            if (detailsJson.has("price")) 
-	                price = detailsJson.optInt("price", 0);
-	            else if (detailsJson.has("technikPreis")) 
-	                price = detailsJson.optInt("technikPreis", 0);
-	            else if (detailsJson.has("eventPreis")) 
-	                price = detailsJson.optInt("eventPreis", 0);
-	            else if (detailsJson.has("dienstleistungPreis")) 
-	                price = detailsJson.optInt("dienstleistungPreis", 0);
-	            else if(detailsJson.has("preisProStunde"))
-	        		price = detailsJson.optInt("preisProStunde", 0);
-	            else if(detailsJson.has("gesamtmiete"))
-	        		price = detailsJson.optInt("gesamtmiete", 0);
-	        	else if(detailsJson.has("verguetung"))
-	        		price = detailsJson.optInt("verguetung", 0);
-	            
-
-	            html += "<div class='col-md-4'>";
-	            html += "<div class='card h-100 shadow-sm border-0 rounded-4 home-listing-card'>";
-	            html += "<div class='card-body p-4 d-flex flex-column'>";
-	            html += "<a href='./NavbarAppl.jsp?action=zumListing&id=" 
-	            	      + rs.getInt("listingid") 
-	            	      + "' class='stretched-link'></a>";
-	            if (imageBase64 != null && !imageBase64.isEmpty()) {
-	                html += "<img src='" + imageBase64 + "' "
-	                      + "class='card-img-top rounded-top' "
-	                      + "style='height:200px; object-fit:cover;'>";
-	            } else {
-	                html += "<div class='mb-4 text-center fs-2'>";
-	                html += "<i class='bi bi-box-seam text-primary opacity-75'></i>";
-	                html += "</div>";
-	            }
-	            html += "<div class='listing-content'>";
-	            html += "<h5 class='fw-bold fs-4 mb-2'>" + title + "</h5>";
-	            html += "<div class='mb-2'>";
-	            html += "<span class='badge bg-primary bg-opacity-10 text-primary fw-semibold'>"
-	                  + category + "</span>";
-	            html += "</div>";
-
-	            if (city != null && !city.isEmpty()) {
-	                html += "<p class='text-muted small'>" + city + "</p>";
-	            } else {
-	                html += "<p class='text-muted small'>Ort nicht angegeben</p>";
-	            }
-	            html += "</div>";
-	            if (price > 0) {
-	                html += "<span class='badge bg-primary fs-6 px-3 py-2 mt-3'>"
-	                      + price + " €</span>";
-	            } else {
-	                html += "<span class='badge bg-dark bg-opacity-75 fs-6 px-3 py-2 mt-3'>"
-	                      + "Preis auf Anfrage</span>";
-	            }
-
-	            html += "</div></div></div>";
-	        }
-
-	        if (!hasResults) {
-	            html += "<div class='col-12 text-center text-muted'>"
-	                  + "Derzeit sind keine aktiven Inserate vorhanden."
-	                  + "</div>";
-	        }
-
-	        html += "</div></div></section>";
-
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-
-	    return html;
-	}
+	
+	
+	
 	public String getFooterHtml() {
 		// Wir nutzen Bootstrap-Klassen (bg-dark, text-white), um Konsistenz zu garantieren
 	    String html = "<footer class='bg-dark text-white mt-auto'>" 

@@ -13,13 +13,13 @@
 <script
 	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 	<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean"
 		scope="session" />
 
 	<jsp:getProperty property="navbarHtml" name="myAccount" />
 
-	<main class="container mt-5">
+	<main class="container mt-5 flex-fill">
 		<div class="row justify-content-center">
 			<div class="col-md-6">
 				<h1>Anmelden</h1>
