@@ -16,6 +16,6 @@
 	<main class="flex-fill">
 		<jsp:getProperty property="nachrichtenHtml" name="myAccount"/>
 	</main>
-	<jsp:getProperty name="myAccount" property="footer" />
+	<jsp:getProperty name="myAccount" property="footerHtml" />
 </body>
 </html>

@@ -10,7 +10,6 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Vector;
 
-import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.json.JSONObject;
 import de.hwg_lu.bwi.jdbc.PostgreSQLAccess;
 import de.hwg_lu.bwi520.classes.Account;
@@ -56,7 +55,7 @@ public class AccountBean {
 	
 	
 	public void readAllAccountsFromDB() throws SQLException {
-		String sql = "SELECT email, vorname, nachname, passwort, active, admin FROM account";
+		String sql = "SELECT email, vorname, nachname, active, admin FROM account";
 		PreparedStatement prep = dbConn.prepareStatement(sql);
 		
 		ResultSet dbRes = prep.executeQuery();
@@ -64,7 +63,6 @@ public class AccountBean {
 			String email = dbRes.getString("email");
 			String vorname = dbRes.getString("vorname");
 			String nachname = dbRes.getString("nachname");
-			String passwort = dbRes.getString("passwort");
 			String active = dbRes.getString("active");
 			String admin = dbRes.getString("admin");
 			
@@ -436,7 +434,7 @@ public class AccountBean {
 			html += "</div>" + "</div>";
 
 			html += "<div class='col-12 col-md-8 col-lg-9 d-flex flex-column p-0'>"
-					+ "<div class='border-bottom p-3 fw-bold'>" + this.getNameFromUser(this.aktAnzeigeID) + "</div>"
+					+ "<div class='border-bottom p-3 fw-bold'>" + this.getTitleFromUser(this.aktAnzeigeID) + "---" + this.getNameFromUser(this.aktAnzeigeID) + "</div>"
 					+ "<div class='chat-messages flex-grow-1'>";
 
 			html += this.getChatverlauf();
@@ -455,6 +453,119 @@ public class AccountBean {
 		
 		
 		return html;
+	}
+	public String getHomepageListingsHtml() {
+
+	    String html = "";
+	    String sql = "SELECT l.listingid, l.title, l.city, l.details, c.name AS category_name " +
+	             "FROM listing l " +
+	             "JOIN category c ON l.catid = c.id " +
+	             "WHERE l.status = 'A' ";
+
+	if (this.getLogedIn()) {
+	    sql += "AND l.userid <> ? ";
+	}
+
+	sql += "ORDER BY RANDOM() LIMIT 3";
+
+	    try {
+	        PreparedStatement prep = this.dbConn.prepareStatement(sql);
+	        if (this.getLogedIn()) {
+	            prep.setString(1, this.getEmail());
+	        }
+	        ResultSet rs = prep.executeQuery();
+
+	        html += "<section class='py-5 bg-white'>";
+	        html += "<div class='container'>";
+	        html += "<div class='text-center mb-4'>";
+	        html += "<h2 class='fw-bold'>Entdecke Inserate</h2>";
+	        html += "<p class='text-muted'>Zufällige aktive Angebote auf FlexBoard</p>";
+	        html += "</div>";
+	        html += "<div class='row g-4 justify-content-center'>";
+
+	        boolean hasResults = false;
+
+	        while (rs.next()) {
+	            hasResults = true;
+
+	            String title = rs.getString("title");
+	            String category = rs.getString("category_name");
+	            String city = rs.getString("city");
+	            String detailsJsonString = rs.getString("details");
+	            JSONObject detailsJson = new JSONObject(detailsJsonString);
+	            String imageBase64 = detailsJson.optString("imageBase64", null);
+
+	            // Wir prüfen mehrere mögliche Preisfelder:
+	            int price = 0;
+
+	            if (detailsJson.has("price")) 
+	                price = detailsJson.optInt("price", 0);
+	            else if (detailsJson.has("technikPreis")) 
+	                price = detailsJson.optInt("technikPreis", 0);
+	            else if (detailsJson.has("eventPreis")) 
+	                price = detailsJson.optInt("eventPreis", 0);
+	            else if (detailsJson.has("dienstleistungPreis")) 
+	                price = detailsJson.optInt("dienstleistungPreis", 0);
+	            else if(detailsJson.has("preisProStunde"))
+	        		price = detailsJson.optInt("preisProStunde", 0);
+	            else if(detailsJson.has("gesamtmiete"))
+	        		price = detailsJson.optInt("gesamtmiete", 0);
+	        	else if(detailsJson.has("verguetung"))
+	        		price = detailsJson.optInt("verguetung", 0);
+	            
+
+	            html += "<div class='col-md-4'>";
+	            html += "<div class='card h-100 shadow-sm border-0 rounded-4 home-listing-card'>";
+	            html += "<div class='card-body p-4 d-flex flex-column'>";
+	            html += "<a href='./NavbarAppl.jsp?action=zumListing&id=" 
+	            	      + rs.getInt("listingid") 
+	            	      + "' class='stretched-link'></a>";
+	            if (imageBase64 != null && !imageBase64.isEmpty()) {
+	                html += "<img src='" + imageBase64 + "' "
+	                      + "class='card-img-top rounded-top' "
+	                      + "style='height:200px; object-fit:cover;'>";
+	            } else {
+	                html += "<div class='mb-4 text-center fs-2'>";
+	                html += "<i class='bi bi-box-seam text-primary opacity-75'></i>";
+	                html += "</div>";
+	            }
+	            html += "<div class='listing-content'>";
+	            html += "<h5 class='fw-bold fs-4 mb-2'>" + title + "</h5>";
+	            html += "<div class='mb-2'>";
+	            html += "<span class='badge bg-primary bg-opacity-10 text-primary fw-semibold'>"
+	                  + category + "</span>";
+	            html += "</div>";
+
+	            if (city != null && !city.isEmpty()) {
+	                html += "<p class='text-muted small'>" + city + "</p>";
+	            } else {
+	                html += "<p class='text-muted small'>Ort nicht angegeben</p>";
+	            }
+	            html += "</div>";
+	            if (price > 0) {
+	                html += "<span class='badge bg-primary fs-6 px-3 py-2 mt-3'>"
+	                      + price + " €</span>";
+	            } else {
+	                html += "<span class='badge bg-dark bg-opacity-75 fs-6 px-3 py-2 mt-3'>"
+	                      + "Preis auf Anfrage</span>";
+	            }
+
+	            html += "</div></div></div>";
+	        }
+
+	        if (!hasResults) {
+	            html += "<div class='col-12 text-center text-muted'>"
+	                  + "Derzeit sind keine aktiven Inserate vorhanden."
+	                  + "</div>";
+	        }
+
+	        html += "</div></div></section>";
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return html;
 	}
 	
 	
@@ -475,8 +586,6 @@ public class AccountBean {
 	            + "</div>"
 	            + "</footer>";
 
-		return html;
-	}
 	
 	
 	
@@ -505,6 +614,18 @@ public class AccountBean {
 		return name;
 	}
 	
+	// Methode um den Titel der Anzeige anhand der Anzeige ID herauszufinden
+	public String getTitleFromUser(int listingid) throws SQLException {
+		String sql = "SELECT title FROM listing WHERE listingid = ?";
+		PreparedStatement prep = this.dbConn.prepareStatement(sql);
+		prep.setInt(1, listingid);
+		ResultSet dbRes = prep.executeQuery();
+		if(dbRes.next())
+			return dbRes.getString("title");
+		else
+			return "FEHLER";
+	}
+	
 	// Methode um den Chatverlauf zwischen dem aktuellen ChatPartner zu erzeugen
 	public String getChatverlauf() {
 		String html = "";
@@ -517,16 +638,16 @@ public class AccountBean {
 		return html;
 	}
 	
-	public String getChatSeitenanzeige() {
+	public String getChatSeitenanzeige() throws SQLException {
 		String html = "";
 		
 		for(int i = 0; i < this.aktChatReihenfolge.length; i++) {
 			if(this.aktChatPartner.equals(this.getEmailChatpartner(aktChatReihenfolge[i])))
-				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action active'>" 
-					 + this.getNameFromUser(this.aktChatReihenfolge[i]) + "</a>";
+				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "&listingid=" + aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action active'>" 
+					 + this.getTitleFromUser(this.aktChatReihenfolge[i]) + "</a>";
 			else
 				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action'>" 
-						 + this.getNameFromUser(this.aktChatReihenfolge[i]) + "</a>";
+						 + this.getTitleFromUser(this.aktChatReihenfolge[i]) + "</a>";
 				
 		}
 		
