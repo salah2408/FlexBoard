@@ -585,6 +585,9 @@ public class AccountBean {
 	            + "</div>"
 	            + "</div>"
 	            + "</footer>";
+	    
+	    return html;
+	}
 
 	
 	
