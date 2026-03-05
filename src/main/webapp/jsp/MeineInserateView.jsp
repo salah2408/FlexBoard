@@ -31,6 +31,7 @@
 <jsp:getProperty property="navbarHtml" name="myAccount" />
 
 <main class="flex-fill">
+	<jsp:getProperty name="listingBean" property="profilHtml" />
 
     <jsp:getProperty  property="meineInserateHtml" name="listingBean" />
 

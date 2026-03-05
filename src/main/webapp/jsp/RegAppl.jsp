@@ -11,6 +11,7 @@
 <body>
 <jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
 <jsp:useBean id="myRegMsg" class="de.hwg_lu.bwi520.messages.RegMessage" scope="session" />
+<jsp:useBean id="myWeiter" class="de.hwg_lu.bwi520.beans.WeiterleitungsBean" scope="session" />
 <%
 	String vorname = request.getParameter("vorname");
 	String nachname = request.getParameter("nachname");
@@ -25,7 +26,7 @@
 		if(myAccount.saveAccount(email, vorname, nachname, passwort)){
 			myRegMsg.setRegSuccess();
 			myAccount.login(email, passwort);
-			response.sendRedirect("./HomepageView.jsp");
+			response.sendRedirect(myWeiter.getLink());
 		}
 		else{
 			myRegMsg.setAccountExists(email);

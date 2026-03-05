@@ -140,7 +140,6 @@ public class HomeBean {
     }
     
     public String getFeatureCardsHtml() {
-    	System.out.println("FeatureCardsHtml wird aufgerufen");
     	String[][] features = {
     		    {"bi-megaphone-fill", "Inserate erstellen",
     		     "Erstelle in wenigen Schritten ein Inserat und erreiche andere Nutzer.",

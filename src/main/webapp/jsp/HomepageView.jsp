@@ -11,6 +11,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../js/ui.js"></script>
+<script src="../js/Navigation.js"></script>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -37,8 +38,6 @@
 		<%-- Das ist für das Mein Profil, wenn man eingeloggt ist --%>
 
 		<jsp:getProperty name="home" property="homepageListingsHtml" />
-
-		<jsp:getProperty name="myAccount" property="profilHtml" />
 
 	</main>
 	<jsp:getProperty name="myAccount" property="footerHtml" />
