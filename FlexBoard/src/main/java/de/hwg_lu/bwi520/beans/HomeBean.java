@@ -125,7 +125,7 @@ public class HomeBean {
         html += "<input type='text' "
               + "class='form-control rounded-start-pill' "
               + "name='q' "
-              + "value='" + (this.suchbegriff == null ? "" : this.suchbegriff) + "' "
+              + "value='' "
               + "placeholder='Wonach suchst du? (z.B. Fahrrad, Laptop, Buch)'>";
 
         html += "<button class='btn btn-primary rounded-end-pill px-4' "
