@@ -304,49 +304,19 @@ public class AccountBean {
 	
 	// Abschnitt getHtml
 	
-	public String getProfilHtml() {
-	    if (!this.getLogedIn()) {
-	        return "";
-	    }
-
-	    String html = "<section class='py-5'>"
-	            + "<div class='container'>"
-	            + "<div class='row justify-content-center'>"
-	            + "<div class='col-md-6'>"
-	            + "<div class='card shadow-sm border-0'>"
-	            + "<div class='card-body'>"
-	            + "<h5 class='card-title fw-bold mb-3'>Mein Profil</h5>"
-	            + "<ul class='list-group list-group-flush'>"
-	            + "<li class='list-group-item'><strong>Name:</strong> "
-	            + this.getVorname() + " " + this.getNachname() + "</li>"
-	            + "<li class='list-group-item'><strong>E-Mail:</strong> "
-	            + this.getEmail() + "</li>"
-	            + "<li class='list-group-item'><strong>Status:</strong> "
-	            + "<span class='badge bg-success'>Aktiv</span></li>"
-	            + "</ul>"
-	            + "<div class='mt-3 text-end'>"
-	            + "<a href='./NavbarAppl.jsp?action=profilBearbeiten' class='btn btn-sm btn-outline-secondary'>"
-	            + "Profil bearbeiten</a>"
-	            + "</div>"
-	            + "</div></div></div></div></div></section>";
-
-	    return html;
-	}
-	
 	public String getNavbarHtml() {
 
-	    String html = "<nav class='navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-2'>"
+	    // Ein einziges Formular um die gesamte Navbar, method='get'
+	    String html = "<form action='./NavbarAppl.jsp' method='get'>"
+	            + "<nav class='navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-2'>"
 	            + "<div class='container'>"
-	            + "<a class='navbar-brand d-flex align-items-center fw-semibold fs-4' "
-	            + "href='./NavbarAppl.jsp?action=zurHomepage'>"
-
-	            + "<img src='../img/flexboard-logo.jpg' "
-	            + "alt='FlexBoard Logo' "
-	            + "height='48' "
-	            + "class='me-3'>"
-
+	            
+	            // Brand-Button
+	            + "<button type='submit' name='action' value='zurHomepage' "
+	            + "class='navbar-brand d-flex align-items-center fw-semibold fs-4 bg-transparent border-0'>"
+	            + "<img src='../img/flexboard-logo.jpg' alt='FlexBoard Logo' height='48' class='me-3'>"
 	            + "FlexBoard"
-	            + "</a>"
+	            + "</button>"
 
 	            + "<button class='navbar-toggler' type='button' data-bs-toggle='collapse' "
 	            + "data-bs-target='#navbarNav'>"
@@ -358,20 +328,18 @@ public class AccountBean {
 	            // Linke Navigation
 	            + "<ul class='navbar-nav me-auto'>";
 
-	    // NUR wenn eingeloggt → diese Links anzeigen
 	    if (this.getLogedIn()) {
 	        html += "<li class='nav-item'>"
-	              + "<a class='nav-link "
+	              + "<button type='submit' name='action' value='zumInserieren' class='nav-link bg-transparent border-0 w-100 text-start "
 	              + (this.aktuelleSeite.equals("inserieren") ? "active fw-bold" : "")
-	              + "' href='./NavbarAppl.jsp?action=zumInserieren'>Inserieren</a>"
+	              + "'>Inserieren</button>"
 	              + "</li>"
 
 	              + "<li class='nav-item'>"
-	              + "<a class='nav-link "
+	              + "<button type='submit' name='action' value='zurSuche' class='nav-link bg-transparent border-0 w-100 text-start "
 	              + (this.aktuelleSeite.equals("suche") ? "active fw-bold" : "")
-	              + "' href='./NavbarAppl.jsp?action=zurSuche'>Jetzt finden</a>"
+	              + "'>Jetzt finden</button>"
 	              + "</li>";
-
 	    }
 
 	    html += "</ul>"
@@ -381,28 +349,29 @@ public class AccountBean {
 
 	    if (!this.getLogedIn()) {
 	        html += "<li class='nav-item'>"
-	              + "<a class='nav-link' href='./NavbarAppl.jsp?action=zumLogin'>Login</a>"
+	              + "<button type='submit' name='action' value='zumLogin' class='nav-link bg-transparent border-0 w-100 text-start' onclick='setCurrentSite()'>Login</button>"
 	              + "</li>"
 	              + "<li class='nav-item'>"
-	              + "<a class='nav-link' href='./NavbarAppl.jsp?action=zurReg'>Registrieren</a>"
+	              + "<button type='submit' name='action' value='zurReg' class='nav-link bg-transparent border-0 w-100 text-start' onclick='setCurrentSite()'>Registrieren</button>"
 	              + "</li>";
 	    } else {
 	        html += "<li class='nav-item dropdown'>"
+	              // Dropdown-Toggle bleibt ein a-Tag, da er nur das Menü aufklappt und nichts sendet
 	              + "<a class='nav-link dropdown-toggle' href='#' role='button' "
 	              + "data-bs-toggle='dropdown'>"
 	              + this.getVorname()
 	              + "</a>"
 	              + "<ul class='dropdown-menu dropdown-menu-end'>"
-	              + "<li><a class='dropdown-item' href='./NavbarAppl.jsp?action=profil'>Profil</a></li>"
-	              + "<li><a class='dropdown-item' href='./NavbarAppl.jsp?action=zurPost'>Posteingang</a></li>"
+	              + "<li><button type='submit' name='action' value='zurMeineInserate' class='dropdown-item bg-transparent border-0'>Profil</button></li>"
+	              + "<li><button type='submit' name='action' value='zurPost' class='dropdown-item bg-transparent border-0'>Posteingang</button></li>"
 	              + "<li><hr class='dropdown-divider'></li>"
-	              + "<li><a class='dropdown-item text-danger' "
-	              + "href='./NavbarAppl.jsp?action=abmelden'>Abmelden</a></li>"
+	              + "<li><button type='submit' name='action' value='abmelden' class='dropdown-item text-danger bg-transparent border-0'>Abmelden</button></li>"
 	              + "</ul>"
 	              + "</li>";
 	    }
-
-	    html += "</ul></div></div></nav>";
+	    
+	    html += "<input id='currSite' type='text' name='currSite' value='' hidden=''";
+	    html += "</ul></div></div></nav></form>";
 
 	    return html;
 	}

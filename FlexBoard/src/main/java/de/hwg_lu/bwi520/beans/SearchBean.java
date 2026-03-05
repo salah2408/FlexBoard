@@ -239,92 +239,92 @@ public class SearchBean {
 	   return html;
    }
     
-    public String getSuchergebnisseHtml() {
-        String html = "";
-        
-        if (ergebnisse.isEmpty()) {
-            html += "<div class='text-center py-5'>";
-            html += "<i class='bi bi-search' style='font-size: 4rem; color: #ccc;'></i>";
-            html += "<h4 class='mt-3 text-muted'>Keine Ergebnisse gefunden</h4>";
-            html += "<p class='text-muted'>Versuche andere Suchbegriffe oder Filter</p>";
-            html += "</div>";
-            return html;
-        }
-        
-        html += "<div class='row g-3'>";
-        
-        for (SearchResult result : ergebnisse) {
-            html += "<div class='col-12'>";
-            html += "<div class='card h-100 shadow-sm border-0 hover-card'>";
-            html += "<div class='card-body'>";
-            html += "<div class='row'>";
-            
-            // Bild (Platzhalter)
-            html += "<div class='col-md-3'>";
-            html += "<img src='../img/flexboard-logo.jpg' class='img-fluid rounded' alt='Bild'>";
-            html += "</div>";
-            
-            // Inhalt
-            html += "<div class='col-md-9'>";
-            html += "<h5 class='card-title fw-bold'>" + result.title + "</h5>";
-            html += "<span class='badge bg-primary mb-2'>" + result.catname + "</span>";
-            
-            // ✅ PREIS ANZEIGEN - verbessert
-            if (result.preis != null && result.preis > 0) {
-                // Preis pro Stunde für Nachhilfe (catid == 2)
-                if (result.catid == 2 && result.details.has("preisProStunde")) {
-                    html += "<p class='text-primary fw-bold fs-5'>" + result.preis + " €/h</p>";
-                } 
-                // Miete für WG & Wohnen (catid == 3)
-                else if (result.catid == 3 && result.details.has("gesamtmiete")) {
-                    html += "<p class='text-primary fw-bold fs-5'>" + result.preis + " € Miete</p>";
-                } 
-                // Standard Preis
-                else {
-                    html += "<p class='text-primary fw-bold fs-5'>" + result.preis + " €</p>";
-                }
-            } else {
-                // Kategorie-spezifische Texte
-                if (result.catid == 2) {
-                    html += "<p class='text-muted'>Preis auf Anfrage</p>";
-                } else if (result.catid == 7) {
-                    html += "<p class='text-success fw-bold'>Kostenlos / Tausch</p>";
-                } else {
-                    html += "<p class='text-muted'>Preis auf Anfrage</p>";
-                }
-            }
-            
-            // Beschreibung (gekürzt)
-            String shortDescr = result.descr;
-            if (shortDescr != null && shortDescr.length() > 150) {
-                shortDescr = shortDescr.substring(0, 150) + "...";
-            }
-            html += "<p class='card-text text-muted'>" + (shortDescr != null ? shortDescr : "") + "</p>";
-            
-            // Standort und Datum
-            html += "<p class='text-muted small mb-2'>";
-            html += "<i class='bi bi-geo-alt'></i> " + result.zip + " " + result.city;
-            html += " &nbsp; | &nbsp; ";
-            html += "<i class='bi bi-calendar'></i> " + result.date;
-            html += "</p>";
-            
-            // Details-Button
-            html += "<a href='./NavbarAppl.jsp?action=zumListing&id=" + result.listingid + "' ";
-            html += "class='btn btn-outline-primary btn-sm'>";
-            html += "Details ansehen <i class='bi bi-arrow-right'></i>";
-            html += "</a>";
-            
-            html += "</div>"; // col-md-9
-            html += "</div>"; // row
-            html += "</div>"; // card-body
-            html += "</div>"; // card
-            html += "</div>"; // col-12
-        }
-        
-        html += "</div>"; // row
-        
-        return html;
-    }
+   public String getSuchergebnisseHtml() {
+	    String html = "";
+	    
+	    if (ergebnisse.isEmpty()) {
+	        html += "<div class='text-center py-5'>";
+	        html += "<i class='bi bi-search' style='font-size: 4rem; color: #ccc;'></i>";
+	        html += "<h4 class='mt-3 text-muted'>Keine Ergebnisse gefunden</h4>";
+	        html += "<p class='text-muted'>Versuche andere Suchbegriffe oder Filter</p>";
+	        html += "</div>";
+	        return html;
+	    }
+	    
+	    html += "<div class='row g-3'>";
+	    
+	    for (SearchResult result : ergebnisse) {
+	        html += "<div class='col-12'>";
+	        
+	        html += "<div class='card h-100 shadow-sm border-0 hover-card position-relative'>";
+	        html += "<div class='card-body'>";
+	        html += "<div class='row'>";
+	        
+	        // Bild (Platzhalter)
+	        html += "<div class='col-md-3'>";
+	        html += "<img src='../img/flexboard-logo.jpg' class='img-fluid rounded' alt='Bild'>";
+	        html += "</div>";
+	        
+	        // Inhalt
+	        html += "<div class='col-md-9'>";
+	        
+	        html += "<a href='./NavbarAppl.jsp?action=zumListing&id=" + result.listingid + "' class='stretched-link'></a>";
+	        
+	        // Titel und Badge
+	        html += "<h5 class='card-title fw-bold'>" + result.title + "</h5>";
+	        html += "<span class='badge bg-primary mb-2'>" + result.catname + "</span>";
+	        
+	        if (result.preis != null && result.preis > 0) {
+	            // Preis pro Stunde für Nachhilfe (catid == 2)
+	            if (result.catid == 2 && result.details.has("preisProStunde")) {
+	                html += "<p class='text-primary fw-bold fs-5'>" + result.preis + " €/h</p>";
+	            } 
+	            // Miete für WG & Wohnen (catid == 3)
+	            else if (result.catid == 3 && result.details.has("gesamtmiete")) {
+	                html += "<p class='text-primary fw-bold fs-5'>" + result.preis + " € Miete</p>";
+	            } 
+	            // Standard Preis
+	            else {
+	                html += "<p class='text-primary fw-bold fs-5'>" + result.preis + " €</p>";
+	            }
+	        } else {
+	            // Kategorie-spezifische Texte
+	            if (result.catid == 2) {
+	                html += "<p class='text-muted'>Preis auf Anfrage</p>";
+	            } else if (result.catid == 7) {
+	                html += "<p class='text-success fw-bold'>Kostenlos / Tausch</p>";
+	            } else {
+	                html += "<p class='text-muted'>Preis auf Anfrage</p>";
+	            }
+	        }
+	        
+	        String shortDescr = result.descr;
+	        if (shortDescr != null && shortDescr.length() > 150) {
+	            shortDescr = shortDescr.substring(0, 150) + "...";
+	        }
+	        html += "<p class='card-text text-muted'>" + (shortDescr != null ? shortDescr : "") + "</p>";
+	        
+	        html += "<p class='text-muted small mb-2'>";
+	        html += "<i class='bi bi-geo-alt'></i> " + result.zip + " " + result.city;
+	        html += " &nbsp; | &nbsp; ";
+	        html += "<i class='bi bi-calendar'></i> " + result.date;
+	        html += "</p>";
+	        
+	        html += "<span class='btn btn-outline-primary btn-sm position-relative' style='z-index: 2;'>";
+	        html += "Details ansehen <i class='bi bi-arrow-right'></i>";
+	        html += "</span>";
+	        
+	        html += "</div>"; 
+	        html += "</div>"; 
+	        html += "</div>"; 
+	        html += "</div>"; 
+	        html += "</div>"; 
+	    }
+	    
+	    html += "</div>";
+	    
+	    return html;
+	}
     
     // Methode um die Kategorien als Dropdown für die option select zu bekommen
     public String getKategorienHtml() {

@@ -20,9 +20,7 @@ public class PostgreSQLAccess extends JDBCAccess {
 	}
 	public void setSchema() throws ClassNotFoundException, SQLException {
 		String sql = "SET Schema '" + dbSchema + "'";
-		System.out.println(sql);
 		this.dbConn.prepareStatement(sql).executeUpdate();
-		System.out.println("Schema " + dbSchema + " gesetzt");
 	}
 
 	public static void main(String[] args) throws ClassNotFoundException, SQLException {

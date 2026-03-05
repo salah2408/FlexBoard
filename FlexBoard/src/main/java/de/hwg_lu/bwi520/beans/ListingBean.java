@@ -235,9 +235,8 @@ public class ListingBean {
 				boolean isOwner = this.account.getEmail().equals(userid);
 
 				html += "<div class='container py-5'>";
-				html += "<div class='row g-4'>"; // Die row bleibt hier ganz normal
+				html += "<div class='row g-4'>";
 
-				// HIER IST DER TRICK: Wenn es dein Inserat ist, bekommt die Spalte "mx-auto"
 				if (isOwner) {
 				    html += "<div class='col-lg-8 offset-lg-2'>";
 				} else {
@@ -309,7 +308,7 @@ public class ListingBean {
 					    html += "<i class='bi bi-envelope me-2'></i> Nachricht schreiben";
 					    html += "</button>";
 					} else {
-					    html += "<a href='./LoginView.jsp' class='btn btn-primary w-100 py-2 mb-2 mt-3'>";
+					    html += "<a href='./InseratDetailAppl.jsp?action=anmelden&link=./InseratDetailView.jsp' class='btn btn-primary w-100 py-2 mb-2 mt-3'>";
 					    html += "<i class='bi bi-box-arrow-in-right me-2'></i> Zum Schreiben einloggen";
 					    html += "</a>";
 					}
@@ -772,18 +771,18 @@ public class ListingBean {
 				}
 				html += "</div>";
 				html += "<div class='text-end'>";
-				html += "<a href='./NavbarAppl.jsp?action=zumListing&id=" + listingid
+				html += "<a href='./MeineInserateAppl.jsp?action=zumListing&id=" + listingid
 						+ "' class='btn btn-sm btn-outline-secondary mb-2 d-block'>Details anzeigen</a>";
-				html += "<a href='./NavbarAppl.jsp?action=bearbeiteListing&id=" + listingid
+				html += "<a href='./MeineInserateAppl.jsp?action=bearbeiteListing&id=" + listingid
 						+ "' class='btn btn-sm btn-outline-primary mb-2 d-block'>Bearbeiten</a>";
 				if (status.equals("A")) {
-					html += "<a href='./NavbarAppl.jsp?action=deaktiviereListing&id=" + listingid
+					html += "<a href='./MeineInserateAppl.jsp?action=deaktiviereListing&id=" + listingid
 							+ "' class='btn btn-sm btn-outline-danger d-block'>Deaktivieren</a>";
 				} else {
-					html += "<a href='./NavbarAppl.jsp?action=aktiviereListing&id=" + listingid
+					html += "<a href='./MeineInserateAppl.jsp?action=aktiviereListing&id=" + listingid
 							+ "' class='btn btn-sm btn-outline-success d-block'>Reaktivieren</a>";
 				}
-				html += "<a href='./NavbarAppl.jsp?action=loescheListing&id=" + listingid
+				html += "<a href='./MeineInserateAppl.jsp?action=loescheListing&id=" + listingid
 						+ "' class='btn btn-sm btn-danger d-block mt-2' "
 						+ "onclick=\"return confirm('Inserat wirklich endgültig löschen?');\">" + "Löschen</a>";
 				html += "</div>";
@@ -803,6 +802,35 @@ public class ListingBean {
 		}
 
 		return html;
+	}
+	
+	public String getProfilHtml() {
+	    if (!this.account.getLogedIn()) {
+	        return "";
+	    }
+
+	    String html = "<section class='py-5 bg-light'>"
+	            + "<div class='container'>"
+	            + "<div class='row justify-content-center'>"
+	            + "<div class='col-md-6'>"
+	            + "<div class='card shadow-sm border-0'>"
+	            + "<div class='card-body'>"
+	            + "<h5 class='card-title fw-bold mb-3'>Mein Profil</h5>"
+	            + "<ul class='list-group list-group-flush'>"
+	            + "<li class='list-group-item'><strong>Name:</strong> "
+	            + this.account.getVorname() + " " + this.account.getNachname() + "</li>"
+	            + "<li class='list-group-item'><strong>E-Mail:</strong> "
+	            + this.account.getEmail() + "</li>"
+	            + "<li class='list-group-item'><strong>Status:</strong> "
+	            + "<span class='badge bg-success'>Aktiv</span></li>"
+	            + "</ul>"
+	            + "<div class='mt-3 text-end'>"
+	            + "<a href='./NavbarAppl.jsp?action=profilBearbeiten' class='btn btn-sm btn-outline-secondary'>"
+	            + "Profil bearbeiten</a>"
+	            + "</div>"
+	            + "</div></div></div></div></div></section>";
+
+	    return html;
 	}
 
 	public boolean aktiviereListing() {

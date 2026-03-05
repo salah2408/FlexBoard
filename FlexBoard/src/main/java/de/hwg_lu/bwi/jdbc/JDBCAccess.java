@@ -27,15 +27,12 @@ public abstract class JDBCAccess {
 
 	public void createConnection() throws ClassNotFoundException, SQLException {
 		Class.forName(dbDrivername);
-		System.out.println("Datenbanktreiberklasse erfolgreich geladen");
 		String dbURL = dbProt + "://" + dbServer + ":" + dbPort + "/" + dbName;
-		System.out.println(dbURL);
 		this.dbConn = DriverManager.getConnection(
 					dbURL,
 					dbUserid,
 					dbPassword
 				);
-		System.out.println("Datenbankverbindung erzeugt");
 	}
 	public abstract void setSchema() throws ClassNotFoundException, SQLException;
 	
