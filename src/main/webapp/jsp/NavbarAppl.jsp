@@ -42,13 +42,13 @@
 			response.sendRedirect("./LoginView.jsp");
 		}
 	} else if (action.equals("zurSuche")) {
-		String q = request.getParameter("q");
+	    String q = request.getParameter("q");
 
-		if (q == null) {
-			q = "";
-		}
+	    if (q == null) {
+	        q = "";
+	    }
 
-		response.sendRedirect("./SucheView.jsp?q=" + java.net.URLEncoder.encode(q, "UTF-8"));
+	    response.sendRedirect("./SucheAppl.jsp?action=Finden&q=" + java.net.URLEncoder.encode(q, "UTF-8"));
 	} else if (action.equals("zurPost")) {
 		if (myAccount.getLogedIn()){
 			myAccount.readAlleNachrichtenFromDB();

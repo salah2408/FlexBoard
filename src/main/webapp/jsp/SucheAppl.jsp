@@ -1,3 +1,4 @@
+<%@page import="de.hwg_lu.bwi520.beans.AccountBean"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="de.hwg_lu.bwi520.beans.SearchBean" %>
 <!DOCTYPE html>
@@ -8,8 +9,10 @@
 </head>
 <body>
 <jsp:useBean id="mySearch" class="de.hwg_lu.bwi520.beans.SearchBean" scope="session" />
-
+<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
 <%
+mySearch.setAccount(myAccount);
+
 String action = request.getParameter("action");
 
 if(action == null)
