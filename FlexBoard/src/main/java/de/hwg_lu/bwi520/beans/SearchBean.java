@@ -16,7 +16,7 @@ import de.hwg_lu.bwi520.classes.Category;
 public class SearchBean {
 	
 	Connection dbConn;
-	
+	AccountBean account;
     String suchbegriff;
     String kategorie;
     String plzOrt;
@@ -43,9 +43,10 @@ public class SearchBean {
         sql.append("FROM listing l ");
         sql.append("JOIN category c ON l.catid = c.id ");
         sql.append("WHERE l.status = 'A' ");
-        
+        if (account != null && account.getLogedIn()) {
+            sql.append("AND l.userid <> ? ");
+        }
         List<Object> params = new ArrayList<>();
-        
         // Suchbegriff-Filter
         if (suchbegriff != null && !suchbegriff.trim().isEmpty()) {
             sql.append("AND (LOWER(l.title) LIKE ? OR LOWER(l.descr) LIKE ?) ");
@@ -72,10 +73,13 @@ public class SearchBean {
         
         try {
             PreparedStatement prep = this.dbConn.prepareStatement(sql.toString());
-            
+            int paramIndex = 1;
+            if (account != null && account.getLogedIn()) {
+                prep.setString(paramIndex++, account.getEmail());
+            }
             // Parameter setzen
             for (int i = 0; i < params.size(); i++) {
-                prep.setObject(i + 1, params.get(i));
+                prep.setObject(paramIndex++, params.get(i));
             }
             
             ResultSet rs = prep.executeQuery();
@@ -260,9 +264,17 @@ public class SearchBean {
 	        html += "<div class='card-body'>";
 	        html += "<div class='row'>";
 	        
-	        // Bild (Platzhalter)
+	        // Bild ()
 	        html += "<div class='col-md-3'>";
-	        html += "<img src='../img/flexboard-logo.jpg' class='img-fluid rounded' alt='Bild'>";
+
+	        String imageBase64 = result.details.optString("imageBase64", null);
+
+	        if (imageBase64 != null && !imageBase64.isEmpty()) {
+	            html += "<img src='" + imageBase64 + "' class='img-fluid rounded listing-preview-img'>";
+	        } else {
+	            html += "<img src='../img/flexboard-logo.jpg' class='img-fluid rounded'>";
+	        }
+
 	        html += "</div>";
 	        
 	        // Inhalt
@@ -423,6 +435,13 @@ public class SearchBean {
     public Integer getMaxPreis() {
         return maxPreis;
     }
+    
+    public AccountBean getAccount() {
+		return account;
+	}
+	public void setAccount(AccountBean account) {
+		this.account = account;
+	}
     
     
     // =============================

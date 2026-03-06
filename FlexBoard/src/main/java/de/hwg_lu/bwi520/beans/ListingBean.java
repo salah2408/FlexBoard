@@ -276,7 +276,7 @@ public class ListingBean {
 							+ "data-bs-toggle='modal' data-bs-target='#imageGalleryModal' " + "alt='Placeholder'>";
 				}
 				html += "<div class='text-end mt-2'>";
-				html += "<small class='text-muted'><i class='bi bi-images'></i> 1 / 2</small>";
+				html += "<small class='text-muted'><i class='bi bi-images'></i> Bild</small>";
 				html += "</div>";
 				html += "</div>";
 
@@ -332,12 +332,21 @@ public class ListingBean {
 				html += "<div id='listingCarousel' class='carousel slide' data-bs-ride='false'>";
 
 				html += "<div class='carousel-inner rounded-3 shadow'>";
-				html += "<div class='carousel-item active'>";
-				html += "<img src='../img/flexboard-logo.jpg' class='d-block w-100 carousel-image-custom' alt='Bild 1'>";
-				html += "</div>";
-				html += "<div class='carousel-item'>";
-				html += "<img src='../img/nico_robin.jpg' class='d-block w-100 carousel-image-custom' alt='Bild 2'>";
-				html += "</div>";
+
+				if (imageBase64 != null && !imageBase64.isEmpty()) {
+
+				    html += "<div class='carousel-item active'>";
+				    html += "<img src='" + imageBase64 + "' class='d-block w-100 carousel-image-custom' alt='Bild'>";
+				    html += "</div>";
+
+				} else {
+
+				    html += "<div class='carousel-item active'>";
+				    html += "<img src='../img/flexboard-logo.jpg' class='d-block w-100 carousel-image-custom' alt='Placeholder'>";
+				    html += "</div>";
+
+				}
+
 				html += "</div>";
 
 				html += "<button class='carousel-control-prev' type='button' data-bs-target='#listingCarousel' data-bs-slide='prev'>";
