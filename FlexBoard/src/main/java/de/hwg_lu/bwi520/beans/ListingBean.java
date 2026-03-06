@@ -205,203 +205,181 @@ public class ListingBean {
 		}
 
 	// gethtml
-	public String getInseratDetailHtml() {
+		public String getInseratDetailHtml() {
 
-		String html = "";
-		String sql = "SELECT c.name, l.userid, l.catid, l.title, l.descr, l.city, l.zip, l.status, l.date, l.details FROM listing l JOIN category c ON c.id = l.catid "
-				+ "WHERE listingid = ?";
+		    String html = "";
+		    String sql = "SELECT c.name, l.userid, l.catid, l.title, l.descr, l.city, l.zip, l.status, l.date, l.details FROM listing l JOIN category c ON c.id = l.catid "
+		            + "WHERE listingid = ?";
 
-		try {
-			PreparedStatement prep = this.dbConn.prepareStatement(sql);
-			prep.setInt(1, this.aktListingId);
-			ResultSet dbRes = prep.executeQuery();
+		    try {
+		        PreparedStatement prep = this.dbConn.prepareStatement(sql);
+		        prep.setInt(1, this.aktListingId);
+		        ResultSet dbRes = prep.executeQuery();
 
-			if (dbRes.next()) {
+		        if (dbRes.next()) {
 
-				String catName = dbRes.getString("name");
-				String userid = dbRes.getString("userid");
-				int catid = dbRes.getInt("catid");
-				String title = dbRes.getString("title");
-				String descr = dbRes.getString("descr");
-				String zip = dbRes.getString("zip");
-				String city = dbRes.getString("city");
-				String status = dbRes.getString("status");
-				Date date = dbRes.getDate("date");
-				String details = dbRes.getString("details");
-				JSONObject detailsJson = new JSONObject(details);
+		            String catName = dbRes.getString("name");
+		            String userid = dbRes.getString("userid");
+		            int catid = dbRes.getInt("catid");
+		            String title = dbRes.getString("title");
+		            String descr = dbRes.getString("descr");
+		            String zip = dbRes.getString("zip");
+		            String city = dbRes.getString("city");
+		            String status = dbRes.getString("status");
+		            java.sql.Date date = dbRes.getDate("date"); 
+		            String details = dbRes.getString("details");
+		            JSONObject detailsJson = new JSONObject(details);
 
-				this.anbieterEmail = userid;
+		            String formattedDate = "Unbekannt";
+		            if (date != null) {
+		                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd.MM.yyyy");
+		                formattedDate = sdf.format(date);
+		            }
 
-				boolean isOwner = this.account.getEmail().equals(userid);
+		            String statusBadgeClass = "bg-danger"; 
+		            String displayStatus = "Deactivated";
+		            
+		            if ("A".equals(status)) {
+		                statusBadgeClass = "bg-success"; 
+		                displayStatus = "Active";
+		            }
 
-				html += "<div class='container py-5'>";
-				html += "<div class='row g-4'>";
+		            this.anbieterEmail = userid;
 
-				if (isOwner) {
-				    html += "<div class='col-lg-8 offset-lg-2'>";
-				} else {
-				    html += "<div class='col-lg-8'>";
-				}
+		            boolean isOwner = this.account.getEmail().equals(userid);
 
-				html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
-				html += "<div class='card-body p-4'>";
-				html += "<h2 class='fw-bold mb-2'>" + title + "</h2>";
-				html += "<span class='badge bg-primary fs-6 mb-3'>" + catName + "</span>";
-				html += "<p class='text-muted'>";
-				html += "<i class='bi bi-geo-alt me-1'></i>" + zip + " " + city;
-				html += "</p>";
-				html += "<hr>";
+		            html += "<div class='container py-5'>";
+		            html += "<div class='row g-4'>";
 
-				if (this.isPrice(detailsJson))
-					html += "<div class='display-6 fw-bold text-primary'>" + this.getPreisHtml(detailsJson) + "</div>";
-				else
-				    html += "<div class='display-6 fw-bold text-primary'>" + this.getGratisHtml(catid, detailsJson) + "</div>";
-				html += "</div>";
-				html += "</div>";
+		            if (isOwner) {
+		                html += "<div class='col-lg-8 offset-lg-2'>";
+		            } else {
+		                html += "<div class='col-lg-8'>";
+		            }
 
-				String imageBase64 = detailsJson.optString("imageBase64", null);
+		            html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
+		            html += "<div class='card-body p-4'>";
+		            
+		            html += "<div class='d-flex justify-content-between align-items-start mb-2'>";
+		            html += "<h2 class='fw-bold mb-0'>" + title + "</h2>";
+		            html += "<span class='badge " + statusBadgeClass + " fs-6'>" + displayStatus + "</span>";
+		            html += "</div>";
+		            
+		            html += "<span class='badge bg-primary fs-6 mb-3'>" + catName + "</span>";
+		            
+		            html += "<p class='text-muted'>";
+		            html += "<i class='bi bi-geo-alt me-1'></i>" + zip + " " + city;
+		            html += "<span class='ms-3'><i class='bi bi-calendar3 me-1'></i>Erstellt am: " + formattedDate + "</span>";
+		            html += "</p>";
+		            html += "<hr>";
 
-				html += "<div class='mb-4'>";
+		            if (this.isPrice(detailsJson))
+		                html += "<div class='display-6 fw-bold text-primary'>" + this.getPreisHtml(detailsJson) + "</div>";
+		            else
+		                html += "<div class='display-6 fw-bold text-primary'>" + this.getGratisHtml(catid, detailsJson) + "</div>";
+		            
+		            html += "</div>";
+		            html += "</div>";
 
-				if (imageBase64 != null && !imageBase64.isEmpty()) {
+		            String imageBase64 = detailsJson.optString("imageBase64", null);
 
-					html += "<img src='" + imageBase64 + "' "
-							+ "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' "
-							+ "data-bs-toggle='modal' data-bs-target='#imageGalleryModal' " + "alt='Hauptbild'>";
+		            html += "<div class='mb-4'>";
 
-				} else {
+		            if (imageBase64 != null && !imageBase64.isEmpty()) {
+		                html += "<img src='" + imageBase64 + "' "
+		                        + "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' alt='Hauptbild'>";
+		            } else {
+		                html += "<img src='../img/flexboard-logo.jpg' "
+		                        + "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' alt='Placeholder'>";
+		            }
+		            html += "<div class='text-end mt-2'>";
+		            html += "</div>";
+		            html += "</div>";
 
-					html += "<img src='../img/flexboard-logo.jpg' "
-							+ "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' "
-							+ "data-bs-toggle='modal' data-bs-target='#imageGalleryModal' " + "alt='Placeholder'>";
-				}
-				html += "<div class='text-end mt-2'>";
-				html += "<small class='text-muted'><i class='bi bi-images'></i> 1 / 2</small>";
-				html += "</div>";
-				html += "</div>";
+		            html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
+		            html += "<div class='card-body p-4'>";
+		            html += "<h5 class='fw-bold mb-3'>Beschreibung</h5>";
+		            html += "<p class='mb-0 description-text'>" + descr + "</p>";
+		            html += "</div>";
+		            html += "</div>";
 
-				html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
-				html += "<div class='card-body p-4'>";
-				html += "<h5 class='fw-bold mb-3'>Beschreibung</h5>";
-				html += "<p class='mb-0 description-text'>" + descr + "</p>";
-				html += "</div>";
-				html += "</div>";
+		            html += this.getDetailsKategorie(catid, detailsJson);
 
-				html += this.getDetailsKategorie(catid, detailsJson);
+		            html += "</div>";
 
-				html += "</div>";
+		            html += "<div class='col-lg-4'>";
+		            
+		            if(!isOwner) {
+		                html += "<div class='card shadow-sm border-0 rounded-4 sticky-sidebar'>";
+		                html += "<div class='card-body p-4 text-center'>";
+		                html += "<div class='mb-3'>";
+		                html += "<i class='bi bi-person-circle text-secondary profile-icon-large'></i>";
+		                html += "</div>";
+		                html += "<h5 class='fw-bold mb-1'>" + userid + "</h5>";
 
-				html += "<div class='col-lg-4'>";
-				
-				// Nachricht schreiben soll nur erscheinen wenn der Inhaber der Anzeige nicht der User selbst ist
-				if(!isOwner) {
-					html += "<div class='card shadow-sm border-0 rounded-4 sticky-sidebar'>";
-					html += "<div class='card-body p-4 text-center'>";
-					html += "<div class='mb-3'>";
-					html += "<i class='bi bi-person-circle text-secondary profile-icon-large'></i>";
-					html += "</div>";
-					html += "<h5 class='fw-bold mb-1'>" + userid + "</h5>";
+		                if (this.account.getLogedIn()) {
+		                    html += "<button class='btn btn-primary w-100 py-2 mb-2 mt-3' data-bs-toggle='offcanvas' data-bs-target='#chatOffcanvas'>";
+		                    html += "<i class='bi bi-envelope me-2'></i> Nachricht schreiben";
+		                    html += "</button>";
+		                } else {
+		                    html += "<a href='./InseratDetailAppl.jsp?action=anmelden&link=./InseratDetailView.jsp' class='btn btn-primary w-100 py-2 mb-2 mt-3'>";
+		                    html += "<i class='bi bi-box-arrow-in-right me-2'></i> Zum Schreiben einloggen";
+		                    html += "</a>";
+		                }
+		            }
 
+		            html += "</div>";
+		            html += "</div>";
+		            html += "</div>";
+		            html += "</div>";
+		            html += "</div>";
 
-					if (this.account.getLogedIn()) {
-					    html += "<button class='btn btn-primary w-100 py-2 mb-2 mt-3' data-bs-toggle='offcanvas' data-bs-target='#chatOffcanvas'>";
-					    html += "<i class='bi bi-envelope me-2'></i> Nachricht schreiben";
-					    html += "</button>";
-					} else {
-					    html += "<a href='./InseratDetailAppl.jsp?action=anmelden&link=./InseratDetailView.jsp' class='btn btn-primary w-100 py-2 mb-2 mt-3'>";
-					    html += "<i class='bi bi-box-arrow-in-right me-2'></i> Zum Schreiben einloggen";
-					    html += "</a>";
-					}
-				}
+		            html += "<div class='offcanvas offcanvas-bottom shadow-lg rounded-top-4' tabindex='-1' id='chatOffcanvas' style='height: auto; max-height: 50vh;'>";
+		            html += "<div class='offcanvas-header border-bottom px-4 py-3'>";
+		            html += "<h5 class='offcanvas-title fw-bold'>";
+		            html += "<i class='bi bi-chat-dots text-primary me-2'></i>Nachricht an " + userid;
+		            html += "</h5>";
+		            html += "<button type='button' class='btn-close' data-bs-dismiss='offcanvas' aria-label='Close'></button>";
+		            html += "</div>";
 
-				html += "</div>";
-				html += "</div>";
-				html += "</div>";
-				html += "</div>";
-				html += "</div>";
+		            html += "<div class='offcanvas-body p-4'>";
+		            html += "<form action='./InseratDetailAppl.jsp' method='post'>"; 
 
-				html += "<div class='modal fade' id='imageGalleryModal' tabindex='-1' aria-hidden='true'>";
-				html += "<div class='modal-dialog modal-xl modal-dialog-centered'>";
-				html += "<div class='modal-content bg-transparent border-0 shadow-none'>";
+		            html += "<input type='hidden' name='empfaengerid' value='" + userid + "'>";
+		            html += "<input type='hidden' name='listingid' value='" + this.aktListingId + "'>";
 
-				html += "<div class='modal-header border-0 pb-0'>";
-				html += "<button type='button' class='btn-close btn-close-white ms-auto modal-close-custom' data-bs-dismiss='modal' aria-label='Close'></button>";
-				html += "</div>";
+		            html += "<div class='mb-3'>";
+		            html += "<label class='form-label text-muted small'>Deine Nachricht:</label>";
+		            html += "<textarea class='form-control rounded-4 bg-light' name='nachrichtText' rows='4' placeholder='Hallo, ich habe Interesse an deinem Inserat...' required></textarea>";
+		            html += "</div>";
 
-				html += "<div class='modal-body p-0'>";
-				html += "<div id='listingCarousel' class='carousel slide' data-bs-ride='false'>";
+		            html += "<div class='text-end'>";
+		            html += "<input type='submit' name='action' value='Senden' class='btn btn-primary px-4 py-2 rounded-5'>";
+		            html += "</div>";
 
-				html += "<div class='carousel-inner rounded-3 shadow'>";
-				html += "<div class='carousel-item active'>";
-				html += "<img src='../img/flexboard-logo.jpg' class='d-block w-100 carousel-image-custom' alt='Bild 1'>";
-				html += "</div>";
-				html += "<div class='carousel-item'>";
-				html += "<img src='../img/nico_robin.jpg' class='d-block w-100 carousel-image-custom' alt='Bild 2'>";
-				html += "</div>";
-				html += "</div>";
+		            html += "</form>";
 
-				html += "<button class='carousel-control-prev' type='button' data-bs-target='#listingCarousel' data-bs-slide='prev'>";
-				html += "<span class='carousel-control-prev-icon' aria-hidden='true'></span>";
-				html += "<span class='visually-hidden'>Zurück</span>";
-				html += "</button>";
-				html += "<button class='carousel-control-next' type='button' data-bs-target='#listingCarousel' data-bs-slide='next'>";
-				html += "<span class='carousel-control-next-icon' aria-hidden='true'></span>";
-				html += "<span class='visually-hidden'>Weiter</span>";
-				html += "</button>";
+		            html += "</div>";
+		            html += "</div>";
 
-				html += "</div>";
-				html += "</div>";
+		        } else {
+		            html = "<div class='container py-5 text-center text-muted'>" + "Inserat nicht gefunden." + "</div>";
+		        }
 
-				html += "</div>";
-				html += "</div>";
-				html += "</div>";
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		    }
 
-				html += "<div class='offcanvas offcanvas-bottom shadow-lg rounded-top-4' tabindex='-1' id='chatOffcanvas' style='height: auto; max-height: 50vh;'>";
-				html += "<div class='offcanvas-header border-bottom px-4 py-3'>";
-				html += "<h5 class='offcanvas-title fw-bold'>";
-				html += "<i class='bi bi-chat-dots text-primary me-2'></i>Nachricht an " + userid;
-				html += "</h5>";
-				html += "<button type='button' class='btn-close' data-bs-dismiss='offcanvas' aria-label='Close'></button>";
-				html += "</div>";
-
-				html += "<div class='offcanvas-body p-4'>";
-				html += "<form action='./InseratDetailAppl.jsp' method='post'>"; 
-
-				html += "<input type='hidden' name='empfaengerid' value='" + userid + "'>";
-				html += "<input type='hidden' name='listingid' value='" + this.aktListingId + "'>";
-
-				html += "<div class='mb-3'>";
-				html += "<label class='form-label text-muted small'>Deine Nachricht:</label>";
-				html += "<textarea class='form-control rounded-4 bg-light' name='nachrichtText' rows='4' placeholder='Hallo, ich habe Interesse an deinem Inserat...' required></textarea>";
-				html += "</div>";
-
-				html += "<div class='text-end'>";
-				html += "<input type='submit' name='action' value='Senden' class='btn btn-primary px-4 py-2 rounded-5'>";
-
-				html += "</button>";
-				html += "</div>";
-
-				html += "</form>";
-
-				html += "</div>";
-				html += "</div>";
-
-			} else {
-				html = "<div class='container py-5 text-center text-muted'>" + "Inserat nicht gefunden." + "</div>";
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
+		    return html;
 		}
-
-		return html;
-	}
 	// Hilfsmethoden für die DetailAnzeigenHtml
 
 	// Hilfsmethode um für die aktuellen Details der Anzeige zu bekommen (von
 	// Kategorie abhängig)
 	public String getDetailsKategorie(int catid, JSONObject detailsJson) {
 	    String html = "";
+	    if(catid == 9)
+	    	return html;
 	    html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
 	    html += "<div class='card-body p-4'>";
 	    html += "<h5 class='fw-bold mb-3'>Details</h5>";
@@ -525,6 +503,10 @@ public class ListingBean {
 			return detailsJson.getInt("gesamtmiete") > 0;
 		else if(detailsJson.has("verguetung"))
 			return detailsJson.getInt("verguetung") > 0;
+		else if(detailsJson.has("sonstigesPreis")) {
+			return detailsJson.getInt("sonstigesPreis") > 0;
+		}
+			
 		return false;
 	}
 
@@ -544,6 +526,8 @@ public class ListingBean {
 			return detailsJson.getInt("gesamtmiete")  + "€";
 		else if(detailsJson.has("verguetung"))
 			return detailsJson.getInt("verguetung")  + "€";
+		else if(detailsJson.has("sonstigesPreis"))
+			return detailsJson.getInt("sonstigesPreis") + "€";
 		
 		return html;
 	}
@@ -576,7 +560,14 @@ public class ListingBean {
 		    	html = "auf Anfrage";
 		    } else if (catid == 8) {
 		    	html = "Preis auf Anfrage";
+		    } else if(catid == 9) {
+		    	if(detailsJson.getString("sonstigesTyp").equals("Gratis"))
+		    		html = "Gratis";
+		    	else if(detailsJson.getString("sonstigesTyp").equals("Auf Anfrage"))
+		    		html = "Preis auf Anfrage";
 		    }
+		    else
+		    	System.out.println("ungültige catid !!!");
 
 		
 		return html;
