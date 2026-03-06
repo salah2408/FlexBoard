@@ -36,6 +36,7 @@
 	}
 	else
 		response.sendRedirect("./HomepageView.jsp");
+	
 %>
 </body>
 </html>
