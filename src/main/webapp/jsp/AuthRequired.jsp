@@ -8,7 +8,7 @@
     // Sicherheitsnetz gegen Loop:
     String uri = request.getRequestURI();
 
-    // Diese Seiten dürfen IMMER ohne Login erreichbar sein
+    // Diese Seiten dÃ¼rfen IMMER ohne Login erreichbar sein
     boolean isPublic =
            uri.endsWith("/LoginView.jsp")
         || uri.endsWith("/RegView.jsp")
