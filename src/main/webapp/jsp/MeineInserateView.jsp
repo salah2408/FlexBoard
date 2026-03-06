@@ -1,3 +1,4 @@
+<%@ include file="./AuthRequired.jsp" %>
 <%@page import="de.hwg_lu.bwi520.beans.ListingBean"%>
 <%@page import="de.hwg_lu.bwi520.beans.AccountBean"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"

@@ -557,7 +557,7 @@ public class ListingBean {
 		    	else if(detailsJson.getString("eintritt").equals("Kostenpflichtig"))
 		    		html = "Preis auf Anfrage";
 		    } else if (catid == 7) {
-		    	html = "auf Anfrage";
+		    	html = "Tausch";
 		    } else if (catid == 8) {
 		    	html = "Preis auf Anfrage";
 		    } else if(catid == 9) {
@@ -739,6 +739,8 @@ public class ListingBean {
 					price = detailsJson.optInt("eventPreis", 0);
 				} else if (detailsJson.has("dienstleistungPreis")) {
 					price = detailsJson.optInt("dienstleistungPreis", 0);
+				} else if (detailsJson.has("sonstigesPreis")) {
+					price = detailsJson.optInt("sonstigesPreis", 0);
 				}
 				html += "<div class='card shadow-sm mb-4 border-0'>";
 				html += "<div class='card-body'>";
