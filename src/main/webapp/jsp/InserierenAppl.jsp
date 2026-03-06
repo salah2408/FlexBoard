@@ -8,7 +8,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>NavbarAppl</title>
+<title></title>
 </head>
 <body>
 
@@ -191,10 +191,18 @@ if(action.equals("Anzeige erstellen") || action.equals("Anzeige aktualisieren"))
             detailsJson
         );
     }
-    myListing.readAlleAnzeigenFromDB();
-    myListing.resetEditMode();
-
-    response.sendRedirect("./HomepageView.jsp");
+    if(success){
+    	myListing.readAlleAnzeigenFromDB();
+    	myListing.resetEditMode();
+    	int latestListing = myListing.getLatestListingId();
+    	response.sendRedirect("./NavbarAppl.jsp?action=zumListing&id=" + latestListing);
+    }
+    else{
+    	System.out.println("Ein Fehler beim Inserieren oder bearbeiten ist geschehen bitte wenden sie sich an ihren IT-Admin");
+    	response.sendRedirect("./HomepageView.jsp");
+    }
+    	
+    
 } else {
 	response.sendRedirect("./HomepageView.jsp");
 }

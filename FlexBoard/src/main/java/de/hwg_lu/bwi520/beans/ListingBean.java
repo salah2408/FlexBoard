@@ -1,5 +1,6 @@
 package de.hwg_lu.bwi520.beans;
 
+import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -19,6 +20,7 @@ public class ListingBean {
 	Connection dbConn;
 
 	int aktListingId;
+	int latestListingId;
 	AccountBean account;
 	String anbieterEmail;
 	ArrayList<Listing> anzeigen;
@@ -77,7 +79,7 @@ public class ListingBean {
 			String sql = "INSERT INTO listing (userid, catid, title, descr, zip, city, status, date, details) "
 					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-			PreparedStatement prep = this.dbConn.prepareStatement(sql);
+			PreparedStatement prep = this.dbConn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
 			prep.setString(1, userid);
 			prep.setInt(2, catid);
@@ -90,6 +92,12 @@ public class ListingBean {
 			prep.setString(9, detailsJson.toString());
 
 			prep.executeUpdate();
+			
+			ResultSet dbRes = prep.getGeneratedKeys();
+			if (dbRes.next()) {
+			    int neueListingId = dbRes.getInt(1);
+			    this.latestListingId = neueListingId;
+			}
 
 			return true;
 
@@ -911,9 +919,19 @@ public class ListingBean {
 	           "style='height:100px;width:100px;object-fit:cover;" +
 	           "border-radius:8px;border:1px solid #dee2e6;'>";
 	}
+	
+	
+	
+	
+	
+	
+	
 
 	// Getter und Setter (Inserieren)
-
+	
+	public int getLatestListingId() {
+		return this.latestListingId;
+	}
 	public void setAktListingId(int id) {
 		this.aktListingId = id;
 	}
