@@ -105,13 +105,13 @@ if(action.equals("Anzeige erstellen") || action.equals("Anzeige aktualisieren"))
     } else if (categoryID.equals("2")) {
         detailsJson.put("fach", fach);
         detailsJson.put("nachhilfeTyp", nachhilfeTyp);
-        detailsJson.put("preisProStunde", (preisProStunde != null && !preisProStunde.equals("")) ? Integer.parseInt(preisProStunde) : 0);
+        detailsJson.put("preisProStunde", (preisProStunde != null && !preisProStunde.equals("")) ? Double.parseDouble(preisProStunde) : 0);
         detailsJson.put("nachhilfeOrt", nachhilfeOrt);
         detailsJson.put("nachhilfeNiveau", nachhilfeNiveau);
 
     } else if (categoryID.equals("3")) {
         detailsJson.put("zimmergroesse", zimmergroesse);
-        detailsJson.put("gesamtmiete", gesamtmiete != null ? Integer.parseInt(gesamtmiete) : 0);
+        detailsJson.put("gesamtmiete", gesamtmiete != null ? Double.parseDouble(gesamtmiete) : 0);
         detailsJson.put("einzugsdatum", einzugsdatum);
         detailsJson.put("befristung", befristung);
         detailsJson.put("wgDetails", wgDetails != null ? wgDetails : "");
@@ -120,21 +120,21 @@ if(action.equals("Anzeige erstellen") || action.equals("Anzeige aktualisieren"))
         detailsJson.put("jobTypSelect", jobTypSelect);
         detailsJson.put("anstellungsart", anstellungsart);
         detailsJson.put("wochenstunden", wochenstunden);
-        detailsJson.put("verguetung", (verguetung != null && !verguetung.equals("")) ? Integer.parseInt(verguetung) : 0);
+        detailsJson.put("verguetung", (verguetung != null && !verguetung.equals("")) ? Double.parseDouble(verguetung) : 0);
 
     } else if (categoryID.equals("5")) {
         detailsJson.put("geraetetyp", geraetetyp);
         detailsJson.put("marke", marke);
         detailsJson.put("zustandTechnik", zustandTechnik);
         detailsJson.put("garantie", garantie);
-        detailsJson.put("technikPreis", technikPreis != null ? Integer.parseInt(technikPreis) : 0);
+        detailsJson.put("technikPreis", technikPreis != null ? Double.parseDouble(technikPreis) : 0);
 
     } else if (categoryID.equals("6")) {
         detailsJson.put("eventDatum", eventDatum);
         detailsJson.put("veranstalter", veranstalter);
         detailsJson.put("eintritt", eintritt);
         detailsJson.put("anmeldung", anmeldung);
-        detailsJson.put("eventPreis", (eventPreis != null && !eventPreis.equals(""))? Integer.parseInt(eventPreis) : 0);
+        detailsJson.put("eventPreis", (eventPreis != null && !eventPreis.equals(""))? Double.parseDouble(eventPreis) : 0);
 
     } else if (categoryID.equals("7")) {
         detailsJson.put("tauschGegen", tauschGegen);
@@ -144,11 +144,11 @@ if(action.equals("Anzeige erstellen") || action.equals("Anzeige aktualisieren"))
     } else if (categoryID.equals("8")) {
         detailsJson.put("dienstleistungKat", dienstleistungKat);
         detailsJson.put("preismodell", preismodell);
-        detailsJson.put("dienstleistungPreis", dienstleistungPreis != null ? Integer.parseInt(dienstleistungPreis) : 0);
+        detailsJson.put("dienstleistungPreis", dienstleistungPreis != null ? Double.parseDouble(dienstleistungPreis) : 0);
         detailsJson.put("referenzen", referenzen);
     } else if(categoryID.equals("9")){
     	detailsJson.put("sonstigesTyp", sonstigesTyp);
-    	detailsJson.put("sonstigesPreis", (sonstigesPreis != null && !sonstigesPreis.equals("")) ? Integer.parseInt(sonstigesPreis) : 0);
+    	detailsJson.put("sonstigesPreis", (sonstigesPreis != null && !sonstigesPreis.equals("")) ? Double.parseDouble(sonstigesPreis) : 0);
     }
     if (imageBase64 != null && !imageBase64.isEmpty()) {
         // Neues Bild wurde hochgeladen

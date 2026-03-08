@@ -12,14 +12,12 @@ function zeigeZusatzFelder() {
             });
         }
     }
-    console.log("Reset beendet: Alle Kategorien versteckt und entsperrt.");
 
     // 2. Aktive Kategorie auslesen
     let selectElement = document.getElementById('categorySelect');
     if (!selectElement) return;
     
     let selectedValue = selectElement.value;
-    console.log("Ausgewählte Kategorie-ID: '" + selectedValue + "'");
 
     // 3. Block anzeigen und Felder aktivieren
     if (selectedValue !== '') {
@@ -28,26 +26,19 @@ function zeigeZusatzFelder() {
             aktiverBlock.hidden = false;
             
             let neueFelder = aktiverBlock.querySelectorAll('input, select, textarea');
-            console.log("Gefundene Felder in Kategorie " + selectedValue + ": " + neueFelder.length);
-            
             neueFelder.forEach(function(feld) {
-                // Ignoriere Checkboxen und versteckte Felder
                 if (feld.type !== 'checkbox' && feld.type !== 'hidden' && feld.type !== 'button' && feld.type !== 'submit') {
                     feld.required = true;
-                    console.log(" -> REQUIRED gesetzt für Feld: " + (feld.name || feld.id) + " (Type: " + feld.type + ")");
                 }
             });
         }
     }
 
-    // 4. Unter-Funktionen aufrufen (damit z.B. Preis-Felder bei 'Gratis' ihr required wieder verlieren)
-    console.log("Prüfe Unter-Kategorien...");
-    checkEventPreis();
-    checkJobVerguetung();
-    checkNachhilfePreis();
-    checkSonstigesPreis();
-
-    console.log("--- zeigeZusatzFelder BEENDET ---");
+    // 4. BUGFIX: Wir rufen hier NUR die Funktion auf, die zur aktuellen Kategorie gehört!
+    if (selectedValue === '6') checkEventPreis();
+    if (selectedValue === '4') checkJobVerguetung();
+    if (selectedValue === '2') checkNachhilfePreis();
+    if (selectedValue === '9') checkSonstigesPreis();
 }
 
 function checkEventPreis() {
@@ -60,13 +51,11 @@ function checkEventPreis() {
     if (selectElement.value === 'Kostenpflichtig') {
         preisBlock.hidden = false;
         if (preisInput) preisInput.required = true;
-        console.log("[Event] Eintritt ist Kostenpflichtig -> Event-Preis ist REQUIRED");
     } else {
         preisBlock.hidden = true;
         if (preisInput) {
             preisInput.value = '';
             preisInput.required = false;
-            console.log("[Event] Eintritt ist Gratis/Leer -> Event-Preis NICHT required");
         }
     }
 }
@@ -83,13 +72,10 @@ function checkJobVerguetung() {
         if (verguetungInput) {
             verguetungInput.value = '';
             verguetungInput.required = false;
-            console.log("[Job] Suche Job -> Vergütung NICHT required");
         }
     } else {
         verguetungBlock.hidden = false;
-        if (verguetungInput) preisInput.required = true; // BUGFIX HIER WAR VORHER EIN TIPPFEHLER!
         if (verguetungInput) verguetungInput.required = true;
-        console.log("[Job] Biete/Leer -> Vergütung ist REQUIRED");
     }
 }
 
@@ -103,13 +89,11 @@ function checkNachhilfePreis() {
     if (selectElement.value === 'Biete Nachhilfe') {
         preisBlock.hidden = false;
         if (preisInput) preisInput.required = true;
-        console.log("[Nachhilfe] Bietet an -> Preis pro Stunde ist REQUIRED");
     } else {
         preisBlock.hidden = true;
         if (preisInput) {
             preisInput.value = '';
             preisInput.required = false;
-            console.log("[Nachhilfe] Sucht/Lerngruppe -> Preis pro Stunde NICHT required");
         }
     }
 }
@@ -124,64 +108,85 @@ function checkSonstigesPreis() {
     if (selectElement.value === 'Preis') {
         preisBlock.hidden = false;
         if (preisInput) preisInput.required = true;
-        console.log("[Sonstiges] Festpreis gewählt -> Preis-Feld ist REQUIRED");
     } else {
         preisBlock.hidden = true;
         if (preisInput) {
             preisInput.value = '';
             preisInput.required = false;
-            console.log("[Sonstiges] Gratis/Auf Anfrage -> Preis-Feld NICHT required");
         }
     }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    zeigeZusatzFelder();
-    checkEventPreis();
-    checkJobVerguetung();
-    checkNachhilfePreis();
-    checkSonstigesPreis();
+    // 1. Zuerst die Formular-Funktionen aufrufen
+    try {
+        zeigeZusatzFelder();
+        // BUGFIX: Hier habe ich die 4 check... Aufrufe gelöscht. 
+        // Sie werden jetzt durch zeigeZusatzFelder() automatisch richtig aufgerufen!
+    } catch (e) {
+        console.error("Fehler in den Formular-Funktionen:", e);
+    }
     
+    // 2. Jetzt kümmern wir uns isoliert um den Bild-Upload
+    console.log("--- BILD UPLOAD INITIALISIERUNG ---");
     const fileInput = document.getElementById('bildUpload');
     const container = document.getElementById('vorschauContainer');
     const hiddenInput = document.getElementById('imageBase64Input');
 
+    console.log("Prüfe HTML-Elemente:");
+    console.log("1. fileInput gefunden?", fileInput !== null);
+    console.log("2. container gefunden?", container !== null);
+    console.log("3. hiddenInput gefunden?", hiddenInput !== null);
+
     if (!fileInput || !container || !hiddenInput) {
+        console.error("ABBRUCH: Eines der Bild-Elemente fehlt im HTML! Überprüfe die IDs.");
         return; 
     }
 
+    console.log("Alle Bild-Elemente gefunden. Aktiviere Listener...");
+
     fileInput.addEventListener('change', function(event) {
+        console.log("Datei wurde ausgewählt!");
         container.innerHTML = ''; 
         hiddenInput.value = '';
         const dateien = event.target.files;
 
-        if (!dateien || dateien.length === 0) return;
+        if (!dateien || dateien.length === 0) {
+            console.log("Auswahl abgebrochen.");
+            return;
+        }
 		
         const datei = dateien[0];
+        console.log("Ausgewählte Datei: " + datei.name + " (Typ: " + datei.type + ")");
 		
+        // Sicherheits-Check: Ist es wirklich ein Bild?
         if (!datei.type.startsWith('image/')) {
-            alert('Bitte wähle ausschließlich Bilddateien aus.');
-            fileInput.value = '';
+            alert('Bitte wähle ausschließlich Bilddateien (wie JPG oder PNG) aus.');
+            fileInput.value = ''; // Feld wieder leeren
             return;
         }
 
         const reader = new FileReader();
+        
         reader.onload = function(e) {
+            console.log("Datei im Speicher gelesen, beginne Komprimierung...");
             const img = new Image();
+            
             img.onload = function() {
                 const MAX_WIDTH = 800;
                 const MAX_HEIGHT = 800;
                 let width = img.width;
                 let height = img.height;
 
+                // Saubere Mathematik für das Seitenverhältnis
                 if (width > height) {
                     if (width > MAX_WIDTH) {
-                        height = Math.round(height *= MAX_WIDTH / width);
+                        height = Math.round(height * (MAX_WIDTH / width));
                         width = MAX_WIDTH;
                     }
                 } else {
                     if (height > MAX_HEIGHT) {
-                        width = Math.round(width *= MAX_HEIGHT / height);
+                        width = Math.round(width * (MAX_HEIGHT / height));
                         height = MAX_HEIGHT;
                     }
                 }
@@ -192,9 +197,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
 
+                // Bild zu Base64 machen
                 const komprimiertesBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                
+                // 1. In die DB (verstecktes Feld) schreiben!
                 hiddenInput.value = komprimiertesBase64;
+                console.log("Erfolg! Bild komprimiert und in hiddenInput geschrieben.");
 
+                // 2. Vorschau erzeugen!
                 const previewImg = document.createElement('img');
                 previewImg.src = komprimiertesBase64;
                 previewImg.style.height = '100px';
@@ -206,6 +216,12 @@ document.addEventListener('DOMContentLoaded', function() {
             };
             img.src = e.target.result;
         };
+        
+        reader.onerror = function() {
+            console.error("Fehler beim Einlesen der Datei!");
+            alert("Die Datei konnte nicht gelesen werden.");
+        };
+
         reader.readAsDataURL(datei);
     });
 });

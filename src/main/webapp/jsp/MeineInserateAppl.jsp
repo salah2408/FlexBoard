@@ -60,6 +60,8 @@
 
 		response.sendRedirect("./MeineInserateView.jsp");
 			} else if (action.equals("bearbeiteListing")) {
+				int id = Integer.parseInt(request.getParameter("id"));
+				listingBean.setAktListingId(id);
 
 		String idParam = request.getParameter("id");
 

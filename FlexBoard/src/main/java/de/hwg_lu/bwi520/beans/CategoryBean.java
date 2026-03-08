@@ -389,7 +389,7 @@ public class CategoryBean {
 
             + "  <div class='col-md-6' id='jobVerguetungBlock'>"
             + "    Vergütung"
-            + "    <input type='text' class='form-control' name='verguetung' "
+            + "    <input type='number' class='form-control' name='verguetung' "
             + "    id='jobVerguetungInput' "
             + "    value='" + getEditValue("verguetung") + "'>"
             + "  </div>"
