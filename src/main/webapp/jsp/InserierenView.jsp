@@ -16,7 +16,7 @@
 <link type="text/css" rel="stylesheet" href="../css/Inserieren.css" />
 <script
 	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../js/Inserieren.js"></script>
+<script src="../js/Inserieren.js" defer></script>
 </head>
 
 <body class="d-flex flex-column min-vh-100">
@@ -24,8 +24,16 @@
 <jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
 <jsp:useBean id="listingBean" class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
 <jsp:useBean id="categoryBean" class="de.hwg_lu.bwi520.beans.CategoryBean" scope="session" />
+
 <%
-categoryBean.setListingBean(listingBean);
+	// WICHTIG: wenn explizit neu, dann Edit-Mode löschen
+	String mode = request.getParameter("mode");
+	if ("new".equalsIgnoreCase(mode)) {
+		listingBean.resetEditMode();
+		listingBean.setAktListingId(0);
+	}
+
+	categoryBean.setListingBean(listingBean);
 %>
 
 	<jsp:getProperty property="navbarHtml" name="myAccount" />

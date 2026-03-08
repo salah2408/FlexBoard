@@ -33,6 +33,7 @@
 
 	if (action.equals("zurHomepage")) {
 		response.sendRedirect("./HomepageView.jsp");
+
 	} else if (action.equals("zumLogin")) {
 
 		if (listingId != null) {
@@ -40,15 +41,22 @@
 		}
 
 		response.sendRedirect("./LoginView.jsp");
+
 	} else if (action.equals("zurReg")) {
 		response.sendRedirect("./RegView.jsp");
+
 	} else if (action.equals("zumInserieren")) {
-		if (myAccount.getLogedIn())
-			response.sendRedirect("./InserierenView.jsp");
-		else {
-			myWeiter.setLink("./InserierenView.jsp");
+		if (myAccount.getLogedIn()) {
+			// WICHTIG: beim "Neu inserieren" Edit-Modus zurücksetzen
+			listingBean.resetEditMode();
+			listingBean.setAktListingId(0);
+
+			response.sendRedirect("./InserierenView.jsp?mode=new");
+		} else {
+			myWeiter.setLink("./InserierenView.jsp?mode=new");
 			response.sendRedirect("./LoginView.jsp");
 		}
+
 	} else if (action.equals("zurSuche")) {
 		String q = request.getParameter("q");
 
@@ -57,6 +65,7 @@
 		}
 
 		response.sendRedirect("./SucheAppl.jsp?action=Finden&q=" + java.net.URLEncoder.encode(q, "UTF-8"));
+
 	} else if (action.equals("zurPost")) {
 		if (myAccount.getLogedIn()) {
 			myAccount.readAlleNachrichtenFromDB();
@@ -66,8 +75,14 @@
 			myAccount.readAlleNachrichtenFromDB();
 			response.sendRedirect("./LoginView.jsp");
 		}
+
 	} else if (action.equals("abmelden")) {
 		myAccount.abmelden();
+
+		// optional sauber zurücksetzen
+		listingBean.resetEditMode();
+		listingBean.setAktListingId(0);
+
 		myWeiter.setLink("./HomepageView.jsp");
 		response.sendRedirect("./HomepageView.jsp");
 
@@ -78,6 +93,7 @@
 			myWeiter.setLink("./MeineInserateView.jsp");
 			response.sendRedirect("./LoginView.jsp");
 		}
+
 	} else if (action.equals("zuMeineFavoriten")) {
 		if (myAccount.getLogedIn())
 			response.sendRedirect("./MeineFavoritenView.jsp");
@@ -85,16 +101,17 @@
 			myWeiter.setLink("./MeineFavoritenView.jsp");
 			response.sendRedirect("./LoginView.jsp");
 		}
+
 	} else if (action.equals("zumListing")) {
 
 		int listingid = Integer.parseInt(request.getParameter("id"));
-
 		listingBean.setAktListingId(listingid);
 
 		response.sendRedirect("./InseratDetailView.jsp");
-	} // =============================
-		// FAVORIT HINZUFÜGEN
-		// =============================
+	}
+	// =============================
+	// FAVORIT HINZUFÜGEN
+	// =============================
 	else if (action.equals("addFavorite")) {
 
 		int listingid = Integer.parseInt(request.getParameter("id"));
