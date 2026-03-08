@@ -1,7 +1,6 @@
 package de.hwg_lu.bwi520.beans;
 
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -217,13 +216,6 @@ public class ListingBean {
 		}
 
 	// gethtml
-Hier ist dein komplett bereinigter und zusammengeführter Code!
-
-Ich habe die Merge-Konflikte (die doppelten if-Abfragen bei den Buttons) aufgelöst, kleine HTML-Fehler (wie ein schließendes </button> nach einem <input>) korrigiert und die Report-Funktion (Anzeige melden) nahtlos in dein neues Layout mit den Favoriten integriert.
-
-Ersetze deine komplette Methode einfach mit diesem Code:
-
-Java
 
 public String getInseratDetailHtml() {
 
@@ -258,7 +250,7 @@ public String getInseratDetailHtml() {
             // NEU: Vorab prüfen, ob der User das Inserat schon gemeldet hat
             boolean hatBereitsGemeldet = false;
             if (this.account.getLogedIn()) {
-                hatBereitsGemeldet = this.hatUserSchonGemeldet(this.aktListingId, this.account.getEmail());
+                hatBereitsGemeldet = this.hatUserSchonGemeldet();
             }
 
             html += "<div class='container py-5'>";
