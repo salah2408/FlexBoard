@@ -1184,6 +1184,7 @@ public class ListingBean {
 
 	    return false;
 	}
+	
 	// Getter und Setter (Inserieren)
 
 	public void setAktListingId(int id) {

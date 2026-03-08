@@ -19,66 +19,55 @@ public class AccountBean {
 	Vector<Account> allAccounts;
 	Connection dbConn;
 	public String aktuelleSeite = "";
-	
+	ListingBean ListingBean;
 	Account user;
 	HashMap<Integer, Vector<Nachricht>> alleNachrichten;
-	
+
 	int[] aktChatReihenfolge;
 	String aktChatPartner;
 	int aktAnzeigeID;
 	public boolean loginSuccess = false;
-	
+
 	public AccountBean() throws ClassNotFoundException, SQLException {
 		this.allAccounts = new Vector<Account>();
-		this.dbConn = new PostgreSQLAccess().getConnection(); 
-		
+		this.dbConn = new PostgreSQLAccess().getConnection();
+
 		this.user = new Account();
 		this.alleNachrichten = new HashMap<Integer, Vector<Nachricht>>();
-		
+
 		this.readAllAccountsFromDB();
 		this.aktChatReihenfolge = new int[0];
-		
+
 		this.aktChatPartner = "";
 		this.aktAnzeigeID = -1;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
+
 	// Abschnitt Account
-	
-	
-	
-	
-	
+
 	public void readAllAccountsFromDB() throws SQLException {
 		String sql = "SELECT email, vorname, nachname, active, admin FROM account";
 		PreparedStatement prep = dbConn.prepareStatement(sql);
-		
+
 		ResultSet dbRes = prep.executeQuery();
-		while(dbRes.next()) {
+		while (dbRes.next()) {
 			String email = dbRes.getString("email");
 			String vorname = dbRes.getString("vorname");
 			String nachname = dbRes.getString("nachname");
 			String active = dbRes.getString("active");
 			String admin = dbRes.getString("admin");
-			
+
 			this.allAccounts.add(new Account(vorname, nachname, email, active, admin));
 		}
 	}
-	
+
 	public boolean saveAccount(String email, String vorname, String nachname, String passwort) throws SQLException {
-		if(this.checkAccountExists(email)) {
+		if (this.checkAccountExists(email)) {
 			System.out.println("Account mit dieser Email existiert bereits");
 			return false;
 		}
-		
+
 		try {
-			String sql ="insert into account (email, vorname, nachname, passwort, active, admin) "
+			String sql = "insert into account (email, vorname, nachname, passwort, active, admin) "
 					+ "values (?,?,?,?,?,?)";
 			System.out.println(sql);
 			PreparedStatement prep = this.dbConn.prepareStatement(sql);
@@ -89,36 +78,34 @@ public class AccountBean {
 			prep.setString(5, "yes");
 			prep.setString(6, "no");
 			prep.executeUpdate();
-			System.out.println("Account erfolgreich eingefuegt");	
-			
+			System.out.println("Account erfolgreich eingefuegt");
+
 			return true;
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 			System.out.println("Ein unerwarteter Fehler ist aufgetreten. Bitte wenden sie sich an einen Admin");
 			e.printStackTrace();
 			return false;
 		}
-		
+
 	}
-	
+
 	public boolean checkAccountExists(String email) throws SQLException {
 		String sql = "select email from account where email = ?";
 		System.out.println(sql);
 		PreparedStatement prep = this.dbConn.prepareStatement(sql);
 		prep.setString(1, email);
 		ResultSet dbRes = prep.executeQuery();
-		return dbRes.next(); 
+		return dbRes.next();
 	}
-	
+
 	public boolean login(String email, String passwort) throws SQLException {
-		String sql = "select email, vorname, nachname, passwort, active, admin "
-				+ "from account where email = ?";
+		String sql = "select email, vorname, nachname, passwort, active, admin " + "from account where email = ?";
 		System.out.println(sql);
 		PreparedStatement prep = this.dbConn.prepareStatement(sql);
 		prep.setString(1, email);
 		ResultSet dbRes = prep.executeQuery();
-		if(dbRes.next()) {		
-			if(dbRes.getString("passwort").equals(passwort)) {
+		if (dbRes.next()) {
+			if (dbRes.getString("passwort").equals(passwort)) {
 				user.setEmail(email);
 				user.setVorname(dbRes.getString("vorname"));
 				user.setNachname(dbRes.getString("nachname"));
@@ -126,52 +113,33 @@ public class AccountBean {
 				user.setAdmin(dbRes.getString("admin"));
 				user.setLogedIn(true);
 				return true;
-			}
-			else
+			} else
 				return false;
-		}
-		else
+		} else
 			return false;
-		
+
 	}
 
-	
 	public void abmelden() {
-		this.allAccounts = new Vector<Account>();	
+		this.allAccounts = new Vector<Account>();
 		this.user = new Account();
 		this.alleNachrichten = new HashMap<Integer, Vector<Nachricht>>();
 		this.aktChatReihenfolge = new int[0];
 		this.aktChatPartner = "";
 		this.aktAnzeigeID = -1;
-		
+
 		System.out.println("Erfolgreich abgemeldet");
 	}
-	
+
 	public String getInserierenLink() {
-	    return "./NavbarAppl.jsp?action=zumInserieren";
+		return "./NavbarAppl.jsp?action=zumInserieren";
 	}
 
-	
-
-	
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	// Abschnitt Nachrichten / Posteingang
-	
-	
-	
-	
-	// Methode um vom aktuell eingelogten User alle Chatverläufe zu lesen (in Reihenfolge: Alt -> neu) und in eine Hashmap zu speichern mit allen wichtigen informationen
+
+	// Methode um vom aktuell eingelogten User alle Chatverläufe zu lesen (in
+	// Reihenfolge: Alt -> neu) und in eine Hashmap zu speichern mit allen wichtigen
+	// informationen
 	public void readAlleNachrichtenFromDB() throws SQLException {
 		this.alleNachrichten.clear();
 		String sql = "SELECT listingid, sender_email, empfaenger_email, datum, uhrzeit, nachricht FROM chatlog WHERE sender_email = ? OR empfaenger_email = ? "
@@ -179,61 +147,63 @@ public class AccountBean {
 		PreparedStatement prep = this.dbConn.prepareStatement(sql);
 		prep.setString(1, this.user.getEmail());
 		prep.setString(2, this.user.getEmail());
-		
-		 ResultSet dbRes = prep.executeQuery();
-	        while (dbRes.next()) {
-	        	int listingid = dbRes.getInt("listingid");
-	            String sender = dbRes.getString("sender_email");
-	            String empfaenger = dbRes.getString("empfaenger_email");
-	            String nachricht = dbRes.getString("nachricht");
-	            LocalDate datum = dbRes.getDate("datum").toLocalDate();
-	            LocalTime uhrzeit = dbRes.getTime("uhrzeit").toLocalTime();
-	            LocalDateTime zeitpunkt = LocalDateTime.of(datum, uhrzeit);
 
+		ResultSet dbRes = prep.executeQuery();
+		while (dbRes.next()) {
+			int listingid = dbRes.getInt("listingid");
+			String sender = dbRes.getString("sender_email");
+			String empfaenger = dbRes.getString("empfaenger_email");
+			String nachricht = dbRes.getString("nachricht");
+			LocalDate datum = dbRes.getDate("datum").toLocalDate();
+			LocalTime uhrzeit = dbRes.getTime("uhrzeit").toLocalTime();
+			LocalDateTime zeitpunkt = LocalDateTime.of(datum, uhrzeit);
 
-	            
-	            // Erstmal überprüfen ob der aktuelle user der sender oder der empfaenger der Nachricht ist
-	            // User ist sender 
-	            if(this.user.getEmail().equals(sender)) {
-	            	// Überprüfen ob der andere User bereits in die HashMap gespeichert wurde falls nicht dann neuen Eintrag erstellen und neuen Vector
-	            	if(this.alleNachrichten.containsKey(listingid)) {
-	            		this.alleNachrichten.get(listingid).add(new Nachricht(listingid, nachricht, datum, uhrzeit, zeitpunkt, sender, empfaenger));
-	            	}
-	            	// ersten Eintrag vom anderen User erstellen
-	            	else {
-	            		Vector<Nachricht> nachrichten = new Vector<Nachricht>();
-	            		nachrichten.add(new Nachricht(listingid, nachricht, datum, uhrzeit, zeitpunkt, sender, empfaenger));
-	            		this.alleNachrichten.put(listingid, nachrichten);
-	            	}
-	            }
-	            // User ist empfaenger
-	            else {
-	            	if(this.alleNachrichten.containsKey(listingid)) {
-	            		this.alleNachrichten.get(listingid).add(new Nachricht(listingid, nachricht, datum, uhrzeit, zeitpunkt, sender, empfaenger));
-	            	}
-	            	// ersten Eintrag vom anderen User erstellen
-	            	else {
-	            		Vector<Nachricht> nachrichten = new Vector<Nachricht>();
-	            		nachrichten.add(new Nachricht(listingid, nachricht, datum, uhrzeit, zeitpunkt, sender, empfaenger));
-	            		this.alleNachrichten.put(listingid, nachrichten);
-	            	}
-	            }
-	        }
-	       this.sortChats();
+			// Erstmal überprüfen ob der aktuelle user der sender oder der empfaenger der
+			// Nachricht ist
+			// User ist sender
+			if (this.user.getEmail().equals(sender)) {
+				// Überprüfen ob der andere User bereits in die HashMap gespeichert wurde falls
+				// nicht dann neuen Eintrag erstellen und neuen Vector
+				if (this.alleNachrichten.containsKey(listingid)) {
+					this.alleNachrichten.get(listingid)
+							.add(new Nachricht(listingid, nachricht, datum, uhrzeit, zeitpunkt, sender, empfaenger));
+				}
+				// ersten Eintrag vom anderen User erstellen
+				else {
+					Vector<Nachricht> nachrichten = new Vector<Nachricht>();
+					nachrichten.add(new Nachricht(listingid, nachricht, datum, uhrzeit, zeitpunkt, sender, empfaenger));
+					this.alleNachrichten.put(listingid, nachrichten);
+				}
+			}
+			// User ist empfaenger
+			else {
+				if (this.alleNachrichten.containsKey(listingid)) {
+					this.alleNachrichten.get(listingid)
+							.add(new Nachricht(listingid, nachricht, datum, uhrzeit, zeitpunkt, sender, empfaenger));
+				}
+				// ersten Eintrag vom anderen User erstellen
+				else {
+					Vector<Nachricht> nachrichten = new Vector<Nachricht>();
+					nachrichten.add(new Nachricht(listingid, nachricht, datum, uhrzeit, zeitpunkt, sender, empfaenger));
+					this.alleNachrichten.put(listingid, nachrichten);
+				}
+			}
+		}
+		this.sortChats();
 	}
-	
-	// Methode um die Reihenfolge der Chats festzulegen. Dadurch soll beim öffnen des Posteingagns die aktuellsten Nachrichten immer oben stehen.
+
+	// Methode um die Reihenfolge der Chats festzulegen. Dadurch soll beim öffnen
+	// des Posteingagns die aktuellsten Nachrichten immer oben stehen.
 	public void sortChats() {
 		this.aktChatReihenfolge = new int[this.alleNachrichten.size()];
 		int counter = 0;
-		
+
 		// Chats in das Array speichern
-		for(int listingid: this.alleNachrichten.keySet()) {
+		for (int listingid : this.alleNachrichten.keySet()) {
 			this.aktChatReihenfolge[counter] = listingid;
 			counter++;
 		}
-		
-		
+
 		// Sortieren des Chats mit Bubble Sort
 		int n = this.aktChatReihenfolge.length;
 		boolean swapped;
@@ -241,41 +211,41 @@ public class AccountBean {
 			swapped = false; // Track if any swap happens in this pass
 			for (int j = 0; j < n - 1 - i; j++) {
 				Vector<Nachricht> nachrichten1 = this.alleNachrichten.get(this.aktChatReihenfolge[j]);
-				Vector<Nachricht> nachrichten2 = this.alleNachrichten.get(this.aktChatReihenfolge[j+1]);
+				Vector<Nachricht> nachrichten2 = this.alleNachrichten.get(this.aktChatReihenfolge[j + 1]);
 				// Die aktuellsten Nachrichten werden raus genommen um verglichen zu werden
-				LocalDateTime zeitUser1 = nachrichten1.get(nachrichten1.size()-1).getZeitpunkt();
-				LocalDateTime zeitUser2 = nachrichten2.get(nachrichten2.size()-1).getZeitpunkt();
-				
-				if (zeitUser2.isAfter(zeitUser1)) { 
+				LocalDateTime zeitUser1 = nachrichten1.get(nachrichten1.size() - 1).getZeitpunkt();
+				LocalDateTime zeitUser2 = nachrichten2.get(nachrichten2.size() - 1).getZeitpunkt();
+
+				if (zeitUser2.isAfter(zeitUser1)) {
 					int temp = this.aktChatReihenfolge[j];
 					this.aktChatReihenfolge[j] = this.aktChatReihenfolge[j + 1];
-					this.aktChatReihenfolge[j + 1] = temp; 
+					this.aktChatReihenfolge[j + 1] = temp;
 					swapped = true;
 				}
 			}
 			if (!swapped)
 				break;
 		}
-		
-		// Initiallisierung vom aktuellsten Chat (dies ist nur wichtig beim ersten mal laden auf die Seite)
-		if(this.aktChatReihenfolge.length > 0) {
-			if(this.aktAnzeigeID == -1) {
+
+		// Initiallisierung vom aktuellsten Chat (dies ist nur wichtig beim ersten mal
+		// laden auf die Seite)
+		if (this.aktChatReihenfolge.length > 0) {
+			if (this.aktAnzeigeID == -1) {
 				this.aktAnzeigeID = this.aktChatReihenfolge[0];
 				this.aktChatPartner = this.getEmailChatpartner(this.aktAnzeigeID);
 			}
 		}
-		
+
 	}
-	
+
 	// Methode um eine neue Nachricht zu senden
 	public void sendMessage(String text) {
-		
+
 		LocalDate date = LocalDate.now();
 		LocalTime time = LocalTime.now();
-		
-		
+
 		try {
-			String sql ="insert into chatlog (listingid, sender_email, empfaenger_email, datum, uhrzeit, nachricht) "
+			String sql = "insert into chatlog (listingid, sender_email, empfaenger_email, datum, uhrzeit, nachricht) "
 					+ "values (?,?,?,?,?,?)";
 			System.out.println(sql);
 			PreparedStatement prep = this.dbConn.prepareStatement(sql);
@@ -286,131 +256,142 @@ public class AccountBean {
 			prep.setTime(5, java.sql.Time.valueOf(time));
 			prep.setString(6, text);
 			prep.executeUpdate();
-			System.out.println("Nachricht erfolgreich eingefuegt");	
-			
-		}
-		catch(Exception e) {
+			System.out.println("Nachricht erfolgreich eingefuegt");
+
+		} catch (Exception e) {
 			System.out.println("Ein unerwarteter Fehler ist aufgetreten. Bitte wenden sie sich an einen Admin");
 			e.printStackTrace();
 		}
 	}
-	
 
-	
-	
-
-	
-	
-	
 	// Abschnitt getHtml
-	
+
 	public String getNavbarHtml() {
 
-	    // Ein einziges Formular um die gesamte Navbar, method='get'
-	    String html = "<form action='./NavbarAppl.jsp' method='get'>"
-	            + "<nav class='navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-2'>"
-	            + "<div class='container'>"
-	            
-	            // Brand-Button
-	            + "<button type='submit' name='action' value='zurHomepage' "
-	            + "class='navbar-brand d-flex align-items-center fw-semibold fs-4 bg-transparent border-0'>"
-	            + "<img src='../img/flexboard-logo.jpg' alt='FlexBoard Logo' height='48' class='me-3'>"
-	            + "FlexBoard"
-	            + "</button>"
+		// Ein einziges Formular um die gesamte Navbar, method='get'
+		String html = "<form action='./NavbarAppl.jsp' method='get'>"
+				+ "<nav class='navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-2'>" + "<div class='container'>"
 
-	            + "<button class='navbar-toggler' type='button' data-bs-toggle='collapse' "
-	            + "data-bs-target='#navbarNav'>"
-	            + "<span class='navbar-toggler-icon'></span>"
-	            + "</button>"
+				// Brand-Button
+				+ "<button type='submit' name='action' value='zurHomepage' "
+				+ "class='navbar-brand d-flex align-items-center fw-semibold fs-4 bg-transparent border-0'>"
+				+ "<img src='../img/flexboard-logo.jpg' alt='FlexBoard Logo' height='48' class='me-3'>" + "FlexBoard"
+				+ "</button>"
 
-	            + "<div class='collapse navbar-collapse' id='navbarNav'>"
+				+ "<button class='navbar-toggler' type='button' data-bs-toggle='collapse' "
+				+ "data-bs-target='#navbarNav'>" + "<span class='navbar-toggler-icon'></span>" + "</button>"
 
-	            // Linke Navigation
-	            + "<ul class='navbar-nav me-auto'>";
+				+ "<div class='collapse navbar-collapse' id='navbarNav'>"
 
-	    if (this.getLogedIn()) {
-	        html += "<li class='nav-item'>"
-	              + "<button type='submit' name='action' value='zumInserieren' class='nav-link bg-transparent border-0 w-100 text-start "
-	              + (this.aktuelleSeite.equals("inserieren") ? "active fw-bold" : "")
-	              + "'>Inserieren</button>"
-	              + "</li>"
+				// Linke Navigation
+				+ "<ul class='navbar-nav me-auto'>";
 
-	              + "<li class='nav-item'>"
-	              + "<button type='submit' name='action' value='zurSuche' class='nav-link bg-transparent border-0 w-100 text-start "
-	              + (this.aktuelleSeite.equals("suche") ? "active fw-bold" : "")
-	              + "'>Jetzt finden</button>"
-	              + "</li>";
-	    }
+		if (this.getLogedIn()) {
+			html += "<li class='nav-item'>"
+					+ "<button type='submit' name='action' value='zumInserieren' class='nav-link bg-transparent border-0 w-100 text-start "
+					+ (this.aktuelleSeite.equals("inserieren") ? "active fw-bold" : "") + "'>Inserieren</button>"
+					+ "</li>"
 
-	    html += "</ul>"
+					+ "<li class='nav-item'>"
+					+ "<button type='submit' name='action' value='zurSuche' class='nav-link bg-transparent border-0 w-100 text-start "
+					+ (this.aktuelleSeite.equals("suche") ? "active fw-bold" : "") + "'>Jetzt finden</button>"
+					+ "</li>";
+		}
 
-	            // Rechte Navigation
-	            + "<ul class='navbar-nav ms-auto'>";
+		html += "</ul>"
 
-	    if (!this.getLogedIn()) {
-	        html += "<li class='nav-item'>"
-	              + "<button type='submit' name='action' value='zumLogin' class='nav-link bg-transparent border-0 w-100 text-start' onclick='setCurrentSite()'>Login</button>"
-	              + "</li>"
-	              + "<li class='nav-item'>"
-	              + "<button type='submit' name='action' value='zurReg' class='nav-link bg-transparent border-0 w-100 text-start' onclick='setCurrentSite()'>Registrieren</button>"
-	              + "</li>";
-	    } else {
-	        html += "<li class='nav-item dropdown'>"
-	              // Dropdown-Toggle bleibt ein a-Tag, da er nur das Menü aufklappt und nichts sendet
-	              + "<a class='nav-link dropdown-toggle' href='#' role='button' "
-	              + "data-bs-toggle='dropdown'>"
-	              + this.getVorname()
-	              + "</a>"
-	              + "<ul class='dropdown-menu dropdown-menu-end'>"
-	              + "<li><button type='submit' name='action' value='zurMeineInserate' class='dropdown-item bg-transparent border-0'>Profil</button></li>"
-	              + "<li><button type='submit' name='action' value='zurPost' class='dropdown-item bg-transparent border-0'>Posteingang</button></li>"
-	              + "<li><hr class='dropdown-divider'></li>"
-	              + "<li><button type='submit' name='action' value='abmelden' class='dropdown-item text-danger bg-transparent border-0'>Abmelden</button></li>"
-	              + "</ul>"
-	              + "</li>";
-	    }
-	    
-	    html += "<input id='currSite' type='text' name='currSite' value='' hidden=''";
-	    html += "</ul></div></div></nav></form>";
+				// Rechte Navigation
+				+ "<ul class='navbar-nav ms-auto'>";
 
-	    return html;
-	}
-	
-	public String getFooter() {
-		// Footer mit Inline-Styles, damit er auf JEDER Seite (auch ohne Homepage.css) exakt gleich aussieht
-	    String html = "<footer class='mt-auto' style='background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #e2e8f0; border-top: 1px solid rgba(255,255,255,0.05);'>" 
-	            + "<div class='container py-4'>"
-	            + "<div class='row'>"
-	            + "<div class='col-md-6'>"
-	            + "<h6 class='fw-bold mb-2' style='color: #ffffff; letter-spacing: 0.5px;'>FlexBoard</h6>"
-	            + "<p class='small mb-0' style='color: #94a3b8;'>Eine einfache Plattform zum Erstellen und Finden von Inseraten. ✓ Schnell erstellt &nbsp; ✓ Kostenlos &nbsp; ✓ Lokal vernetzt</p>"
-	            + "</div>"
-	            + "<div class='col-md-6 text-md-end mt-3 mt-md-0'>"
-	            + "<small style='color: #94a3b8;'> © 2026 FlexBoard · Praktikum Anwendungssysteme </small>"
-	            + "</div>"
-	            + "</div>"
-	            + "</div>"
-	            + "</footer>";
-		
+		if (!this.getLogedIn()) {
+			html += "<li class='nav-item'>"
+					+ "<button type='submit' name='action' value='zumLogin' class='nav-link bg-transparent border-0 w-100 text-start' onclick='setCurrentSite()'>Login</button>"
+					+ "</li>" + "<li class='nav-item'>"
+					+ "<button type='submit' name='action' value='zurReg' class='nav-link bg-transparent border-0 w-100 text-start' onclick='setCurrentSite()'>Registrieren</button>"
+					+ "</li>";
+		} else {
+			html += "<li class='nav-item dropdown'>"
+					// Dropdown-Toggle bleibt ein a-Tag, da er nur das Menü aufklappt und nichts
+					// sendet
+					+ "<a class='nav-link dropdown-toggle' href='#' role='button' " + "data-bs-toggle='dropdown'>"
+					+ this.getVorname() + "</a>" + "<ul class='dropdown-menu dropdown-menu-end'>"
+					+ "<li><button type='submit' name='action' value='zurMeineInserate' class='dropdown-item bg-transparent border-0'>Profil</button></li>"
+					+ "<li><button type='submit' name='action' value='zurPost' class='dropdown-item bg-transparent border-0'>Posteingang</button></li>"
+
+					+ "<li><button type='submit' name='action' value='zuMeineFavoriten' class='dropdown-item bg-transparent border-0'>"
+					+ "<i class='bi bi-heart-fill text-danger'></i> Favoriten ("
+					+ "<span id='favoriteCounter'>"
+					+ this.getFavoriteCount()
+					+ "</span>)</button></li>"
+
+					+ "<li><hr class='dropdown-divider'></li>"
+					+ "<li><button type='submit' name='action' value='abmelden' class='dropdown-item text-danger bg-transparent border-0'>Abmelden</button></li>"
+					+ "</ul>" + "</li>";
+		}
+
+		html += "<input id='currSite' type='text' name='currSite' value='' hidden=''";
+		html += "</ul></div></div></nav></form>";
+
 		return html;
 	}
 	
+	public int getFavoriteCount() {
+
+	    if (!this.getLogedIn())
+	        return 0;
+
+	    int count = 0;
+
+	    try {
+
+	        String sql = "SELECT COUNT(*) FROM favorite WHERE userid=?";
+	        PreparedStatement prep = dbConn.prepareStatement(sql);
+
+	        prep.setString(1, this.getEmail());
+
+	        ResultSet rs = prep.executeQuery();
+
+	        if (rs.next()) {
+	            count = rs.getInt(1);
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return count;
+	}
+
+	public String getFooter() {
+		// Footer mit Inline-Styles, damit er auf JEDER Seite (auch ohne Homepage.css)
+		// exakt gleich aussieht
+		String html = "<footer class='mt-auto' style='background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #e2e8f0; border-top: 1px solid rgba(255,255,255,0.05);'>"
+				+ "<div class='container py-4'>" + "<div class='row'>" + "<div class='col-md-6'>"
+				+ "<h6 class='fw-bold mb-2' style='color: #ffffff; letter-spacing: 0.5px;'>FlexBoard</h6>"
+				+ "<p class='small mb-0' style='color: #94a3b8;'>Eine einfache Plattform zum Erstellen und Finden von Inseraten. ✓ Schnell erstellt &nbsp; ✓ Kostenlos &nbsp; ✓ Lokal vernetzt</p>"
+				+ "</div>" + "<div class='col-md-6 text-md-end mt-3 mt-md-0'>"
+				+ "<small style='color: #94a3b8;'> © 2026 FlexBoard · Praktikum Anwendungssysteme </small>" + "</div>"
+				+ "</div>" + "</div>" + "</footer>";
+
+		return html;
+	}
+
 	public String getNachrichtenHtml() throws SQLException {
 		String html = "";
-		if(this.aktChatReihenfolge.length > 0) {
-			html = "<div class='container-fluid chat-container'>" 
-				 + "<div class='row h-100'>"
-				 + "<div class='col-12 col-md-4 col-lg-3 chat-list p-0'>"
-				 + "<div class='list-group list-group-flush'>";
+		if (this.aktChatReihenfolge.length > 0) {
+			html = "<div class='container-fluid chat-container'>" + "<div class='row h-100'>"
+					+ "<div class='col-12 col-md-4 col-lg-3 chat-list p-0'>"
+					+ "<div class='list-group list-group-flush'>";
 
 			html += this.getChatSeitenanzeige();
 
 			html += "</div>" + "</div>";
 
 			html += "<div class='col-12 col-md-8 col-lg-9 d-flex flex-column p-0'>"
-					+ "<div class='border-bottom p-3 fw-bold'>" + this.getTitleFromUser(this.aktAnzeigeID) + "---" + this.getNameFromUser(this.aktAnzeigeID) + "</div>"
-					+ "<div class='chat-messages flex-grow-1'>";
-			System.out.println("Aktuelle anzeigeID: " + this.aktAnzeigeID + " Und der ChatPartner: " + this.getAktChatPartner());
+					+ "<div class='border-bottom p-3 fw-bold'>" + this.getTitleFromUser(this.aktAnzeigeID) + "---"
+					+ this.getNameFromUser(this.aktAnzeigeID) + "</div>" + "<div class='chat-messages flex-grow-1'>";
+			System.out.println(
+					"Aktuelle anzeigeID: " + this.aktAnzeigeID + " Und der ChatPartner: " + this.getAktChatPartner());
 
 			html += this.getChatverlauf();
 
@@ -419,281 +400,277 @@ public class AccountBean {
 					+ "<input class='form-control' type='text' name='text' value='' placeholder='Nachricht schreiben...'>"
 					+ "<input class='btn btn-primary' type='submit' name='action' value='Senden'>" + "</form>"
 					+ "</div>" + "</div>" + "</div>" + "</div>" + "</div>";
-		}
-		else {
+		} else {
 			html = "<div class='col-12 col-md-8 col-lg-9 d-flex flex-column p-0'>";
 			html += "<h2> Es wurden noch keine Chats angefangen</h2>";
 			html += "</div>";
 		}
-		
-		
+
 		return html;
 	}
+
 	public String getHomepageListingsHtml() {
 
-	    String html = "";
-	    String sql = "SELECT l.listingid, l.title, l.city, l.details, c.name AS category_name " +
-	             "FROM listing l " +
-	             "JOIN category c ON l.catid = c.id " +
-	             "WHERE l.status = 'A' ";
+		String html = "";
+		String sql = "SELECT l.listingid, l.title, l.city, l.details, c.name AS category_name " + "FROM listing l "
+				+ "JOIN category c ON l.catid = c.id " + "WHERE l.status = 'A' ";
 
-	if (this.getLogedIn()) {
-	    sql += "AND l.userid <> ? ";
+		if (this.getLogedIn()) {
+			sql += "AND l.userid <> ? ";
+		}
+
+		sql += "ORDER BY RANDOM() LIMIT 3";
+
+		try {
+			PreparedStatement prep = this.dbConn.prepareStatement(sql);
+			if (this.getLogedIn()) {
+				prep.setString(1, this.getEmail());
+			}
+			ResultSet rs = prep.executeQuery();
+
+			html += "<section class='py-5 bg-white'>";
+			html += "<div class='container'>";
+			html += "<div class='text-center mb-4'>";
+			html += "<h2 class='fw-bold'>Entdecke Inserate</h2>";
+			html += "<p class='text-muted'>Zufällige aktive Angebote auf FlexBoard</p>";
+			html += "</div>";
+			html += "<div class='row g-4 justify-content-center'>";
+
+			boolean hasResults = false;
+
+			while (rs.next()) {
+				hasResults = true;
+
+				String title = rs.getString("title");
+				String category = rs.getString("category_name");
+				String city = rs.getString("city");
+				String detailsJsonString = rs.getString("details");
+				JSONObject detailsJson = new JSONObject(detailsJsonString);
+				String imageBase64 = detailsJson.optString("imageBase64", null);
+
+				// Wir prüfen mehrere mögliche Preisfelder:
+				int price = 0;
+
+				if (detailsJson.has("price"))
+					price = detailsJson.optInt("price", 0);
+				else if (detailsJson.has("technikPreis"))
+					price = detailsJson.optInt("technikPreis", 0);
+				else if (detailsJson.has("eventPreis"))
+					price = detailsJson.optInt("eventPreis", 0);
+				else if (detailsJson.has("dienstleistungPreis"))
+					price = detailsJson.optInt("dienstleistungPreis", 0);
+				else if (detailsJson.has("preisProStunde"))
+					price = detailsJson.optInt("preisProStunde", 0);
+				else if (detailsJson.has("gesamtmiete"))
+					price = detailsJson.optInt("gesamtmiete", 0);
+				else if (detailsJson.has("verguetung"))
+					price = detailsJson.optInt("verguetung", 0);
+
+				html += "<div class='col-md-4'>";
+				html += "<div class='card h-100 shadow-sm border-0 rounded-4 home-listing-card'>";
+				html += "<div class='card-body p-4 d-flex flex-column'>";
+				html += "<a href='./NavbarAppl.jsp?action=zumListing&id=" + rs.getInt("listingid")
+						+ "' class='stretched-link'></a>";
+				if (imageBase64 != null && !imageBase64.isEmpty()) {
+					html += "<img src='" + imageBase64 + "' " + "class='card-img-top rounded-top' "
+							+ "style='height:200px; object-fit:cover;'>";
+				} else {
+					html += "<div class='mb-4 text-center fs-2'>";
+					html += "<i class='bi bi-box-seam text-primary opacity-75'></i>";
+					html += "</div>";
+				}
+				html += "<div class='listing-content'>";
+				html += "<h5 class='fw-bold fs-4 mb-2'>" + title + "</h5>";
+				html += "<div class='mb-2'>";
+				html += "<span class='badge bg-primary bg-opacity-10 text-primary fw-semibold'>" + category + "</span>";
+				html += "</div>";
+
+				if (city != null && !city.isEmpty()) {
+					html += "<p class='text-muted small'>" + city + "</p>";
+				} else {
+					html += "<p class='text-muted small'>Ort nicht angegeben</p>";
+				}
+				html += "</div>";
+				if (price > 0) {
+					html += "<span class='badge bg-primary fs-6 px-3 py-2 mt-3'>" + price + " €</span>";
+				} else {
+					html += "<span class='badge bg-dark bg-opacity-75 fs-6 px-3 py-2 mt-3'>"
+							+ "Preis auf Anfrage</span>";
+				}
+
+				html += "</div></div></div>";
+			}
+
+			if (!hasResults) {
+				html += "<div class='col-12 text-center text-muted'>" + "Derzeit sind keine aktiven Inserate vorhanden."
+						+ "</div>";
+			}
+
+			html += "</div></div></section>";
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return html;
 	}
 
-	sql += "ORDER BY RANDOM() LIMIT 3";
-
-	    try {
-	        PreparedStatement prep = this.dbConn.prepareStatement(sql);
-	        if (this.getLogedIn()) {
-	            prep.setString(1, this.getEmail());
-	        }
-	        ResultSet rs = prep.executeQuery();
-
-	        html += "<section class='py-5 bg-white'>";
-	        html += "<div class='container'>";
-	        html += "<div class='text-center mb-4'>";
-	        html += "<h2 class='fw-bold'>Entdecke Inserate</h2>";
-	        html += "<p class='text-muted'>Zufällige aktive Angebote auf FlexBoard</p>";
-	        html += "</div>";
-	        html += "<div class='row g-4 justify-content-center'>";
-
-	        boolean hasResults = false;
-
-	        while (rs.next()) {
-	            hasResults = true;
-
-	            String title = rs.getString("title");
-	            String category = rs.getString("category_name");
-	            String city = rs.getString("city");
-	            String detailsJsonString = rs.getString("details");
-	            JSONObject detailsJson = new JSONObject(detailsJsonString);
-	            String imageBase64 = detailsJson.optString("imageBase64", null);
-
-	            // Wir prüfen mehrere mögliche Preisfelder:
-	            int price = 0;
-
-	            if (detailsJson.has("price")) 
-	                price = detailsJson.optInt("price", 0);
-	            else if (detailsJson.has("technikPreis")) 
-	                price = detailsJson.optInt("technikPreis", 0);
-	            else if (detailsJson.has("eventPreis")) 
-	                price = detailsJson.optInt("eventPreis", 0);
-	            else if (detailsJson.has("dienstleistungPreis")) 
-	                price = detailsJson.optInt("dienstleistungPreis", 0);
-	            else if(detailsJson.has("preisProStunde"))
-	        		price = detailsJson.optInt("preisProStunde", 0);
-	            else if(detailsJson.has("gesamtmiete"))
-	        		price = detailsJson.optInt("gesamtmiete", 0);
-	        	else if(detailsJson.has("verguetung"))
-	        		price = detailsJson.optInt("verguetung", 0);
-	            
-
-	            html += "<div class='col-md-4'>";
-	            html += "<div class='card h-100 shadow-sm border-0 rounded-4 home-listing-card'>";
-	            html += "<div class='card-body p-4 d-flex flex-column'>";
-	            html += "<a href='./NavbarAppl.jsp?action=zumListing&id=" 
-	            	      + rs.getInt("listingid") 
-	            	      + "' class='stretched-link'></a>";
-	            if (imageBase64 != null && !imageBase64.isEmpty()) {
-	                html += "<img src='" + imageBase64 + "' "
-	                      + "class='card-img-top rounded-top' "
-	                      + "style='height:200px; object-fit:cover;'>";
-	            } else {
-	                html += "<div class='mb-4 text-center fs-2'>";
-	                html += "<i class='bi bi-box-seam text-primary opacity-75'></i>";
-	                html += "</div>";
-	            }
-	            html += "<div class='listing-content'>";
-	            html += "<h5 class='fw-bold fs-4 mb-2'>" + title + "</h5>";
-	            html += "<div class='mb-2'>";
-	            html += "<span class='badge bg-primary bg-opacity-10 text-primary fw-semibold'>"
-	                  + category + "</span>";
-	            html += "</div>";
-
-	            if (city != null && !city.isEmpty()) {
-	                html += "<p class='text-muted small'>" + city + "</p>";
-	            } else {
-	                html += "<p class='text-muted small'>Ort nicht angegeben</p>";
-	            }
-	            html += "</div>";
-	            if (price > 0) {
-	                html += "<span class='badge bg-primary fs-6 px-3 py-2 mt-3'>"
-	                      + price + " €</span>";
-	            } else {
-	                html += "<span class='badge bg-dark bg-opacity-75 fs-6 px-3 py-2 mt-3'>"
-	                      + "Preis auf Anfrage</span>";
-	            }
-
-	            html += "</div></div></div>";
-	        }
-
-	        if (!hasResults) {
-	            html += "<div class='col-12 text-center text-muted'>"
-	                  + "Derzeit sind keine aktiven Inserate vorhanden."
-	                  + "</div>";
-	        }
-
-	        html += "</div></div></section>";
-
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-
-	    return html;
-	}
-	
-	
-	
 	public String getFooterHtml() {
-		// Wir nutzen Bootstrap-Klassen (bg-dark, text-white), um Konsistenz zu garantieren
-	    String html = "<footer class='bg-dark text-white mt-auto'>" 
-	            + "<div class='container py-4'>"
-	            + "<div class='row'>"
-	            + "<div class='col-md-6'>"
-	            + "<h6 class='fw-bold mb-2'>FlexBoard</h6>"
-	            + "<p class='small mb-0' style='opacity: 0.8;'>Eine einfache Plattform zum Erstellen und Finden von Inseraten. ✓ Schnell erstellt &nbsp; ✓ Kostenlos &nbsp; ✓ Lokal vernetzt</p>"
-	            + "</div>"
-	            + "<div class='col-md-6 text-md-end mt-3 mt-md-0'>"
-	            + "<small style='opacity: 0.8;'> © 2026 FlexBoard · Praktikum Anwendungssysteme </small>"
-	            + "</div>"
-	            + "</div>"
-	            + "</div>"
-	            + "</footer>";
-	    
-	    return html;
+		// Wir nutzen Bootstrap-Klassen (bg-dark, text-white), um Konsistenz zu
+		// garantieren
+		String html = "<footer class='bg-dark text-white mt-auto'>" + "<div class='container py-4'>"
+				+ "<div class='row'>" + "<div class='col-md-6'>" + "<h6 class='fw-bold mb-2'>FlexBoard</h6>"
+				+ "<p class='small mb-0' style='opacity: 0.8;'>Eine einfache Plattform zum Erstellen und Finden von Inseraten. ✓ Schnell erstellt &nbsp; ✓ Kostenlos &nbsp; ✓ Lokal vernetzt</p>"
+				+ "</div>" + "<div class='col-md-6 text-md-end mt-3 mt-md-0'>"
+				+ "<small style='opacity: 0.8;'> © 2026 FlexBoard · Praktikum Anwendungssysteme </small>" + "</div>"
+				+ "</div>" + "</div>" + "</footer>";
+
+		return html;
 	}
 
-	
-	
-	
 	// Abschnitt Hilfsmethoden für getHtml
 	// Methode um aus dem Listingid die email des chatpartners zu bekommen
 	public String getEmailChatpartner(int listingid) {
 		Vector<Nachricht> nachrichten = this.alleNachrichten.get(listingid);
-		for(Nachricht nachricht : nachrichten) {
-			if(nachricht.getSender().equals(this.getEmail()))
+		for (Nachricht nachricht : nachrichten) {
+			if (nachricht.getSender().equals(this.getEmail()))
 				return nachricht.getEmpfaenger();
-			else if(nachricht.getEmpfaenger().equals(this.getEmail()))
+			else if (nachricht.getEmpfaenger().equals(this.getEmail()))
 				return nachricht.getSender();
 		}
 		System.out.println("Keinen Chat mit der ID gefunden zwischen dem aktuellen User und dem Inhaber der Anzeige");
 		return "Keinen Chat mit der ID gefunden zwischen dem aktuellen User und dem Inhaber der Anzeige";
 	}
-	
+
 	// Methode um den Vor- und Nachnamen der Chatpartner zu bekommen
 	public String getNameFromUser(int listinid) {
 		String name = "";
 		String user = this.getEmailChatpartner(listinid);
-		for(Account account : this.allAccounts) {
-			if(account.getEmail().equals(user))
+		for (Account account : this.allAccounts) {
+			if (account.getEmail().equals(user))
 				name = account.getVorname() + " " + account.getNachname();
 		}
 		return name;
 	}
-	
+
 	// Methode um den Titel der Anzeige anhand der Anzeige ID herauszufinden
 	public String getTitleFromUser(int listingid) throws SQLException {
 		String sql = "SELECT title FROM listing WHERE listingid = ?";
 		PreparedStatement prep = this.dbConn.prepareStatement(sql);
 		prep.setInt(1, listingid);
 		ResultSet dbRes = prep.executeQuery();
-		if(dbRes.next())
+		if (dbRes.next())
 			return dbRes.getString("title");
 		else
 			return "FEHLER";
 	}
-	
+
 	// Methode um den Chatverlauf zwischen dem aktuellen ChatPartner zu erzeugen
 	public String getChatverlauf() {
 		String html = "";
-		for(Nachricht nachricht : this.alleNachrichten.get(this.aktAnzeigeID)) {
-			   if(this.aktChatPartner.equals(nachricht.getSender()))
-				   html += "<div class='bg-light rounded p-2 mb-2 message-left'>" + nachricht.getText() + "</div>";
-			   else
-				   html += "<div class='bg-primary text-white rounded p-2 mb-2 message-right'>" + nachricht.getText() + "</div>";
-		   }
+		for (Nachricht nachricht : this.alleNachrichten.get(this.aktAnzeigeID)) {
+			if (this.aktChatPartner.equals(nachricht.getSender()))
+				html += "<div class='bg-light rounded p-2 mb-2 message-left'>" + nachricht.getText() + "</div>";
+			else
+				html += "<div class='bg-primary text-white rounded p-2 mb-2 message-right'>" + nachricht.getText()
+						+ "</div>";
+		}
 		return html;
 	}
-	
+
 	public String getChatSeitenanzeige() throws SQLException {
 		String html = "";
-		
-		for(int i = 0; i < this.aktChatReihenfolge.length; i++) {
-			if(this.aktAnzeigeID == this.aktChatReihenfolge[i])
-				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action active'>" 
-					 + this.getTitleFromUser(this.aktChatReihenfolge[i]) + "</a>";
+
+		for (int i = 0; i < this.aktChatReihenfolge.length; i++) {
+			if (this.aktAnzeigeID == this.aktChatReihenfolge[i])
+				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i]
+						+ "' class='list-group-item list-group-item-action active'>"
+						+ this.getTitleFromUser(this.aktChatReihenfolge[i]) + "</a>";
 			else
-				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i] + "' class='list-group-item list-group-item-action'>" 
-						 + this.getTitleFromUser(this.aktChatReihenfolge[i]) + "</a>";
-				
+				html += "<a href='./NachrichtenAppl.jsp?action=switch&user=" + this.aktChatReihenfolge[i]
+						+ "' class='list-group-item list-group-item-action'>"
+						+ this.getTitleFromUser(this.aktChatReihenfolge[i]) + "</a>";
+
 		}
-		
+
 		return html;
 	}
-	
+
 	// Abschnitt Getter und Setter
-	
-	
-	
 
-
-	
 	public String getAktChatPartner() {
 		return aktChatPartner;
 	}
+
 	public void setAktChatPartner(String aktChatpartner) {
 		this.aktChatPartner = aktChatpartner;
 	}
+
 	// Der aktuelle Chat Partner wird mithilfe der Listingid geändert
 	public void setAktChatPartner(int listingid) {
 		this.aktChatPartner = this.getEmailChatpartner(listingid);
 	}
+
 	public int getAktAnzeigeID() {
 		return aktAnzeigeID;
 	}
+
 	public void setAktAnzeigeID(int aktAnzeigeID) {
 		this.aktAnzeigeID = aktAnzeigeID;
 	}
+
 	public Account getUser() {
 		return this.user;
 	}
+
 	public void setUser(Account user) {
 		this.user = user;
 	}
+
 	public String getVorname() {
 		return user.getVorname();
 	}
+
 	public void setVorname(String vorname) {
 		user.setVorname(vorname);
 	}
+
 	public String getNachname() {
 		return user.getNachname();
 	}
+
 	public void setNachname(String nachname) {
 		user.setNachname(nachname);
 	}
+
 	public String getEmail() {
 		return user.getEmail();
 	}
+
 	public void setEmail(String email) {
 		user.setEmail(email);
 	}
+
 	public String getActive() {
 		return user.getActive();
 	}
+
 	public void setActive(String active) {
 		user.setActive(active);
 	}
+
 	public String getAdmin() {
 		return user.getAdmin();
 	}
+
 	public void setAdmin(String admin) {
 		user.setAdmin(admin);
 	}
+
 	public boolean getLogedIn() {
 		return user.isLogedIn();
 	}
+
 	public void setLogedIn(boolean logedIn) {
 		user.setLogedIn(logedIn);
 	}
@@ -702,15 +679,24 @@ public class AccountBean {
 		return aktuelleSeite;
 	}
 
-
 	public void setAktuelleSeite(String aktuelleSeite) {
 		this.aktuelleSeite = aktuelleSeite;
 	}
+
 	public void setLoginSuccess(boolean loginSuccess) {
-	    this.loginSuccess = loginSuccess;
+		this.loginSuccess = loginSuccess;
 	}
 
 	public boolean getLoginSuccess() {
-	    return loginSuccess;
+		return loginSuccess;
 	}
+
+	public ListingBean getListingBean() {
+		return ListingBean;
+	}
+
+	public void setListingBean(ListingBean listingBean) {
+	ListingBean = listingBean;
+	}
+
 }

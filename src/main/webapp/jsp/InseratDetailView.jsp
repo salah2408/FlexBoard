@@ -10,6 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Inserat Details - FlexBoard</title>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" ></script>
+<script src="../js/ui.js"></script>
 <script src="../js/Navigation.js"></script>
 <script src="../js/favorite.js"></script>
 

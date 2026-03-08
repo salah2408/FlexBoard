@@ -8,18 +8,39 @@ document.addEventListener("click", function(e){
 
     e.preventDefault();
 
-    if(btn.dataset.loading) return;
-    btn.dataset.loading = "1";
+	if(btn.dataset.loading) return;
+
+	btn.dataset.loading = "1";
 
     const id = btn.dataset.id;
     const action = btn.dataset.action;
 
-    fetch("./NavbarAppl.jsp?action=" + (action === "add" ? "addFavorite" : "removeFavorite") + "&id=" + id)
+	fetch("./NavbarAppl.jsp?action=" + (action === "add" ? "addFavorite" : "removeFavorite") + "&id=" + id)
+	.then(res => res.text())
 
     .then(() => {
 
 		// globalen Favoritenstatus speichern (für andere Seiten)
 		    localStorage.setItem("favoriteChanged", Date.now());
+			
+			// ==========================
+				// NAVBAR FAVORITEN COUNTER
+				// ==========================
+
+				const counter = document.getElementById("favoriteCounter");
+
+				if(counter){
+
+				    let current = parseInt(counter.innerText) || 0;
+
+				    if(action === "add"){
+				        counter.innerText = current + 1;
+				    }else{
+				        counter.innerText = Math.max(0, current - 1);
+				    }
+
+				}
+			
         // ==========================
         // HEART ICON (Homepage / Suche)
         // ==========================
@@ -71,7 +92,6 @@ document.addEventListener("click", function(e){
             }
 
         }
-
         // ==========================
         // FAVORITENLISTE
         // ==========================
@@ -123,9 +143,9 @@ document.addEventListener("click", function(e){
 
     })
 
-    .catch(() => {
-        btn.dataset.loading = "";
-    });
+	.catch(() => {
+	  btn.dataset.loading = "";
+	});
 
 });
 // Favoriten synchronisieren (Homepage / Suche / Detailseite)
