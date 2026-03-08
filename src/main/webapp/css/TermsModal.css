@@ -1,0 +1,5 @@
+.terms-scroll-box {
+    max-height: 55vh;
+    overflow-y: auto;
+    line-height: 1.5;
+}
