@@ -16,6 +16,7 @@ import de.hwg_lu.bwi520.classes.Category;
 public class SearchBean {
 	
 	Connection dbConn;
+	ListingBean listingBean;
 	AccountBean account;
     String suchbegriff;
     String kategorie;
@@ -261,9 +262,48 @@ public class SearchBean {
 	        html += "<div class='col-12'>";
 	        
 	        html += "<div class='card h-100 shadow-sm border-0 hover-card position-relative'>";
-	        html += "<div class='card-body'>";
-	        html += "<div class='row'>";
-	        
+
+	     // FAVORITEN HERZ
+	        if (listingBean != null) {
+
+	        	if (account == null || !account.getLogedIn()) {
+
+	        		html += "<a href='./NavbarAppl.jsp?action=zumLogin&id=" + result.listingid + "&currSite=./SucheView.jsp' ";
+	                html += "class='favorite-heart' ";
+	                html += "data-bs-toggle='tooltip' ";
+	                html += "data-bs-title='Zum Speichern einloggen'>";
+	                html += "<i class='bi bi-heart'></i>";
+	                html += "</a>";
+
+	            } 
+	            else if (listingBean.isFavorite(result.listingid)) {
+
+	            	  html += "<a href='#' class='favorite-heart favorite-toggle' ";
+	                  html += "data-id='" + result.listingid + "' ";
+	                  html += "data-action='remove' ";
+	                  html += "data-bs-toggle='tooltip' ";
+	                  html += "data-bs-title='Favorit entfernen'>";
+	                  html += "<i class='bi bi-heart-fill'></i>";
+	                  html += "</a>";
+
+	            } 
+	            else {
+
+	            	html += "<a href='#' class='favorite-heart favorite-toggle' ";
+	                html += "data-id='" + result.listingid + "' ";
+	                html += "data-action='add' ";
+	                html += "data-bs-toggle='tooltip' ";
+	                html += "data-bs-title='Zu Favoriten hinzufügen'>";
+	                html += "<i class='bi bi-heart'></i>";
+	                html += "</a>";
+
+
+	            }
+
+	        }
+
+	     html += "<div class='card-body'>";
+	     html += "<div class='row'>";
 	        // Bild ()
 	        html += "<div class='col-md-3'>";
 
@@ -443,8 +483,18 @@ public class SearchBean {
 		this.account = account;
 	}
     
-    
-    // =============================
+    public ListingBean getListingBean() {
+		return listingBean;
+	}
+
+
+	public void setListingBean(ListingBean listingBean) {
+		this.listingBean = listingBean;
+	}
+
+
+
+	// =============================
     // INNER CLASS: SearchResult
     // =============================
     public static class SearchResult {

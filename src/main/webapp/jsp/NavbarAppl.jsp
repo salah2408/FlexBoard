@@ -11,26 +11,34 @@
 <title>Insert title here</title>
 </head>
 <body>
-<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
-<jsp:useBean id="myWeiter" class="de.hwg_lu.bwi520.beans.WeiterleitungsBean" scope="session" />
-<jsp:useBean id="listingBean" class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
-<jsp:useBean id="categoryBean" class="de.hwg_lu.bwi520.beans.CategoryBean" scope="session"/>
+	<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean"
+		scope="session" />
+	<jsp:useBean id="myWeiter"
+		class="de.hwg_lu.bwi520.beans.WeiterleitungsBean" scope="session" />
+	<jsp:useBean id="listingBean"
+		class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
+	<jsp:useBean id="categoryBean"
+		class="de.hwg_lu.bwi520.beans.CategoryBean" scope="session" />
 	<%
 	String action = request.getParameter("action");
-	
+	String listingId = request.getParameter("id");
 	String currSite = request.getParameter("currSite");
-	
-	if(currSite != null){
+
+	if (currSite != null) {
 		myWeiter.setLink(currSite);
 	}
 
 	if (action == null)
 		action = "";
 
-	
-	if (action.equals("zurHomepage")){
+	if (action.equals("zurHomepage")) {
 		response.sendRedirect("./HomepageView.jsp");
 	} else if (action.equals("zumLogin")) {
+
+		if (listingId != null) {
+			session.setAttribute("favoriteAfterLogin", listingId);
+		}
+
 		response.sendRedirect("./LoginView.jsp");
 	} else if (action.equals("zurReg")) {
 		response.sendRedirect("./RegView.jsp");
@@ -42,19 +50,18 @@
 			response.sendRedirect("./LoginView.jsp");
 		}
 	} else if (action.equals("zurSuche")) {
-	    String q = request.getParameter("q");
+		String q = request.getParameter("q");
 
-	    if (q == null) {
-	        q = "";
-	    }
+		if (q == null) {
+			q = "";
+		}
 
-	    response.sendRedirect("./SucheAppl.jsp?action=Finden&q=" + java.net.URLEncoder.encode(q, "UTF-8"));
+		response.sendRedirect("./SucheAppl.jsp?action=Finden&q=" + java.net.URLEncoder.encode(q, "UTF-8"));
 	} else if (action.equals("zurPost")) {
-		if (myAccount.getLogedIn()){
+		if (myAccount.getLogedIn()) {
 			myAccount.readAlleNachrichtenFromDB();
 			response.sendRedirect("./NachrichtenView.jsp");
-		}
-		else {
+		} else {
 			myWeiter.setLink("./NachrichtenView.jsp");
 			myAccount.readAlleNachrichtenFromDB();
 			response.sendRedirect("./LoginView.jsp");
@@ -71,6 +78,13 @@
 			myWeiter.setLink("./MeineInserateView.jsp");
 			response.sendRedirect("./LoginView.jsp");
 		}
+	} else if (action.equals("zuMeineFavoriten")) {
+		if (myAccount.getLogedIn())
+			response.sendRedirect("./MeineFavoritenView.jsp");
+		else {
+			myWeiter.setLink("./MeineFavoritenView.jsp");
+			response.sendRedirect("./LoginView.jsp");
+		}
 	} else if (action.equals("zumListing")) {
 
 		int listingid = Integer.parseInt(request.getParameter("id"));
@@ -78,7 +92,48 @@
 		listingBean.setAktListingId(listingid);
 
 		response.sendRedirect("./InseratDetailView.jsp");
-			}
+	} // =============================
+		// FAVORIT HINZUFÜGEN
+		// =============================
+	else if (action.equals("addFavorite")) {
+
+		int listingid = Integer.parseInt(request.getParameter("id"));
+		listingBean.setAktListingId(listingid);
+
+		listingBean.addFavorite();
+
+		String back = request.getParameter("currSite");
+
+		if (back != null)
+			response.sendRedirect(back);
+		else
+			response.sendRedirect("./HomepageView.jsp");
+	}
+
+	// =============================
+	// FAVORIT ENTFERNEN
+	// =============================
+	else if (action.equals("removeFavorite")) {
+
+		int listingid = Integer.parseInt(request.getParameter("id"));
+		listingBean.setAktListingId(listingid);
+
+		listingBean.removeFavorite();
+
+		String back = request.getParameter("currSite");
+
+		if (back != null)
+			response.sendRedirect(back);
+		else
+			response.sendRedirect("./HomepageView.jsp");
+
+	} else if (action.equals("removeFavoriteFromFavorites")) {
+
+		listingBean.setAktListingId(Integer.parseInt(request.getParameter("id")));
+		listingBean.removeFavorite();
+		response.sendRedirect("./MeineFavoritenView.jsp");
+	}
+
 	else
 		response.sendRedirect("./HomepageView.jsp");
 	%>

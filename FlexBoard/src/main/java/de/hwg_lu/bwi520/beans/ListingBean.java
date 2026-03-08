@@ -307,6 +307,28 @@ public class ListingBean {
 					    html += "<button class='btn btn-primary w-100 py-2 mb-2 mt-3' data-bs-toggle='offcanvas' data-bs-target='#chatOffcanvas'>";
 					    html += "<i class='bi bi-envelope me-2'></i> Nachricht schreiben";
 					    html += "</button>";
+					}if (this.account.getLogedIn()) {
+
+						if (this.isFavorite()) {
+
+						    html += "<button ";
+						    html += "class='btn btn-danger w-100 py-2 mb-2 favorite-toggle' ";
+						    html += "data-id='" + this.aktListingId + "' ";
+						    html += "data-action='remove'>";
+						    html += "<i class='bi bi-heart-fill'></i> Favorit entfernen";
+						    html += "</button>";
+
+						} else {
+
+						    html += "<button ";
+						    html += "class='btn btn-outline-danger w-100 py-2 mb-2 favorite-toggle' ";
+						    html += "data-id='" + this.aktListingId + "' ";
+						    html += "data-action='add'>";
+						    html += "<i class='bi bi-heart'></i> Zu Favoriten hinzufügen";
+						    html += "</button>";
+
+						}
+
 					} else {
 					    html += "<a href='./InseratDetailAppl.jsp?action=anmelden&link=./InseratDetailView.jsp' class='btn btn-primary w-100 py-2 mb-2 mt-3'>";
 					    html += "<i class='bi bi-box-arrow-in-right me-2'></i> Zum Schreiben einloggen";
@@ -591,6 +613,60 @@ public class ListingBean {
 		return html;
 	}
 	
+	
+	// Hilfsmethode: PRÜFEN OB FAVORIT EXISTIERT
+	
+	public boolean isFavorite() {
+
+	    if (account == null || !account.getLogedIn())
+	        return false;
+
+	    try {
+
+	        String sql = "SELECT * FROM favorite WHERE userid=? AND listingid=?";
+	        PreparedStatement prep = dbConn.prepareStatement(sql);
+
+	        prep.setString(1, account.getEmail());
+	        prep.setInt(2, aktListingId);
+
+	        ResultSet rs = prep.executeQuery();
+
+	        return rs.next();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return false;
+	}
+	
+	public boolean isFavorite(int listingId) {
+
+	    if (account == null || !account.getLogedIn())
+	        return false;
+
+	    try {
+
+	        String sql = "SELECT * FROM favorite WHERE userid=? AND listingid=?";
+	        PreparedStatement prep = dbConn.prepareStatement(sql);
+
+	        prep.setString(1, account.getEmail());
+	        prep.setInt(2, listingId);
+
+	        ResultSet rs = prep.executeQuery();
+
+	        return rs.next();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return false;
+	}
+	
+	
+	//getHtml
+	
 	public String getPreisBadgeHtml(int catid, JSONObject detailsJson) {
 
 	    try {
@@ -813,6 +889,119 @@ public class ListingBean {
 		return html;
 	}
 	
+	public String getMeineFavoritenHtml() {
+
+	    if (account == null)
+	        return "";
+
+	    if (!account.getLogedIn())
+	        return "";
+
+	    String html = "";
+
+	    String sql =
+	        "SELECT l.listingid, l.title, l.city, l.date, l.details " +
+	        "FROM favorite f " +
+	        "JOIN listing l ON l.listingid = f.listingid " +
+	        "WHERE f.userid = ? AND l.status = 'A' " +
+	        "ORDER BY f.createdat DESC";
+
+	    try {
+
+	        PreparedStatement prep = dbConn.prepareStatement(sql);
+	        prep.setString(1, account.getEmail());
+
+	        ResultSet rs = prep.executeQuery();
+
+	        html += "<section class='py-5 bg-light'>";
+	        html += "<div class='container' id='favoritesContainer'>";
+	        html += "<h2 class='fw-bold mb-4'>Meine Favoriten</h2>";
+
+	        boolean hasResults = false;
+
+	        while (rs.next()) {
+
+	            hasResults = true;
+
+	            int listingid = rs.getInt("listingid");
+	            String title = rs.getString("title");
+	            String city = rs.getString("city");
+	            java.sql.Date date = rs.getDate("date");
+
+	            html += "<div class='card shadow-sm mb-4 border-0 favorite-card' ";
+	            html += "data-id='" + listingid + "'>";
+	            html += "<div class='card-body'>";
+
+	            html += "<div class='d-flex justify-content-between align-items-start'>";
+
+	            html += "<div>";
+	            html += "<h5 class='fw-bold'>" + title + "</h5>";
+
+	            if (city != null)
+	                html += "<p class='text-muted'>" + city + "</p>";
+
+	            if (date != null)
+	                html += "<p class='text-muted small'>Erstellt am: " + date + "</p>";
+
+	            html += "</div>";
+
+	            html += "<div class='text-end'>";
+
+	            html += "<a href='./NavbarAppl.jsp?action=zumListing&id=" + listingid + "' ";
+	            html += "class='btn btn-sm btn-outline-secondary mb-2 d-block'>";
+	            html += "Details anzeigen</a>";
+
+	            html += "<button ";
+	            html += "class='btn btn-sm btn-danger d-block favorite-toggle' ";
+	            html += "data-id='" + listingid + "' ";
+	            html += "data-action='remove'>";
+	            html += "Favorit entfernen</button>";
+
+	            html += "</div>";
+
+	            html += "</div>";
+	            html += "</div>";
+	            html += "</div>";
+
+	        }
+
+	        if (!hasResults) {
+	            html += "<div class='text-muted'>Du hast noch keine Favoriten gespeichert.</div>";
+	        }
+
+	        html += "</div></section>";
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return html;
+	}
+	
+	public String getMeineInserateNavigationHtml() {
+
+	    String html = "";
+
+	    html += "<div class='container pt-4'>";
+
+	    html += "<div class='d-flex gap-3 mb-4'>";
+
+	    html += "<a href='./NavbarAppl.jsp?action=zurMeineInserate' ";
+	    html += "class='btn btn-outline-primary'>";
+	    html += "Meine Inserate";
+	    html += "</a>";
+
+	    html += "<a href='./NavbarAppl.jsp?action=zuMeineFavoriten' ";
+	    html += "class='btn btn-outline-danger'>";
+	    html += "<i class='bi bi-heart-fill'></i> Meine Favoriten";
+	    html += "</a>";
+
+	    html += "</div>";
+	    html += "</div>";
+
+	    return html;
+	}
+	
 	public String getProfilHtml() {
 	    if (!this.account.getLogedIn()) {
 	        return "";
@@ -927,7 +1116,74 @@ public class ListingBean {
 	           "style='height:100px;width:100px;object-fit:cover;" +
 	           "border-radius:8px;border:1px solid #dee2e6;'>";
 	}
+	// =============================
+	// FAVORIT SPEICHERN
+	// =============================
+	public boolean addFavorite() {
 
+	    if (account == null || !account.getLogedIn())
+	        return false;
+
+	    try {
+
+	        String sqlCheck = "SELECT * FROM favorite WHERE userid=? AND listingid=?";
+	        PreparedStatement check = dbConn.prepareStatement(sqlCheck);
+	        check.setString(1, account.getEmail());
+	        check.setInt(2, aktListingId);
+
+	        ResultSet rs = check.executeQuery();
+
+	        if (rs.next()) {
+	            return false; // existiert bereits
+	        }
+
+	        String sql = "INSERT INTO favorite (userid, listingid, createdat) VALUES (?, ?, CURRENT_DATE)";
+	        PreparedStatement prep = dbConn.prepareStatement(sql);
+
+	        prep.setString(1, account.getEmail());
+	        prep.setInt(2, aktListingId);
+
+	        prep.executeUpdate();
+
+	        return true;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return false;
+	}
+	
+	// =============================
+	// FAVORIT ENTFERNEN
+	// =============================
+	public boolean removeFavorite() {
+
+	    if (account == null || !account.getLogedIn())
+	        return false;
+
+	    try {
+
+	        String sql = "DELETE FROM favorite WHERE userid=? AND listingid=?";
+	        PreparedStatement prep = dbConn.prepareStatement(sql);
+
+	        prep.setString(1, account.getEmail());
+	        prep.setInt(2, aktListingId);
+
+	        int rows = prep.executeUpdate();
+	        
+	        if(rows == 1){
+	            this.readAlleAnzeigenFromDB();
+	        }
+
+	        return rows == 1;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return false;
+	}
 	// Getter und Setter (Inserieren)
 
 	public void setAktListingId(int id) {
