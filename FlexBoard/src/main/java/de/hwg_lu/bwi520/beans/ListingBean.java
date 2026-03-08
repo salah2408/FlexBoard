@@ -1469,7 +1469,6 @@ public String getInseratDetailHtml() {
 
 	    return false;
 	}
-	
 	// Getter und Setter (Inserieren)
 	
 	public int getLatestListingId() {
