@@ -72,8 +72,8 @@ public class AccountBean {
 			System.out.println(sql);
 			PreparedStatement prep = this.dbConn.prepareStatement(sql);
 			prep.setString(1, email);
-			prep.setString(2, vorname);
-			prep.setString(3, nachname);
+			prep.setString(2, vorname.substring(0, 1).toUpperCase() + vorname.substring(1));
+			prep.setString(3, nachname.substring(0, 1).toUpperCase() + nachname.substring(1));
 			prep.setString(4, passwort);
 			prep.setString(5, "yes");
 			prep.setString(6, "no");

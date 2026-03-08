@@ -52,8 +52,7 @@ categoryBean.setListingBean(listingBean);
 
 			<div class='row row-gap' style='margin-top: 20px;'>
 				<div class='col-md-12'>
-					Bilder hochladen <input type='file' class='form-control'
-						name='listingImage' id='bildUpload' accept='image/*' multiple>
+					Bilder hochladen <input type='file' class='form-control' name='listingImage' id='bildUpload' accept='image/*'>
 					<input type="hidden" name="imageBase64" id="imageBase64Input">
 				</div>
 

@@ -37,15 +37,16 @@ public class CategoryTest {
     }
 
     public void insertDefaultCategories() throws SQLException {
-        String sql = "INSERT INTO category (name, description) VALUES "
-                + "('Lernmaterial & Skripte', 'Studienbezogene Unterlagen wie Skripte, Bücher oder Zusammenfassungen'), "
-                + "('Nachhilfe & Lerngruppen', 'Unterstützung beim Lernen, Nachhilfeangebote oder Projektpartner'), "
-                + "('WG & Wohnen', 'WG-Zimmer, Zwischenmiete oder studentisches Wohnen'), "
-                + "('Jobs & Praktika', 'Werkstudentenjobs, Praktika oder Nebenjobs für Studierende'), "
-                + "('Technik fürs Studium', 'Laptops, Tablets, Drucker und weitere studienrelevante Technik'), "
-                + "('Campus-Events & Hochschulgruppen', 'Veranstaltungen, Hochschulgruppen oder Campus-Aktivitäten'), "
-                + "('Tauschen & Verschenken', 'Kostenlose Angebote oder Tauschmöglichkeiten innerhalb der Community'), "
-                + "('Dienstleistungen von Studierenden', 'Services wie Nachhilfe, Design, IT-Support oder Umzugshilfe') "
+        String sql = "INSERT INTO category (id, name, description) VALUES "
+                + "(1, 'Lernmaterial & Skripte', 'Studienbezogene Unterlagen wie Skripte, Bücher oder Zusammenfassungen'), "
+                + "(2, 'Nachhilfe & Lerngruppen', 'Unterstützung beim Lernen, Nachhilfeangebote oder Projektpartner'), "
+                + "(3, 'WG & Wohnen', 'WG-Zimmer, Zwischenmiete oder studentisches Wohnen'), "
+                + "(4, 'Jobs & Praktika', 'Werkstudentenjobs, Praktika oder Nebenjobs für Studierende'), "
+                + "(5, 'Technik fürs Studium', 'Laptops, Tablets, Drucker und weitere studienrelevante Technik'), "
+                + "(6, 'Campus-Events & Hochschulgruppen', 'Veranstaltungen, Hochschulgruppen oder Campus-Aktivitäten'), "
+                + "(7, 'Tauschen & Verschenken', 'Kostenlose Angebote oder Tauschmöglichkeiten innerhalb der Community'), "
+                + "(8, 'Dienstleistungen von Studierenden', 'Services wie Nachhilfe, Design, IT-Support oder Umzugshilfe'), "
+                + "(9, 'Sonstiges', 'Hier können Nutzer alle weiteren Inserate erstellen die nicht zu einer anderen kategorie passen') "
                 + "ON CONFLICT (name) DO NOTHING;";
 
         PreparedStatement prep = dbConn.prepareStatement(sql);
