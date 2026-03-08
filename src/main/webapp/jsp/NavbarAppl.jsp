@@ -47,7 +47,6 @@
 
 	} else if (action.equals("zumInserieren")) {
 		if (myAccount.getLogedIn()) {
-			// WICHTIG: beim "Neu inserieren" Edit-Modus zurücksetzen
 			listingBean.resetEditMode();
 			listingBean.setAktListingId(0);
 
@@ -79,7 +78,6 @@
 	} else if (action.equals("abmelden")) {
 		myAccount.abmelden();
 
-		// optional sauber zurücksetzen
 		listingBean.resetEditMode();
 		listingBean.setAktListingId(0);
 
@@ -109,9 +107,6 @@
 
 		response.sendRedirect("./InseratDetailView.jsp");
 	}
-	// =============================
-	// FAVORIT HINZUFÜGEN
-	// =============================
 	else if (action.equals("addFavorite")) {
 
 		int listingid = Integer.parseInt(request.getParameter("id"));
@@ -127,9 +122,6 @@
 			response.sendRedirect("./HomepageView.jsp");
 	}
 
-	// =============================
-	// FAVORIT ENTFERNEN
-	// =============================
 	else if (action.equals("removeFavorite")) {
 
 		int listingid = Integer.parseInt(request.getParameter("id"));

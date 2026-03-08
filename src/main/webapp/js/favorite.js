@@ -3,7 +3,7 @@ document.addEventListener("click", function(e){
     const btn = e.target.closest(".favorite-toggle");
     if(!btn) return;
 
-    // Wenn Gast → normales Verhalten (Login)
+    // Wenn Gast -> normales Verhalten (Login)
     if(!btn.dataset.id) return;
 
     e.preventDefault();
@@ -22,10 +22,6 @@ document.addEventListener("click", function(e){
 
 		// globalen Favoritenstatus speichern (für andere Seiten)
 		    localStorage.setItem("favoriteChanged", Date.now());
-			
-			// ==========================
-				// NAVBAR FAVORITEN COUNTER
-				// ==========================
 
 				const counter = document.getElementById("favoriteCounter");
 
@@ -40,10 +36,6 @@ document.addEventListener("click", function(e){
 				    }
 
 				}
-			
-        // ==========================
-        // HEART ICON (Homepage / Suche)
-        // ==========================
 
         const icon = btn.querySelector("i");
 
@@ -67,10 +59,6 @@ document.addEventListener("click", function(e){
 
         }
 
-        // ==========================
-        // DETAIL BUTTON
-        // ==========================
-
         if(btn.classList.contains("btn")){
 
             if(action === "add"){
@@ -92,9 +80,6 @@ document.addEventListener("click", function(e){
             }
 
         }
-        // ==========================
-        // FAVORITENLISTE
-        // ==========================
 
         const card = btn.closest(".favorite-card");
 
@@ -124,11 +109,6 @@ document.addEventListener("click", function(e){
             },300);
 
         }
-
-        // ==========================
-        // TOAST
-        // ==========================
-
         if(typeof showToast === "function"){
 
             showToast(

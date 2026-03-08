@@ -31,7 +31,7 @@ if (action.equals("Finden")) {
 	mySearch.setKategorie(kategorie);
 	mySearch.setPlzOrt(plzOrt);
 
-	// Preis-Filter (optional)
+	// Preis Filter
 	try {
 		if (minPreisStr != null && !minPreisStr.isEmpty()) {
 	mySearch.setMinPreis(Integer.parseInt(minPreisStr));
@@ -52,31 +52,19 @@ if (action.equals("Finden")) {
 		mySearch.setMaxPreis(null);
 	}
 
-	// Suche ausführen
 	mySearch.suche();
-
-	// Zurück zur View
 	response.sendRedirect("./SucheView.jsp");
 }
-
-// =============================
-// ACTION: Filter Kategorie
-// =============================
 else if (action.equals("filterKategorie")) {
 
 	String kategorie = request.getParameter("kategorie");
 	mySearch.setKategorie(kategorie);
 
-	// Suche neu ausführen
 	mySearch.suche();
 
 	response.sendRedirect("./SucheView.jsp");
 }
 
-
-// =============================
-// ACTION: Filter zurücksetzen
-// =============================
 else if (action.equals("reset")) {
 
 	mySearch.setSuchbegriff("");
@@ -85,7 +73,6 @@ else if (action.equals("reset")) {
 	mySearch.setMinPreis(null);
 	mySearch.setMaxPreis(null);
 
-	// Alle Anzeigen laden
 	mySearch.suche();
 
 	response.sendRedirect("./SucheView.jsp");

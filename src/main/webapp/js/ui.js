@@ -17,10 +17,6 @@ function showToast(message, type = "success") {
         }, 400);
     }, 3000);
 }
-// ==============================
-// Homepage Carousel Page Indicator
-// ==============================
-
 window.addEventListener("load", function () {
 
     const carouselElement = document.getElementById("homepageCarousel");

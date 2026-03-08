@@ -29,16 +29,13 @@
 listingBean.setAccount(myAccount);
 %>
 
-<!-- Navbar -->
 <jsp:getProperty property="navbarHtml" name="myAccount"/>
 <main class="flex-grow-1 pt-4">
 
-<!-- Favoriten Liste -->
 <jsp:getProperty name="listingBean" property="meineInserateNavigationHtml"/>
 <jsp:getProperty property="meineFavoritenHtml" name="listingBean"/>
 </main>
 
-<!-- Footer -->
 
 <jsp:getProperty property="footerHtml" name="myAccount"/>
 </body>

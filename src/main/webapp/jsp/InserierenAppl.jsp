@@ -155,7 +155,7 @@ if(action.equals("Anzeige erstellen") || action.equals("Anzeige aktualisieren"))
         detailsJson.put("imageBase64", imageBase64);
     } 
     else if (listingIdParam != null && !listingIdParam.isEmpty()) {
-        // Kein neues Bild → DB-basiert altes Bild direkt abfragen
+        // Kein neues Bild -> DB-basiert altes Bild direkt abfragen
         JSONObject oldDetails = myListing.getDetailsForListing(Integer.parseInt(listingIdParam));
         if (oldDetails != null && oldDetails.has("imageBase64")) {
             detailsJson.put("imageBase64", oldDetails.getString("imageBase64"));
@@ -178,6 +178,15 @@ if(action.equals("Anzeige erstellen") || action.equals("Anzeige aktualisieren"))
             zip,
             detailsJson
         );
+        if(success){
+        	myListing.readAlleAnzeigenFromDB();
+        	myListing.resetEditMode();
+        	response.sendRedirect("./NavbarAppl.jsp?action=zumListing&id=" + myListing.getAktListingId());
+        }
+        else{
+        	System.out.println("Ein Fehler beim Inserieren oder bearbeiten ist geschehen bitte wenden sie sich an ihren IT-Admin");
+        	response.sendRedirect("./HomepageView.jsp");
+        }
 
     } else {
 
@@ -190,17 +199,19 @@ if(action.equals("Anzeige erstellen") || action.equals("Anzeige aktualisieren"))
             zip,
             detailsJson
         );
+        
+        if(success){
+        	myListing.readAlleAnzeigenFromDB();
+        	myListing.resetEditMode();
+        	int latestListing = myListing.getLatestListingId();
+        	response.sendRedirect("./NavbarAppl.jsp?action=zumListing&id=" + latestListing);
+        }
+        else{
+        	System.out.println("Ein Fehler beim Inserieren oder bearbeiten ist geschehen bitte wenden sie sich an ihren IT-Admin");
+        	response.sendRedirect("./HomepageView.jsp");
+        }
     }
-    if(success){
-    	myListing.readAlleAnzeigenFromDB();
-    	myListing.resetEditMode();
-    	int latestListing = myListing.getLatestListingId();
-    	response.sendRedirect("./NavbarAppl.jsp?action=zumListing&id=" + latestListing);
-    }
-    else{
-    	System.out.println("Ein Fehler beim Inserieren oder bearbeiten ist geschehen bitte wenden sie sich an ihren IT-Admin");
-    	response.sendRedirect("./HomepageView.jsp");
-    }
+
     	
     
 } else {
