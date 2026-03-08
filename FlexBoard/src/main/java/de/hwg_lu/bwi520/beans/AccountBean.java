@@ -103,17 +103,28 @@ public class AccountBean {
 	
 	public boolean checkAccountExists(String email) throws SQLException {
 		String sql = "select email from account where email = ?";
-		System.out.println(sql);
 		PreparedStatement prep = this.dbConn.prepareStatement(sql);
 		prep.setString(1, email);
 		ResultSet dbRes = prep.executeQuery();
 		return dbRes.next(); 
 	}
 	
+	public boolean checkAccountBanned(String email) throws SQLException {
+		String sql = "SELECT isbanned FROM account where email = ?";
+		PreparedStatement prep = this.dbConn.prepareStatement(sql);
+		prep.setString(1, email);
+		ResultSet dbRes = prep.executeQuery();
+		if(dbRes.next())
+			return dbRes.getBoolean("isbanned");
+		else
+			return false;
+	}
+	
 	public boolean login(String email, String passwort) throws SQLException {
+		if(this.checkAccountBanned(email))
+			return false;
 		String sql = "select email, vorname, nachname, passwort, active, admin "
 				+ "from account where email = ?";
-		System.out.println(sql);
 		PreparedStatement prep = this.dbConn.prepareStatement(sql);
 		prep.setString(1, email);
 		ResultSet dbRes = prep.executeQuery();
