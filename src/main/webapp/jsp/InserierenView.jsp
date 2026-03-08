@@ -26,7 +26,6 @@
 <jsp:useBean id="categoryBean" class="de.hwg_lu.bwi520.beans.CategoryBean" scope="session" />
 
 <%
-	// WICHTIG: wenn explizit neu, dann Edit-Mode löschen
 	String mode = request.getParameter("mode");
 	if ("new".equalsIgnoreCase(mode)) {
 		listingBean.resetEditMode();

@@ -38,10 +38,7 @@ listingBean.setAccount(myAccount);
 
 		<jsp:getProperty name="home" property="heroHtml" />
 
-		<%-- FeatureSection mit den Karten --%>
 		<jsp:getProperty name="home" property="featureSectionHtml" />
-
-		<%-- Das ist für das Mein Profil, wenn man eingeloggt ist --%>
 
 		<jsp:getProperty name="home" property="homepageListingsHtml" />
 

@@ -121,8 +121,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // 1. Zuerst die Formular-Funktionen aufrufen
     try {
         zeigeZusatzFelder();
-        // BUGFIX: Hier habe ich die 4 check... Aufrufe gelöscht. 
-        // Sie werden jetzt durch zeigeZusatzFelder() automatisch richtig aufgerufen!
     } catch (e) {
         console.error("Fehler in den Formular-Funktionen:", e);
     }
@@ -159,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const datei = dateien[0];
         console.log("Ausgewählte Datei: " + datei.name + " (Typ: " + datei.type + ")");
 		
-        // Sicherheits-Check: Ist es wirklich ein Bild?
+        // Sicherheits-Check ob es ein Bild ist
         if (!datei.type.startsWith('image/')) {
             alert('Bitte wähle ausschließlich Bilddateien (wie JPG oder PNG) aus.');
             fileInput.value = ''; // Feld wieder leeren
@@ -178,7 +176,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 let width = img.width;
                 let height = img.height;
 
-                // Saubere Mathematik für das Seitenverhältnis
                 if (width > height) {
                     if (width > MAX_WIDTH) {
                         height = Math.round(height * (MAX_WIDTH / width));
@@ -200,11 +197,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Bild zu Base64 machen
                 const komprimiertesBase64 = canvas.toDataURL('image/jpeg', 0.7);
                 
-                // 1. In die DB (verstecktes Feld) schreiben!
                 hiddenInput.value = komprimiertesBase64;
                 console.log("Erfolg! Bild komprimiert und in hiddenInput geschrieben.");
 
-                // 2. Vorschau erzeugen!
+                // Vorschau erzeugen!
                 const previewImg = document.createElement('img');
                 previewImg.src = komprimiertesBase64;
                 previewImg.style.height = '100px';

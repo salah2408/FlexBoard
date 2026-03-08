@@ -5,10 +5,8 @@
     response.setHeader("Pragma", "no-cache");
     response.setDateHeader("Expires", 0);
 
-    // Sicherheitsnetz gegen Loop:
     String uri = request.getRequestURI();
 
-    // Diese Seiten dürfen IMMER ohne Login erreichbar sein
     boolean isPublic =
            uri.endsWith("/LoginView.jsp")
         || uri.endsWith("/RegView.jsp")
