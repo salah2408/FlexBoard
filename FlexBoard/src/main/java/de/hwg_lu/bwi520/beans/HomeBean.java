@@ -13,6 +13,7 @@ import de.hwg_lu.bwi.jdbc.PostgreSQLAccess;
 public class HomeBean {
 	
 	public AccountBean account;
+	public ListingBean listingBean;
 	private String suchbegriff = "";
 	Connection dbConn;
 
@@ -243,10 +244,43 @@ public class HomeBean {
                 String imageBase64 = detailsJson.optString("imageBase64", null);
 
                 html += "<div class='col-md-4'>";
-                html += "<div class='card h-100 shadow-sm border-0 rounded-4 home-listing-card'>";
+                html += "<div class='card h-100 shadow-sm border-0 rounded-4 home-listing-card position-relative'>";
                 html += "<div class='card-body p-4 d-flex flex-column'>";
+                if (account != null && account.getLogedIn()) {
+
+                	if (listingBean.isFavorite(listingId)) {
+                		html += "<a href='./NavbarAppl.jsp?action=removeFavorite&id=" + listingId + "&currSite=./HomepageView.jsp' ";
+                	    html += "class='favorite-heart favorite-toggle' ";
+                	    html += "data-id='" + listingId + "' ";
+                	    html += "data-action='remove' ";
+                	    html += "title='Favorit entfernen'>";
+                	    html += "<i class='bi bi-heart-fill'></i>";
+                	    html += "</a>";
+
+                	} else {
+
+                		 html += "<a href='./NavbarAppl.jsp?action=addFavorite&id=" + listingId + "&currSite=./HomepageView.jsp' ";
+                		    html += "class='favorite-heart favorite-toggle' ";
+                		    html += "data-id='" + listingId + "' ";
+                		    html += "data-action='add' ";
+                		    html += "title='Favorit hinzufügen'>";
+                		    html += "<i class='bi bi-heart'></i>";
+                		    html += "</a>";
+
+                	}
+
+                } else {
+
+                    // Gast → Login
+
+                    html += "<a href='./NavbarAppl.jsp?action=zumLogin' ";
+                    html += "class='favorite-heart' title='Zum Login um Favoriten zu speichern'> ";                    
+                    html += "<i class='bi bi-heart'></i>";
+                    html += "</a>";
+
+                }
                 html += "<a href='./NavbarAppl.jsp?action=zumListing&id="
-                        + listingId + "' class='stretched-link'></a>";
+                        + listingId + "' class='card-link-overlay'></a>";
 
                 if (imageBase64 != null && !imageBase64.isEmpty()) {
                     html += "<img src='" + imageBase64 + "' class='card-img-top rounded-top' style='height:200px; object-fit:cover;'>";
@@ -367,4 +401,13 @@ public class HomeBean {
 	public void setSuchbegriff(String suchbegriff) {
 		this.suchbegriff = suchbegriff;
 	}
+
+	public ListingBean getListingBean() {
+		return listingBean;
+	}
+
+	public void setListingBean(ListingBean listingBean) {
+		this.listingBean = listingBean;
+	}
+	
 }

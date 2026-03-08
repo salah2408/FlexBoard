@@ -123,20 +123,6 @@ body {
 	border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* JS_Anmeldungs/Systembenachrichtigung */
-.app-toast {
-	position: fixed;
-	top: -80px;
-	left: 50%;
-	transform: translateX(-50%);
-	padding: 15px 30px;
-	border-radius: 8px;
-	color: white;
-	font-weight: 500;
-	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-	transition: top 0.4s ease;
-	z-index: 9999;
-}
 
 /* Animation */
 .app-toast {
@@ -150,7 +136,7 @@ body {
 	font-weight: 500;
 	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 	transition: top 0.4s ease;
-	z-index: 9999;
+	z-index: 20000;
 }
 
 .app-toast.show {
@@ -166,6 +152,8 @@ body {
 /* ============================= */
 .home-listing-card {
 	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	position: relative;
+	overflow: hidden;
 }
 
 .home-listing-card:hover {
@@ -192,6 +180,57 @@ body {
 }
 .home-listing-card .listing-city {
     min-height: 20px;
+}
+.favorite-heart{
+    position:absolute;
+    top:16px;
+    right:16px;
+    z-index:40;
+
+    background:rgba(255,255,255,0.95);
+    width:38px;
+    height:38px;
+    border-radius:50%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    box-shadow:0 6px 14px rgba(0,0,0,0.15);
+    transform:scale(0.9);
+    transition:all 0.2s ease;
+    backdrop-filter: blur(4px);
+}
+.home-listing-card:hover .favorite-heart{
+    transform:scale(1);
+}
+
+
+.bi-heart,
+.bi-heart-fill{
+    color:#dc3545 !important;
+}
+
+/* HOVER */
+.favorite-heart:hover{
+    transform:scale(1.25);
+    background:#fff;
+    box-shadow:0 6px 16px rgba(0,0,0,0.25);
+}
+
+.favorite-heart:hover i{
+    transform:scale(1.15);
+}
+.card-link-overlay{
+    position:absolute;
+    inset:0;
+    z-index:5;
+}
+.favorite-heart i.bi-heart-fill{
+    opacity:1;
+}
+.favorite-heart:active i{
+    transform:scale(1.3);
 }
 /* ============================= */
 /* Carousel Controls außen */

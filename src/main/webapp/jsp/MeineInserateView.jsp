@@ -33,7 +33,7 @@
 
 <main class="flex-fill">
 	<jsp:getProperty name="listingBean" property="profilHtml" />
-
+	<jsp:getProperty name="listingBean" property="meineInserateNavigationHtml"/>
     <jsp:getProperty  property="meineInserateHtml" name="listingBean" />
 
 </main>

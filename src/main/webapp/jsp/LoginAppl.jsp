@@ -1,3 +1,4 @@
+<%@page import="de.hwg_lu.bwi520.beans.ListingBean"%>
 <%@page import="de.hwg_lu.bwi520.messages.RegMessage"%>
 <%@page import="de.hwg_lu.bwi520.beans.AccountBean"%>
 <%@page import="de.hwg_lu.bwi520.beans.WeiterleitungsBean"%>
@@ -10,14 +11,19 @@
 <title>Insert title here</title>
 </head>
 <body>
-<jsp:useBean id="myWeiter" class="de.hwg_lu.bwi520.beans.WeiterleitungsBean" scope="session" />
-<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
-<jsp:useBean id="myRegMsg" class="de.hwg_lu.bwi520.messages.RegMessage" scope="session" />
+	<jsp:useBean id="myWeiter"
+		class="de.hwg_lu.bwi520.beans.WeiterleitungsBean" scope="session" />
+	<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean"
+		scope="session" />
+	<jsp:useBean id="myRegMsg" class="de.hwg_lu.bwi520.messages.RegMessage"
+		scope="session" />
+	<jsp:useBean id="listingBean"
+		class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
 	<%
 	String email = request.getParameter("email");
 	String passwort = request.getParameter("passwort");
 	String action = request.getParameter("action");
-	
+	String favId = (String) session.getAttribute("favoriteAfterLogin");
 
 	if (action == null)
 		action = "";
@@ -26,6 +32,17 @@
 		if (myAccount.login(email, passwort)) {
 			myAccount.readAlleNachrichtenFromDB();
 			myAccount.setLoginSuccess(true);
+
+			if (favId != null) {
+
+		int listingId = Integer.parseInt(favId);
+
+		listingBean.setAktListingId(listingId);
+		listingBean.addFavorite();
+
+		session.removeAttribute("favoriteAfterLogin");
+			}
+
 			response.sendRedirect(myWeiter.getLink());
 		} else {
 			response.sendRedirect("./LoginView.jsp");

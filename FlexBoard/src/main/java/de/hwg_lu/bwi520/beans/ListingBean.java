@@ -217,227 +217,280 @@ public class ListingBean {
 		}
 
 	// gethtml
-		public String getInseratDetailHtml() {
+Hier ist dein komplett bereinigter und zusammengeführter Code!
 
-		    String html = "";
-		    String sql = "SELECT c.name, l.userid, l.catid, l.title, l.descr, l.city, l.zip, l.status, l.date, l.details FROM listing l JOIN category c ON c.id = l.catid "
-		            + "WHERE listingid = ?";
+Ich habe die Merge-Konflikte (die doppelten if-Abfragen bei den Buttons) aufgelöst, kleine HTML-Fehler (wie ein schließendes </button> nach einem <input>) korrigiert und die Report-Funktion (Anzeige melden) nahtlos in dein neues Layout mit den Favoriten integriert.
 
-		    try {
-		        PreparedStatement prep = this.dbConn.prepareStatement(sql);
-		        prep.setInt(1, this.aktListingId);
-		        ResultSet dbRes = prep.executeQuery();
+Ersetze deine komplette Methode einfach mit diesem Code:
 
-		        if (dbRes.next()) {
+Java
 
-		            String catName = dbRes.getString("name");
-		            String userid = dbRes.getString("userid");
-		            int catid = dbRes.getInt("catid");
-		            String title = dbRes.getString("title");
-		            String descr = dbRes.getString("descr");
-		            String zip = dbRes.getString("zip");
-		            String city = dbRes.getString("city");
-		            String status = dbRes.getString("status");
-		            java.sql.Date date = dbRes.getDate("date"); 
-		            String details = dbRes.getString("details");
-		            JSONObject detailsJson = new JSONObject(details);
+public String getInseratDetailHtml() {
 
-		            String formattedDate = "Unbekannt";
-		            if (date != null) {
-		                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd.MM.yyyy");
-		                formattedDate = sdf.format(date);
-		            }
+    String html = "";
+    String sql = "SELECT c.name, l.userid, l.catid, l.title, l.descr, l.city, l.zip, l.status, l.date, l.details "
+               + "FROM listing l JOIN category c ON c.id = l.catid "
+               + "WHERE listingid = ?";
 
-		            String statusBadgeClass = "bg-danger"; 
-		            String displayStatus = "Deactivated";
-		            
-		            if ("A".equals(status)) {
-		                statusBadgeClass = "bg-success"; 
-		                displayStatus = "Active";
-		            }
+    try {
+        PreparedStatement prep = this.dbConn.prepareStatement(sql);
+        prep.setInt(1, this.aktListingId);
+        ResultSet dbRes = prep.executeQuery();
 
-		            this.anbieterEmail = userid;
+        if (dbRes.next()) {
 
-		            boolean isOwner = this.account.getEmail().equals(userid);
+            String catName = dbRes.getString("name");
+            String userid = dbRes.getString("userid");
+            int catid = dbRes.getInt("catid");
+            String title = dbRes.getString("title");
+            String descr = dbRes.getString("descr");
+            String zip = dbRes.getString("zip");
+            String city = dbRes.getString("city");
+            String status = dbRes.getString("status");
+            Date date = dbRes.getDate("date");
+            String details = dbRes.getString("details");
+            JSONObject detailsJson = new JSONObject(details);
 
-		            html += "<div class='container py-5'>";
-		            html += "<div class='row g-4'>";
+            this.anbieterEmail = userid;
 
-		            if (isOwner) {
-		                html += "<div class='col-lg-8 offset-lg-2'>";
-		            } else {
-		                html += "<div class='col-lg-8'>";
-		            }
+            boolean isOwner = this.account.getEmail().equals(userid);
+            
+            // NEU: Vorab prüfen, ob der User das Inserat schon gemeldet hat
+            boolean hatBereitsGemeldet = false;
+            if (this.account.getLogedIn()) {
+                hatBereitsGemeldet = this.hatUserSchonGemeldet(this.aktListingId, this.account.getEmail());
+            }
 
-		            html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
-		            html += "<div class='card-body p-4'>";
-		            
-		            html += "<div class='d-flex justify-content-between align-items-start mb-2'>";
-		            html += "<h2 class='fw-bold mb-0'>" + title + "</h2>";
-		            html += "<span class='badge " + statusBadgeClass + " fs-6'>" + displayStatus + "</span>";
-		            html += "</div>";
-		            
-		            html += "<span class='badge bg-primary fs-6 mb-3'>" + catName + "</span>";
-		            
-		            html += "<p class='text-muted'>";
-		            html += "<i class='bi bi-geo-alt me-1'></i>" + zip + " " + city;
-		            html += "<span class='ms-3'><i class='bi bi-calendar3 me-1'></i>Erstellt am: " + formattedDate + "</span>";
-		            html += "</p>";
-		            html += "<hr>";
+            html += "<div class='container py-5'>";
+            html += "<div class='row g-4'>";
 
-		            if (this.isPrice(detailsJson))
-		                html += "<div class='display-6 fw-bold text-primary'>" + this.getPreisHtml(detailsJson) + "</div>";
-		            else
-		                html += "<div class='display-6 fw-bold text-primary'>" + this.getGratisHtml(catid, detailsJson) + "</div>";
-		            
-		            html += "</div>";
-		            html += "</div>";
+            // Linke Spalte
+            if (isOwner) {
+                html += "<div class='col-lg-8 offset-lg-2'>";
+            } else {
+                html += "<div class='col-lg-8'>";
+            }
 
-		            String imageBase64 = detailsJson.optString("imageBase64", null);
+            html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
+            html += "<div class='card-body p-4'>";
+            html += "<h2 class='fw-bold mb-2'>" + title + "</h2>";
+            html += "<span class='badge bg-primary fs-6 mb-3'>" + catName + "</span>";
+            html += "<p class='text-muted'>";
+            html += "<i class='bi bi-geo-alt me-1'></i>" + zip + " " + city;
+            html += "</p>";
+            html += "<hr>";
 
-		            html += "<div class='mb-4'>";
+            if (this.isPrice(detailsJson))
+                html += "<div class='display-6 fw-bold text-primary'>" + this.getPreisHtml(detailsJson) + "</div>";
+            else
+                html += "<div class='display-6 fw-bold text-primary'>" + this.getGratisHtml(catid, detailsJson) + "</div>";
+            html += "</div>";
+            html += "</div>";
 
-		            if (imageBase64 != null && !imageBase64.isEmpty()) {
-		                html += "<img src='" + imageBase64 + "' "
-		                        + "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' alt='Hauptbild'>";
-		            } else {
-		                html += "<img src='../img/flexboard-logo.jpg' "
-		                        + "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' alt='Placeholder'>";
-		            }
-		            html += "<div class='text-end mt-2'>";
-		            html += "</div>";
-		            html += "</div>";
+            String imageBase64 = detailsJson.optString("imageBase64", null);
 
-		            html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
-		            html += "<div class='card-body p-4'>";
-		            html += "<h5 class='fw-bold mb-3'>Beschreibung</h5>";
-		            html += "<p class='mb-0 description-text'>" + descr + "</p>";
-		            html += "</div>";
-		            html += "</div>";
+            html += "<div class='mb-4'>";
 
-		            html += this.getDetailsKategorie(catid, detailsJson);
+            if (imageBase64 != null && !imageBase64.isEmpty()) {
+                html += "<img src='" + imageBase64 + "' "
+                        + "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' "
+                        + "data-bs-toggle='modal' data-bs-target='#imageGalleryModal' " + "alt='Hauptbild'>";
+            } else {
+                html += "<img src='../img/flexboard-logo.jpg' "
+                        + "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' "
+                        + "data-bs-toggle='modal' data-bs-target='#imageGalleryModal' " + "alt='Placeholder'>";
+            }
+            html += "<div class='text-end mt-2'>";
+            html += "<small class='text-muted'><i class='bi bi-images'></i> Bild</small>";
+            html += "</div>";
+            html += "</div>";
 
-		            html += "</div>";
+            html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
+            html += "<div class='card-body p-4'>";
+            html += "<h5 class='fw-bold mb-3'>Beschreibung</h5>";
+            html += "<p class='mb-0 description-text'>" + descr + "</p>";
+            html += "</div>";
+            html += "</div>";
 
-		            html += "<div class='col-lg-4'>";
-		            
-		            if(!isOwner) {
-		                html += "<div class='card shadow-sm border-0 rounded-4 sticky-sidebar mb-3'>";
-		                html += "<div class='card-body p-4 text-center'>";
-		                html += "<div class='mb-3'>";
-		                html += "<i class='bi bi-person-circle text-secondary profile-icon-large'></i>";
-		                html += "</div>";
-		                html += "<h5 class='fw-bold mb-1'>" + userid + "</h5>";
+            html += this.getDetailsKategorie(catid, detailsJson);
 
-		                if (this.account.getLogedIn()) {
-		                    html += "<button class='btn btn-primary w-100 py-2 mb-2 mt-3' data-bs-toggle='offcanvas' data-bs-target='#chatOffcanvas'>";
-		                    html += "<i class='bi bi-envelope me-2'></i> Nachricht schreiben";
-		                    html += "</button>";
-		                } else {
-		                    html += "<a href='./InseratDetailAppl.jsp?action=anmelden&link=./InseratDetailView.jsp' class='btn btn-primary w-100 py-2 mb-2 mt-3'>";
-		                    html += "<i class='bi bi-box-arrow-in-right me-2'></i> Zum Schreiben einloggen";
-		                    html += "</a>";
-		                }
-		                
-		                html += "</div>"; 
-		                html += "</div>"; 
+            html += "</div>"; // Ende col-lg-8
 
-		                if (this.account.getLogedIn()) {
-		                    if (this.hatUserSchonGemeldet()) {
-		                        html += "<button class='btn btn-secondary w-100 py-2 rounded-4 shadow-sm' disabled>";
-		                        html += "<i class='bi bi-check-circle me-2'></i> Du hast diese Anzeige gemeldet";
-		                        html += "</button>";
-		                    } else {
-		                        html += "<button class='btn btn-outline-danger w-100 py-2 rounded-4 shadow-sm' data-bs-toggle='modal' data-bs-target='#reportModal'>";
-		                        html += "<i class='bi bi-exclamation-triangle me-2'></i> Anzeige melden";
-		                        html += "</button>";
-		                    }
-		                } else {
-		                    html += "<a href='./InseratDetailAppl.jsp?action=anmelden&link=./InseratDetailView.jsp' class='btn btn-outline-danger w-100 py-2 rounded-4 shadow-sm'>";
-		                    html += "<i class='bi bi-exclamation-triangle me-2'></i> Zum Melden einloggen";
-		                    html += "</a>";
-		                }
-		            }
+            // Rechte Spalte (Sidebar) - Wird nur gerendert, wenn man nicht der Besitzer ist
+            html += "<div class='col-lg-4'>";
+            
+            if(!isOwner) {
+                // Card für das Profil & Haupt-Aktionen
+                html += "<div class='card shadow-sm border-0 rounded-4 sticky-sidebar mb-3'>";
+                html += "<div class='card-body p-4 text-center'>";
+                html += "<div class='mb-3'>";
+                html += "<i class='bi bi-person-circle text-secondary profile-icon-large'></i>";
+                html += "</div>";
+                html += "<h5 class='fw-bold mb-1'>" + userid + "</h5>";
 
-		            html += "</div>";
-		            html += "</div>";
-		            html += "</div>";
-		            html += "</div>";
-		            html += "</div>";
+                if (this.account.getLogedIn()) {
+                    // Chat Button
+                    html += "<button class='btn btn-primary w-100 py-2 mb-2 mt-3' data-bs-toggle='offcanvas' data-bs-target='#chatOffcanvas'>";
+                    html += "<i class='bi bi-envelope me-2'></i> Nachricht schreiben";
+                    html += "</button>";
 
-		            html += "<div class='offcanvas offcanvas-bottom shadow-lg rounded-top-4' tabindex='-1' id='chatOffcanvas' style='height: auto; max-height: 50vh;'>";
-		            html += "<div class='offcanvas-header border-bottom px-4 py-3'>";
-		            html += "<h5 class='offcanvas-title fw-bold'>";
-		            html += "<i class='bi bi-chat-dots text-primary me-2'></i>Nachricht an " + userid;
-		            html += "</h5>";
-		            html += "<button type='button' class='btn-close' data-bs-dismiss='offcanvas' aria-label='Close'></button>";
-		            html += "</div>";
+                    // Favoriten Button
+                    if (this.isFavorite()) {
+                        html += "<button class='btn btn-danger w-100 py-2 mb-2 favorite-toggle' data-id='" + this.aktListingId + "' data-action='remove'>";
+                        html += "<i class='bi bi-heart-fill me-2'></i> Favorit entfernen";
+                        html += "</button>";
+                    } else {
+                        html += "<button class='btn btn-outline-danger w-100 py-2 mb-2 favorite-toggle' data-id='" + this.aktListingId + "' data-action='add'>";
+                        html += "<i class='bi bi-heart me-2'></i> Zu Favoriten hinzufügen";
+                        html += "</button>";
+                    }
+                } else {
+                    // Nicht eingeloggt
+                    html += "<a href='./InseratDetailAppl.jsp?action=anmelden&link=./InseratDetailView.jsp' class='btn btn-primary w-100 py-2 mb-2 mt-3'>";
+                    html += "<i class='bi bi-box-arrow-in-right me-2'></i> Einloggen für Aktionen";
+                    html += "</a>";
+                }
 
-		            html += "<div class='offcanvas-body p-4'>";
-		            html += "<form action='./InseratDetailAppl.jsp' method='post'>"; 
+                html += "</div>"; // Ende card-body
+                html += "</div>"; // Ende card Profil
 
-		            html += "<input type='hidden' name='empfaengerid' value='" + userid + "'>";
-		            html += "<input type='hidden' name='listingid' value='" + this.aktListingId + "'>";
+                // NEU: Der Melden-Button direkt unter der Profil-Card
+                if (this.account.getLogedIn()) {
+                    if (hatBereitsGemeldet) {
+                        html += "<button class='btn btn-secondary w-100 py-2 rounded-4 shadow-sm' disabled>";
+                        html += "<i class='bi bi-check-circle me-2'></i> Anzeige gemeldet";
+                        html += "</button>";
+                    } else {
+                        html += "<button class='btn btn-outline-danger w-100 py-2 rounded-4 shadow-sm' data-bs-toggle='modal' data-bs-target='#reportModal'>";
+                        html += "<i class='bi bi-exclamation-triangle me-2'></i> Anzeige melden";
+                        html += "</button>";
+                    }
+                } else {
+                    html += "<a href='./InseratDetailAppl.jsp?action=anmelden&link=./InseratDetailView.jsp' class='btn btn-outline-danger w-100 py-2 rounded-4 shadow-sm'>";
+                    html += "<i class='bi bi-exclamation-triangle me-2'></i> Zum Melden einloggen";
+                    html += "</a>";
+                }
+            }
 
-		            html += "<div class='mb-3'>";
-		            html += "<label class='form-label text-muted small'>Deine Nachricht:</label>";
-		            html += "<textarea class='form-control rounded-4 bg-light' name='nachrichtText' rows='4' placeholder='Hallo, ich habe Interesse an deinem Inserat...' required></textarea>";
-		            html += "</div>";
+            html += "</div>"; // Ende col-lg-4
+            html += "</div>"; // Ende row
+            html += "</div>"; // Ende container
 
-		            html += "<div class='text-end'>";
-		            html += "<input type='submit' name='action' value='Senden' class='btn btn-primary px-4 py-2 rounded-5'>";
-		            html += "</div>";
+            // --- HIER STARTEN DIE POPUPS (MODALS & OFFCANVAS) ---
 
-		            html += "</form>";
+            // Modal: Image Gallery
+            html += "<div class='modal fade' id='imageGalleryModal' tabindex='-1' aria-hidden='true'>";
+            html += "<div class='modal-dialog modal-xl modal-dialog-centered'>";
+            html += "<div class='modal-content bg-transparent border-0 shadow-none'>";
 
-		            html += "</div>";
-		            html += "</div>";
-		            
-		            
-		            // report pop up
-		            html += "<div class='modal fade' id='reportModal' tabindex='-1' aria-labelledby='reportModalLabel' aria-hidden='true'>";
-		            html += "<div class='modal-dialog modal-dialog-centered'>";
-		            html += "<div class='modal-content rounded-4 border-0 shadow'>";
+            html += "<div class='modal-header border-0 pb-0'>";
+            html += "<button type='button' class='btn-close btn-close-white ms-auto modal-close-custom' data-bs-dismiss='modal' aria-label='Close'></button>";
+            html += "</div>";
 
-		            html += "<div class='modal-header border-bottom-0 pb-0'>";
-		            html += "<h5 class='modal-title fw-bold text-danger' id='reportModalLabel'>";
-		            html += "<i class='bi bi-exclamation-triangle-fill me-2'></i>Inserat melden";
-		            html += "</h5>";
-		            html += "<button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>";
-		            html += "</div>";
+            html += "<div class='modal-body p-0'>";
+            html += "<div id='listingCarousel' class='carousel slide' data-bs-ride='false'>";
+            html += "<div class='carousel-inner rounded-3 shadow'>";
 
-		            html += "<div class='modal-body p-4'>";
-		            html += "<form action='./InseratDetailAppl.jsp' method='get'>"; 
+            if (imageBase64 != null && !imageBase64.isEmpty()) {
+                html += "<div class='carousel-item active'>";
+                html += "<img src='" + imageBase64 + "' class='d-block w-100 carousel-image-custom' alt='Bild'>";
+                html += "</div>";
+            } else {
+                html += "<div class='carousel-item active'>";
+                html += "<img src='../img/flexboard-logo.jpg' class='d-block w-100 carousel-image-custom' alt='Placeholder'>";
+                html += "</div>";
+            }
 
-		            html += "<input type='hidden' name='listingid' value='" + this.aktListingId + "'>";
+            html += "</div>";
 
-		            html += "<div class='mb-4'>";
-		            html += "<label class='form-label text-muted small'>Warum möchtest du dieses Inserat melden?</label>";
-		            html += "<textarea class='form-control rounded-4 bg-light' name='reportText' rows='4' required></textarea>";
-		            html += "</div>";
+            html += "<button class='carousel-control-prev' type='button' data-bs-target='#listingCarousel' data-bs-slide='prev'>";
+            html += "<span class='carousel-control-prev-icon' aria-hidden='true'></span>";
+            html += "<span class='visually-hidden'>Zurück</span>";
+            html += "</button>";
+            html += "<button class='carousel-control-next' type='button' data-bs-target='#listingCarousel' data-bs-slide='next'>";
+            html += "<span class='carousel-control-next-icon' aria-hidden='true'></span>";
+            html += "<span class='visually-hidden'>Weiter</span>";
+            html += "</button>";
 
-		            html += "<div class='text-end'>";
-		            html += "<button type='button' class='btn btn-light me-2 rounded-5 px-4' data-bs-dismiss='modal'>Abbrechen</button>";
-		            html += "<input type='submit' name='action' value='Melden' class='btn btn-danger px-4 py-2 rounded-5'>";
-		            html += "</div>";
+            html += "</div>"; // Ende carousel slide
+            html += "</div>"; // Ende modal-body
+            html += "</div>"; // Ende modal-content
+            html += "</div>"; // Ende modal-dialog
+            html += "</div>"; // Ende imageGalleryModal
 
-		            html += "</form>";
-		            html += "</div>"; // Ende modal-body
+            // Offcanvas: Chat
+            html += "<div class='offcanvas offcanvas-bottom shadow-lg rounded-top-4' tabindex='-1' id='chatOffcanvas' style='height: auto; max-height: 50vh;'>";
+            html += "<div class='offcanvas-header border-bottom px-4 py-3'>";
+            html += "<h5 class='offcanvas-title fw-bold'>";
+            html += "<i class='bi bi-chat-dots text-primary me-2'></i>Nachricht an " + userid;
+            html += "</h5>";
+            html += "<button type='button' class='btn-close' data-bs-dismiss='offcanvas' aria-label='Close'></button>";
+            html += "</div>";
 
-		            html += "</div>"; // Ende modal-content
-		            html += "</div>"; // Ende modal-dialog
-		            html += "</div>"; // Ende modal
+            html += "<div class='offcanvas-body p-4'>";
+            html += "<form action='./InseratDetailAppl.jsp' method='post'>"; 
 
-		        } else {
-		            html = "<div class='container py-5 text-center text-muted'>" + "Inserat nicht gefunden." + "</div>";
-		        }
+            html += "<input type='hidden' name='empfaengerid' value='" + userid + "'>";
+            html += "<input type='hidden' name='listingid' value='" + this.aktListingId + "'>";
 
-		    } catch (Exception e) {
-		        e.printStackTrace();
-		    }
+            html += "<div class='mb-3'>";
+            html += "<label class='form-label text-muted small'>Deine Nachricht:</label>";
+            html += "<textarea class='form-control rounded-4 bg-light' name='nachrichtText' rows='4' placeholder='Hallo, ich habe Interesse an deinem Inserat...' required></textarea>";
+            html += "</div>";
 
-		    return html;
-		}
+            html += "<div class='text-end'>";
+            html += "<input type='submit' name='action' value='Senden' class='btn btn-primary px-4 py-2 rounded-5'>";
+            html += "</div>";
+
+            html += "</form>";
+            html += "</div>"; // Ende offcanvas-body
+            html += "</div>"; // Ende chatOffcanvas
+
+            // NEU: Modal: Anzeige melden
+            html += "<div class='modal fade' id='reportModal' tabindex='-1' aria-hidden='true'>";
+            html += "<div class='modal-dialog modal-dialog-centered'>";
+            html += "<div class='modal-content rounded-4 border-0 shadow'>";
+
+            html += "<div class='modal-header border-bottom-0 pb-0'>";
+            html += "<h5 class='modal-title fw-bold text-danger'>";
+            html += "<i class='bi bi-exclamation-triangle-fill me-2'></i>Inserat melden";
+            html += "</h5>";
+            html += "<button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>";
+            html += "</div>";
+
+            html += "<div class='modal-body p-4'>";
+            html += "<form action='./InseratDetailAppl.jsp' method='post'>"; 
+
+            html += "<input type='hidden' name='action' value='Melden'>";
+            html += "<input type='hidden' name='listingid' value='" + this.aktListingId + "'>";
+
+            html += "<div class='mb-4'>";
+            html += "<label class='form-label text-muted small'>Warum möchtest du dieses Inserat melden?</label>";
+            html += "<textarea class='form-control rounded-4 bg-light' name='reportText' rows='4' placeholder='Bitte beschreibe kurz, was mit diesem Inserat nicht stimmt...' required></textarea>";
+            html += "</div>";
+
+            html += "<div class='text-end'>";
+            html += "<button type='button' class='btn btn-light me-2 rounded-5 px-4' data-bs-dismiss='modal'>Abbrechen</button>";
+            html += "<button type='submit' class='btn btn-danger px-4 py-2 rounded-5'>Meldung abschicken</button>";
+            html += "</div>";
+
+            html += "</form>";
+            html += "</div>"; // Ende modal-body
+
+            html += "</div>"; // Ende modal-content
+            html += "</div>"; // Ende modal-dialog
+            html += "</div>"; // Ende reportModal
+
+        } else {
+            html = "<div class='container py-5 text-center text-muted'>Inserat nicht gefunden.</div>";
+        }
+        
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    
+    return html;
+}
 	// Hilfsmethoden für die DetailAnzeigenHtml
 
 	// Hilfsmethode um für die aktuellen Details der Anzeige zu bekommen (von
@@ -638,6 +691,60 @@ public class ListingBean {
 		
 		return html;
 	}
+	
+	
+	// Hilfsmethode: PRÜFEN OB FAVORIT EXISTIERT
+	
+	public boolean isFavorite() {
+
+	    if (account == null || !account.getLogedIn())
+	        return false;
+
+	    try {
+
+	        String sql = "SELECT * FROM favorite WHERE userid=? AND listingid=?";
+	        PreparedStatement prep = dbConn.prepareStatement(sql);
+
+	        prep.setString(1, account.getEmail());
+	        prep.setInt(2, aktListingId);
+
+	        ResultSet rs = prep.executeQuery();
+
+	        return rs.next();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return false;
+	}
+	
+	public boolean isFavorite(int listingId) {
+
+	    if (account == null || !account.getLogedIn())
+	        return false;
+
+	    try {
+
+	        String sql = "SELECT * FROM favorite WHERE userid=? AND listingid=?";
+	        PreparedStatement prep = dbConn.prepareStatement(sql);
+
+	        prep.setString(1, account.getEmail());
+	        prep.setInt(2, listingId);
+
+	        ResultSet rs = prep.executeQuery();
+
+	        return rs.next();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return false;
+	}
+	
+	
+	//getHtml
 	
 	public String getPreisBadgeHtml(int catid, JSONObject detailsJson) {
 
@@ -863,6 +970,119 @@ public class ListingBean {
 		return html;
 	}
 	
+	public String getMeineFavoritenHtml() {
+
+	    if (account == null)
+	        return "";
+
+	    if (!account.getLogedIn())
+	        return "";
+
+	    String html = "";
+
+	    String sql =
+	        "SELECT l.listingid, l.title, l.city, l.date, l.details " +
+	        "FROM favorite f " +
+	        "JOIN listing l ON l.listingid = f.listingid " +
+	        "WHERE f.userid = ? AND l.status = 'A' " +
+	        "ORDER BY f.createdat DESC";
+
+	    try {
+
+	        PreparedStatement prep = dbConn.prepareStatement(sql);
+	        prep.setString(1, account.getEmail());
+
+	        ResultSet rs = prep.executeQuery();
+
+	        html += "<section class='py-5 bg-light'>";
+	        html += "<div class='container' id='favoritesContainer'>";
+	        html += "<h2 class='fw-bold mb-4'>Meine Favoriten</h2>";
+
+	        boolean hasResults = false;
+
+	        while (rs.next()) {
+
+	            hasResults = true;
+
+	            int listingid = rs.getInt("listingid");
+	            String title = rs.getString("title");
+	            String city = rs.getString("city");
+	            java.sql.Date date = rs.getDate("date");
+
+	            html += "<div class='card shadow-sm mb-4 border-0 favorite-card' ";
+	            html += "data-id='" + listingid + "'>";
+	            html += "<div class='card-body'>";
+
+	            html += "<div class='d-flex justify-content-between align-items-start'>";
+
+	            html += "<div>";
+	            html += "<h5 class='fw-bold'>" + title + "</h5>";
+
+	            if (city != null)
+	                html += "<p class='text-muted'>" + city + "</p>";
+
+	            if (date != null)
+	                html += "<p class='text-muted small'>Erstellt am: " + date + "</p>";
+
+	            html += "</div>";
+
+	            html += "<div class='text-end'>";
+
+	            html += "<a href='./NavbarAppl.jsp?action=zumListing&id=" + listingid + "' ";
+	            html += "class='btn btn-sm btn-outline-secondary mb-2 d-block'>";
+	            html += "Details anzeigen</a>";
+
+	            html += "<button ";
+	            html += "class='btn btn-sm btn-danger d-block favorite-toggle' ";
+	            html += "data-id='" + listingid + "' ";
+	            html += "data-action='remove'>";
+	            html += "Favorit entfernen</button>";
+
+	            html += "</div>";
+
+	            html += "</div>";
+	            html += "</div>";
+	            html += "</div>";
+
+	        }
+
+	        if (!hasResults) {
+	            html += "<div class='text-muted'>Du hast noch keine Favoriten gespeichert.</div>";
+	        }
+
+	        html += "</div></section>";
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return html;
+	}
+	
+	public String getMeineInserateNavigationHtml() {
+
+	    String html = "";
+
+	    html += "<div class='container pt-4'>";
+
+	    html += "<div class='d-flex gap-3 mb-4'>";
+
+	    html += "<a href='./NavbarAppl.jsp?action=zurMeineInserate' ";
+	    html += "class='btn btn-outline-primary'>";
+	    html += "Meine Inserate";
+	    html += "</a>";
+
+	    html += "<a href='./NavbarAppl.jsp?action=zuMeineFavoriten' ";
+	    html += "class='btn btn-outline-danger'>";
+	    html += "<i class='bi bi-heart-fill'></i> Meine Favoriten";
+	    html += "</a>";
+
+	    html += "</div>";
+	    html += "</div>";
+
+	    return html;
+	}
+	
 	public String getProfilHtml() {
 	    if (!this.account.getLogedIn()) {
 	        return "";
@@ -976,6 +1196,43 @@ public class ListingBean {
 	    return "<img src='" + image + "' " +
 	           "style='height:100px;width:100px;object-fit:cover;" +
 	           "border-radius:8px;border:1px solid #dee2e6;'>";
+	}
+	// =============================
+	// FAVORIT SPEICHERN
+	// =============================
+	public boolean addFavorite() {
+
+	    if (account == null || !account.getLogedIn())
+	        return false;
+
+	    try {
+
+	        String sqlCheck = "SELECT * FROM favorite WHERE userid=? AND listingid=?";
+	        PreparedStatement check = dbConn.prepareStatement(sqlCheck);
+	        check.setString(1, account.getEmail());
+	        check.setInt(2, aktListingId);
+
+	        ResultSet rs = check.executeQuery();
+
+	        if (rs.next()) {
+	            return false; // existiert bereits
+	        }
+
+	        String sql = "INSERT INTO favorite (userid, listingid, createdat) VALUES (?, ?, CURRENT_DATE)";
+	        PreparedStatement prep = dbConn.prepareStatement(sql);
+
+	        prep.setString(1, account.getEmail());
+	        prep.setInt(2, aktListingId);
+
+	        prep.executeUpdate();
+
+	        return true;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return false;
 	}
 	
 	public boolean reportListing(int listingid, String reportText) throws SQLException {
@@ -1190,7 +1447,36 @@ public class ListingBean {
 		}
 		return false;
 	}
+	// =============================
+	// FAVORIT ENTFERNEN
+	// =============================
+	public boolean removeFavorite() {
 
+	    if (account == null || !account.getLogedIn())
+	        return false;
+
+	    try {
+
+	        String sql = "DELETE FROM favorite WHERE userid=? AND listingid=?";
+	        PreparedStatement prep = dbConn.prepareStatement(sql);
+
+	        prep.setString(1, account.getEmail());
+	        prep.setInt(2, aktListingId);
+
+	        int rows = prep.executeUpdate();
+	        
+	        if(rows == 1){
+	            this.readAlleAnzeigenFromDB();
+	        }
+
+	        return rows == 1;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return false;
+	}
 	// Getter und Setter (Inserieren)
 	
 	public int getLatestListingId() {

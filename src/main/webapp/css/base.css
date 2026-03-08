@@ -276,3 +276,13 @@ input[type="file"]{
 .img-preview-wrap{ margin-top:4px; }
 /* ✨ Sicherstellen, dass hidden IMMER ausblendet – auch bei inline display */
 [hidden] { display: none !important; }
+
+/* ============================= */
+/* Favorite Card Fade-Out       */
+/* ============================= */
+
+.favorite-card.removing{
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}

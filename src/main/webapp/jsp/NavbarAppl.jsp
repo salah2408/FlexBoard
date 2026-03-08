@@ -1,190 +1,141 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.net.URLEncoder" %>
-<%@ page import="de.hwg_lu.bwi520.beans.AccountBean" %>
-<%@ page import="de.hwg_lu.bwi520.beans.WeiterleitungsBean" %>
-<%@ page import="de.hwg_lu.bwi520.beans.ListingBean" %>
-<%@ page import="de.hwg_lu.bwi520.beans.CategoryBean" %>
+<%@page import="de.hwg_lu.bwi520.beans.CategoryBean"%>
+<%@page import="de.hwg_lu.bwi520.beans.WeiterleitungsBean"%>
+<%@page import="de.hwg_lu.bwi520.beans.AccountBean"%>
 
-<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
-<jsp:useBean id="myWeiter" class="de.hwg_lu.bwi520.beans.WeiterleitungsBean" scope="session" />
-<jsp:useBean id="listingBean" class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
-<jsp:useBean id="categoryBean" class="de.hwg_lu.bwi520.beans.CategoryBean" scope="session"/>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean"
+		scope="session" />
+	<jsp:useBean id="myWeiter"
+		class="de.hwg_lu.bwi520.beans.WeiterleitungsBean" scope="session" />
+	<jsp:useBean id="listingBean"
+		class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
+	<jsp:useBean id="categoryBean"
+		class="de.hwg_lu.bwi520.beans.CategoryBean" scope="session" />
+	<%
+	String action = request.getParameter("action");
+	String listingId = request.getParameter("id");
+	String currSite = request.getParameter("currSite");
 
-<%
-    // Wichtig gegen "Zurück"-Cache nach Logout
-    response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-    response.setHeader("Pragma", "no-cache");
-    response.setDateHeader("Expires", 0);
+	if (currSite != null) {
+		myWeiter.setLink(currSite);
+	}
 
-    String action = request.getParameter("action");
-    if (action == null) action = "";
+	if (action == null)
+		action = "";
 
-    String currSite = request.getParameter("currSite");
-    if (currSite != null && !currSite.trim().isEmpty()) {
-        myWeiter.setLink(currSite);
-    }
+	if (action.equals("zurHomepage")) {
+		response.sendRedirect("./HomepageView.jsp");
+	} else if (action.equals("zumLogin")) {
 
-    boolean loggedIn = (myAccount != null && myAccount.getLogedIn());
+		if (listingId != null) {
+			session.setAttribute("favoriteAfterLogin", listingId);
+		}
 
-    // Geschützte Aktionen (nur eingeloggt)
-    boolean requiresLogin =
-           "zumInserieren".equals(action)
-        || "zurPost".equals(action)
-        || "zurMeineInserate".equals(action)
-        || "bearbeiteListing".equals(action)
-        || "deaktiviereListing".equals(action)
-        || "aktiviereListing".equals(action)
-        || "loescheListing".equals(action);
+		response.sendRedirect("./LoginView.jsp");
+	} else if (action.equals("zurReg")) {
+		response.sendRedirect("./RegView.jsp");
+	} else if (action.equals("zumInserieren")) {
+		if (myAccount.getLogedIn())
+			response.sendRedirect("./InserierenView.jsp");
+		else {
+			myWeiter.setLink("./InserierenView.jsp");
+			response.sendRedirect("./LoginView.jsp");
+		}
+	} else if (action.equals("zurSuche")) {
+		String q = request.getParameter("q");
 
-    if (requiresLogin && !loggedIn) {
-        String ziel = "./HomepageView.jsp";
+		if (q == null) {
+			q = "";
+		}
 
-        if ("zumInserieren".equals(action)) {
-            ziel = "./InserierenView.jsp";
-        } else if ("zurPost".equals(action)) {
-            ziel = "./NachrichtenView.jsp";
-        } else if ("zurMeineInserate".equals(action)
-                || "bearbeiteListing".equals(action)
-                || "deaktiviereListing".equals(action)
-                || "aktiviereListing".equals(action)
-                || "loescheListing".equals(action)) {
-            ziel = "./MeineInserateView.jsp";
-        }
+		response.sendRedirect("./SucheAppl.jsp?action=Finden&q=" + java.net.URLEncoder.encode(q, "UTF-8"));
+	} else if (action.equals("zurPost")) {
+		if (myAccount.getLogedIn()) {
+			myAccount.readAlleNachrichtenFromDB();
+			response.sendRedirect("./NachrichtenView.jsp");
+		} else {
+			myWeiter.setLink("./NachrichtenView.jsp");
+			myAccount.readAlleNachrichtenFromDB();
+			response.sendRedirect("./LoginView.jsp");
+		}
+	} else if (action.equals("abmelden")) {
+		myAccount.abmelden();
+		myWeiter.setLink("./HomepageView.jsp");
+		response.sendRedirect("./HomepageView.jsp");
 
-        myWeiter.setLink(ziel);
-        response.sendRedirect("./LoginView.jsp");
-        return;
-    }
+	} else if (action.equals("zurMeineInserate")) {
+		if (myAccount.getLogedIn())
+			response.sendRedirect("./MeineInserateView.jsp");
+		else {
+			myWeiter.setLink("./MeineInserateView.jsp");
+			response.sendRedirect("./LoginView.jsp");
+		}
+	} else if (action.equals("zuMeineFavoriten")) {
+		if (myAccount.getLogedIn())
+			response.sendRedirect("./MeineFavoritenView.jsp");
+		else {
+			myWeiter.setLink("./MeineFavoritenView.jsp");
+			response.sendRedirect("./LoginView.jsp");
+		}
+	} else if (action.equals("zumListing")) {
 
-    // ===== Öffentliche Actions =====
-    if ("zurHomepage".equals(action)) {
-        response.sendRedirect("./HomepageView.jsp");
-        return;
+		int listingid = Integer.parseInt(request.getParameter("id"));
 
-    } else if ("zumLogin".equals(action)) {
-        response.sendRedirect("./LoginView.jsp");
-        return;
+		listingBean.setAktListingId(listingid);
 
-    } else if ("zurReg".equals(action)) {
-        response.sendRedirect("./RegView.jsp");
-        return;
+		response.sendRedirect("./InseratDetailView.jsp");
+	} // =============================
+		// FAVORIT HINZUFÜGEN
+		// =============================
+	else if (action.equals("addFavorite")) {
 
-    } else if ("zurSuche".equals(action)) {
-        String q = request.getParameter("q");
-        if (q == null) q = "";
-        response.sendRedirect("./SucheAppl.jsp?action=Finden&q=" + URLEncoder.encode(q, "UTF-8"));
-        return;
+		int listingid = Integer.parseInt(request.getParameter("id"));
+		listingBean.setAktListingId(listingid);
 
-    } else if ("abmelden".equals(action)) {
-        try {
-            myAccount.abmelden();
-        } catch (Exception e) {
-            // optional: loggen
-        }
+		listingBean.addFavorite();
 
-        // Session komplett beenden
-        session.invalidate();
+		String back = request.getParameter("currSite");
 
-        // No-Cache nochmal setzen
-        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-        response.setHeader("Pragma", "no-cache");
-        response.setDateHeader("Expires", 0);
+		if (back != null)
+			response.sendRedirect(back);
+		else
+			response.sendRedirect("./HomepageView.jsp");
+	}
 
-        response.sendRedirect("./HomepageView.jsp");
-        return;
-    }
+	// =============================
+	// FAVORIT ENTFERNEN
+	// =============================
+	else if (action.equals("removeFavorite")) {
 
-    // ===== Geschützte Actions =====
-    else if ("zumInserieren".equals(action)) {
-        // Neuer Eintrag => Edit-Mode zurücksetzen
-        listingBean.resetEditMode();
-        response.sendRedirect("./InserierenView.jsp");
-        return;
+		int listingid = Integer.parseInt(request.getParameter("id"));
+		listingBean.setAktListingId(listingid);
 
-    } else if ("zurPost".equals(action)) {
-        myAccount.readAlleNachrichtenFromDB();
-        response.sendRedirect("./NachrichtenView.jsp");
-        return;
+		listingBean.removeFavorite();
 
-    } else if ("zurMeineInserate".equals(action)) {
-        response.sendRedirect("./MeineInserateView.jsp");
-        return;
+		String back = request.getParameter("currSite");
 
-    } else if ("zumListing".equals(action)) {
-        String idStr = request.getParameter("id");
-        try {
-            int listingId = Integer.parseInt(idStr);
-            listingBean.setAktListingId(listingId);
-            listingBean.setAccount(myAccount);
-            response.sendRedirect("./InseratDetailView.jsp");
-            return;
-        } catch (Exception e) {
-            response.sendRedirect("./HomepageView.jsp");
-            return;
-        }
+		if (back != null)
+			response.sendRedirect(back);
+		else
+			response.sendRedirect("./HomepageView.jsp");
 
-    } else if ("bearbeiteListing".equals(action)) {
-        String idStr = request.getParameter("id");
-        try {
-            int listingId = Integer.parseInt(idStr);
+	} else if (action.equals("removeFavoriteFromFavorites")) {
 
-            listingBean.setAccount(myAccount);
-            boolean ok = listingBean.loadListingForEdit(listingId, myAccount.getEmail());
+		listingBean.setAktListingId(Integer.parseInt(request.getParameter("id")));
+		listingBean.removeFavorite();
+		response.sendRedirect("./MeineFavoritenView.jsp");
+	}
 
-            if (ok) {
-                categoryBean.setListingBean(listingBean);
-                categoryBean.setSelectedCategoryId(listingBean.getEditCatId());
-                response.sendRedirect("./InserierenView.jsp");
-            } else {
-                response.sendRedirect("./MeineInserateView.jsp");
-            }
-            return;
-        } catch (Exception e) {
-            response.sendRedirect("./MeineInserateView.jsp");
-            return;
-        }
-
-    } else if ("deaktiviereListing".equals(action)) {
-        String idStr = request.getParameter("id");
-        try {
-            int listingId = Integer.parseInt(idStr);
-            listingBean.setAccount(myAccount);
-            listingBean.setAktListingId(listingId);
-            listingBean.deaktiviereListing();
-        } catch (Exception e) {
-            // optional: loggen
-        }
-        response.sendRedirect("./MeineInserateView.jsp");
-        return;
-
-    } else if ("aktiviereListing".equals(action)) {
-        String idStr = request.getParameter("id");
-        try {
-            int listingId = Integer.parseInt(idStr);
-            listingBean.setAccount(myAccount);
-            listingBean.setAktListingId(listingId);
-            listingBean.aktiviereListing();
-        } catch (Exception e) {
-            // optional: loggen
-        }
-        response.sendRedirect("./MeineInserateView.jsp");
-        return;
-
-    } else if ("loescheListing".equals(action)) {
-        String idStr = request.getParameter("id");
-        try {
-            int listingId = Integer.parseInt(idStr);
-            listingBean.setAccount(myAccount);
-            listingBean.setAktListingId(listingId);
-            listingBean.loescheListing();
-        } catch (Exception e) {
-            // optional: loggen
-        }
-        response.sendRedirect("./MeineInserateView.jsp");
-        return;
-    }
-
-    // Fallback
-    response.sendRedirect("./HomepageView.jsp");
-    return;
-%>
+	else
+		response.sendRedirect("./HomepageView.jsp");
+	%>
+</body>
+</html>
