@@ -18,6 +18,7 @@
 	String email = request.getParameter("email");
 	String passwort = request.getParameter("passwort");
 	String action = request.getParameter("action");
+	String agbAccepted = request.getParameter("agbAccepted");
 	
 	if(action == null)
 		action = "";
@@ -36,8 +37,12 @@
 	else if(action.equals("zumLogin")){
 		response.sendRedirect("./LoginView.jsp");
 	}
-	else{
+	else  {
 		response.sendRedirect("./HomepageView.jsp");
+	}
+	if (agbAccepted == null || !"true".equals(agbAccepted)) {
+	    response.sendRedirect("./RegView.jsp");
+	    return;
 	}
 %>
 </body>
