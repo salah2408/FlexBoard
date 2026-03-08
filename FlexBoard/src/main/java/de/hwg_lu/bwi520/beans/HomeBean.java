@@ -357,6 +357,9 @@ public class HomeBean {
             price = detailsJson.optInt("gesamtmiete", 0);
         else if (detailsJson.has("verguetung"))
             price = detailsJson.optInt("verguetung", 0);
+        else if (detailsJson.has("sonstigesPreis"))
+			price = detailsJson.optInt("sonstigesPreis", 0);
+		
 
         if (price > 0) {
             priceText = price + " €";
@@ -371,6 +374,14 @@ public class HomeBean {
                 priceText = "Gratis";
                 badgeClass = "bg-success";
             }
+            else if (catid == 7) {
+           	 	priceText = "Tausch";
+                badgeClass = "bg-success";
+           }
+            else if (catid == 9 && "Gratis".equals(detailsJson.optString("sonstigesTyp"))){
+            	priceText = "Gratis";
+                badgeClass = "bg-success";
+            } 
         }
 
         return "<span class='badge " + badgeClass + " fs-6 px-3 py-2 mt-3'>"

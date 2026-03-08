@@ -1,9 +1,10 @@
+<%@ include file="./AuthRequired.jsp" %>
 <%@page import="de.hwg_lu.bwi520.beans.CategoryBean"%>
 <%@page import="de.hwg_lu.bwi520.beans.ListingBean"%>
 <%@page import="de.hwg_lu.bwi520.beans.AccountBean"%>
 <%@page import="de.hwg_lu.bwi520.beans.WeiterleitungsBean"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -19,15 +20,11 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
-	<jsp:useBean id="myWeiter"
-		class="de.hwg_lu.bwi520.beans.WeiterleitungsBean" scope="session" />
-	<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean"
-		scope="session" />
-	<jsp:useBean id="listingBean"
-		class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
-	<jsp:useBean id="categoryBean"
-		class="de.hwg_lu.bwi520.beans.CategoryBean" scope="session" />
-	<%
+<jsp:useBean id="myWeiter" class="de.hwg_lu.bwi520.beans.WeiterleitungsBean" scope="session" />
+<jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
+<jsp:useBean id="listingBean" class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
+<jsp:useBean id="categoryBean" class="de.hwg_lu.bwi520.beans.CategoryBean" scope="session" />
+<%
 categoryBean.setListingBean(listingBean);
 %>
 
@@ -67,14 +64,12 @@ categoryBean.setListingBean(listingBean);
 
 			<div class="row-gap">
 				Beschreibung
-				<textarea class="form-control" name="descr" style="height: 150px;"
-					placeholder="Details zu deinem Inserat..." required><%=listingBean.getEditDescr()%></textarea>
+				<textarea class="form-control" name="descr" style="height: 150px;" placeholder="Details zu deinem Inserat..." required><%=listingBean.getEditDescr()%></textarea>
 			</div>
 
 			<div class="row-gap">
 				<div class="custom-select-wrapper">
-					<jsp:getProperty name="categoryBean"
-						property="categoriesDropdownHtml" />
+					<jsp:getProperty name="categoryBean" property="categoriesDropdownHtml" />
 				</div>
 			</div>
 
@@ -86,15 +81,17 @@ categoryBean.setListingBean(listingBean);
 			<jsp:getProperty name="categoryBean" property="tauschenHtml" />
 			<jsp:getProperty name="categoryBean" property="dienstleistungenHtml" />
 			<jsp:getProperty name="categoryBean" property="eventsHtml" />
+			<jsp:getProperty name="categoryBean" property="sonstigesHtml" />
+			
 
 			<div id="testID" class="row row-gap">
 				<div class="col-md-8">
 					Ort <input type="text" class="form-control" name="city"
-						placeholder="Musterstadt" value="<%=listingBean.getEditCity()%>">
+						placeholder="Musterstadt" value="<%=listingBean.getEditCity()%>" required>
 				</div>
 				<div class="col-md-4">
 					PLZ <input type="text" class="form-control" name="zip"
-						placeholder="12345" value="<%=listingBean.getEditZip()%>">
+						placeholder="12345" value="<%=listingBean.getEditZip()%>" required>
 				</div>
 			</div>
 

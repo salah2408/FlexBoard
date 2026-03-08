@@ -1,5 +1,6 @@
 package de.hwg_lu.bwi520.beans;
 
+import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -19,6 +20,7 @@ public class ListingBean {
 	Connection dbConn;
 
 	int aktListingId;
+	int latestListingId;
 	AccountBean account;
 	String anbieterEmail;
 	ArrayList<Listing> anzeigen;
@@ -77,7 +79,7 @@ public class ListingBean {
 			String sql = "INSERT INTO listing (userid, catid, title, descr, zip, city, status, date, details) "
 					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-			PreparedStatement prep = this.dbConn.prepareStatement(sql);
+			PreparedStatement prep = this.dbConn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
 			prep.setString(1, userid);
 			prep.setInt(2, catid);
@@ -90,6 +92,12 @@ public class ListingBean {
 			prep.setString(9, detailsJson.toString());
 
 			prep.executeUpdate();
+			
+			ResultSet dbRes = prep.getGeneratedKeys();
+			if (dbRes.next()) {
+			    int neueListingId = dbRes.getInt(1);
+			    this.latestListingId = neueListingId;
+			}
 
 			return true;
 
@@ -421,18 +429,16 @@ public class ListingBean {
 				html = "<div class='container py-5 text-center text-muted'>" + "Inserat nicht gefunden." + "</div>";
 			}
 
-		} catch (Exception e) {
-			e.printStackTrace();
+		    return html;
 		}
-
-		return html;
-	}
 	// Hilfsmethoden für die DetailAnzeigenHtml
 
 	// Hilfsmethode um für die aktuellen Details der Anzeige zu bekommen (von
 	// Kategorie abhängig)
 	public String getDetailsKategorie(int catid, JSONObject detailsJson) {
 	    String html = "";
+	    if(catid == 9)
+	    	return html;
 	    html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
 	    html += "<div class='card-body p-4'>";
 	    html += "<h5 class='fw-bold mb-3'>Details</h5>";
@@ -556,6 +562,10 @@ public class ListingBean {
 			return detailsJson.getInt("gesamtmiete") > 0;
 		else if(detailsJson.has("verguetung"))
 			return detailsJson.getInt("verguetung") > 0;
+		else if(detailsJson.has("sonstigesPreis")) {
+			return detailsJson.getInt("sonstigesPreis") > 0;
+		}
+			
 		return false;
 	}
 
@@ -575,6 +585,8 @@ public class ListingBean {
 			return detailsJson.getInt("gesamtmiete")  + "€";
 		else if(detailsJson.has("verguetung"))
 			return detailsJson.getInt("verguetung")  + "€";
+		else if(detailsJson.has("sonstigesPreis"))
+			return detailsJson.getInt("sonstigesPreis") + "€";
 		
 		return html;
 	}
@@ -604,10 +616,17 @@ public class ListingBean {
 		    	else if(detailsJson.getString("eintritt").equals("Kostenpflichtig"))
 		    		html = "Preis auf Anfrage";
 		    } else if (catid == 7) {
-		    	html = "auf Anfrage";
+		    	html = "Tausch";
 		    } else if (catid == 8) {
 		    	html = "Preis auf Anfrage";
+		    } else if(catid == 9) {
+		    	if(detailsJson.getString("sonstigesTyp").equals("Gratis"))
+		    		html = "Gratis";
+		    	else if(detailsJson.getString("sonstigesTyp").equals("Auf Anfrage"))
+		    		html = "Preis auf Anfrage";
 		    }
+		    else
+		    	System.out.println("ungültige catid !!!");
 
 		
 		return html;
@@ -833,6 +852,8 @@ public class ListingBean {
 					price = detailsJson.optInt("eventPreis", 0);
 				} else if (detailsJson.has("dienstleistungPreis")) {
 					price = detailsJson.optInt("dienstleistungPreis", 0);
+				} else if (detailsJson.has("sonstigesPreis")) {
+					price = detailsJson.optInt("sonstigesPreis", 0);
 				}
 				html += "<div class='card shadow-sm mb-4 border-0'>";
 				html += "<div class='card-body'>";
@@ -1186,7 +1207,10 @@ public class ListingBean {
 	}
 	
 	// Getter und Setter (Inserieren)
-
+	
+	public int getLatestListingId() {
+		return this.latestListingId;
+	}
 	public void setAktListingId(int id) {
 		this.aktListingId = id;
 	}
