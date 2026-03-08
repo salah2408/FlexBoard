@@ -72,8 +72,8 @@ public class AccountBean {
 			System.out.println(sql);
 			PreparedStatement prep = this.dbConn.prepareStatement(sql);
 			prep.setString(1, email);
-			prep.setString(2, vorname);
-			prep.setString(3, nachname);
+			prep.setString(2, Character.toUpperCase(vorname.charAt(0)) + vorname.substring(1));
+			prep.setString(3, Character.toUpperCase(nachname.charAt(0)) + nachname.substring(1));
 			prep.setString(4, passwort);
 			prep.setString(5, "yes");
 			prep.setString(6, "no");
@@ -308,6 +308,13 @@ public class AccountBean {
 					+ "<button type='submit' name='action' value='zurSuche' class='nav-link bg-transparent border-0 w-100 text-start "
 					+ (this.aktuelleSeite.equals("suche") ? "active fw-bold" : "") + "'>Jetzt finden</button>"
 					+ "</li>";
+			
+			if(this.getAdmin()) {
+				html += "<li class='nav-item'>"
+						+ "<button type='submit' name='action' value='zurAdminControll' class='nav-link bg-transparent border-0 w-100 text-start "
+						+ (this.aktuelleSeite.equals("suche") ? "active fw-bold" : "") + "'>Reports ansehen</button>"
+						+ "</li>";
+			}
 		}
 
 		html += "</ul>"

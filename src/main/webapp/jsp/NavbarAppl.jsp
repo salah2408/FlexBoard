@@ -92,9 +92,7 @@
 		listingBean.setAktListingId(listingid);
 
 		response.sendRedirect("./InseratDetailView.jsp");
-	} // =============================
-		// FAVORIT HINZUFÜGEN
-		// =============================
+	} 
 	else if (action.equals("addFavorite")) {
 
 		int listingid = Integer.parseInt(request.getParameter("id"));
@@ -109,10 +107,6 @@
 		else
 			response.sendRedirect("./HomepageView.jsp");
 	}
-
-	// =============================
-	// FAVORIT ENTFERNEN
-	// =============================
 	else if (action.equals("removeFavorite")) {
 
 		int listingid = Integer.parseInt(request.getParameter("id"));
@@ -132,6 +126,9 @@
 		listingBean.setAktListingId(Integer.parseInt(request.getParameter("id")));
 		listingBean.removeFavorite();
 		response.sendRedirect("./MeineFavoritenView.jsp");
+	}
+	else if(action.equals("zurAdminControll")){
+		response.sendRedirect("./AdminControllView.jsp");
 	}
 
 	else
