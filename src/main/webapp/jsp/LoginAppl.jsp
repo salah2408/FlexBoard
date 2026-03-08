@@ -42,12 +42,8 @@
 
 		session.removeAttribute("favoriteAfterLogin");
 			}
-			
-			// Der Admin soll in jedem Fall auf die Controll View gesendet werden
-			if(myAccount.getAdmin())
-				response.sendRedirect("./AdminControllView.jsp");
-			else
-				response.sendRedirect(myWeiter.getLink());
+
+			response.sendRedirect(myWeiter.getLink());
 		} else {
 			response.sendRedirect("./LoginView.jsp");
 		}

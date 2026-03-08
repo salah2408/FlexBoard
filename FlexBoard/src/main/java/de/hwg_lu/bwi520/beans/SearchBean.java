@@ -434,7 +434,22 @@ public class SearchBean {
     	}
     	return html;
     }
-    
+    public String getDetailSearchHeaderHtml() {
+
+        String html = "";
+
+        html += "<section class='detail-search-wrapper'>";
+
+        html += "<form action='./SucheAppl.jsp' method='get' class='detail-search-form'>";
+
+        html += this.getSuchleisteHtml();
+
+        html += "</form>";
+
+        html += "</section>";
+
+        return html;
+    }
     public int getAnzahlErgebnisse() {
         return ergebnisse.size();
     }

@@ -1095,10 +1095,6 @@ public String getInseratDetailHtml() {
 	            + "<li class='list-group-item'><strong>Status:</strong> "
 	            + "<span class='badge bg-success'>Aktiv</span></li>"
 	            + "</ul>"
-	            + "<div class='mt-3 text-end'>"
-	            + "<a href='./NavbarAppl.jsp?action=profilBearbeiten' class='btn btn-sm btn-outline-secondary'>"
-	            + "Profil bearbeiten</a>"
-	            + "</div>"
 	            + "</div></div></div></div></div></section>";
 
 	    return html;
@@ -1469,6 +1465,7 @@ public String getInseratDetailHtml() {
 
 	    return false;
 	}
+	
 	// Getter und Setter (Inserieren)
 	
 	public int getLatestListingId() {

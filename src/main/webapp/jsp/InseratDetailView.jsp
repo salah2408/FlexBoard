@@ -1,38 +1,42 @@
 <%@page import="de.hwg_lu.bwi520.beans.ListingBean"%>
 <%@page import="de.hwg_lu.bwi520.beans.AccountBean"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Inserat Details - FlexBoard</title>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" ></script>
-<script src="../js/ui.js"></script>
-<script src="../js/Navigation.js"></script>
-<script src="../js/favorite.js"></script>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="../css/HomepageView.css">
+<link rel="stylesheet" href="../css/Search.css">
+<link rel="stylesheet" href="../css/InserierenDetail.css">
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/Navigation.js"></script>
+<script src="../js/favorite.js"></script>
 </head>
+
 <body class="d-flex flex-column min-vh-100">
 <jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
 <jsp:useBean id="listingBean" class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
+<jsp:useBean id="mySearch" class="de.hwg_lu.bwi520.beans.SearchBean" scope="request" />
 
-	<%
-	listingBean.setAccount(myAccount);
-	%>
+<%
+    listingBean.setAccount(myAccount);
+    mySearch.setAccount(myAccount);
+%>
 
-	<jsp:getProperty name="myAccount" property="navbarHtml" />
+<jsp:getProperty name="myAccount" property="navbarHtml" />
+<jsp:getProperty name="mySearch" property="detailSearchHeaderHtml" />
 
-	<main class="flex-fill">
+<main class="flex-fill">
+    <jsp:getProperty name="listingBean" property="inseratDetailHtml" />
+</main>
 
-		<jsp:getProperty name="listingBean" property="inseratDetailHtml" />
-
-	</main>
-
-	<jsp:getProperty name="myAccount" property="footerHtml" />
+<jsp:getProperty name="myAccount" property="footerHtml" />
 </body>
 </html>
