@@ -6,14 +6,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Vector;
 
+import org.json.JSONArray;
+
 import de.hwg_lu.bwi.jdbc.PostgreSQLAccess;
 import de.hwg_lu.bwi520.classes.Category;
 
 public class CategoryBean {
 	Vector<Category> allCategories;
     Connection dbConn;
-    private long selectedCategoryId = -1;
-    private ListingBean listingBean;
+    long selectedCategoryId = -1;
+    ListingBean listingBean;
 
     public CategoryBean() throws ClassNotFoundException, SQLException {
         this.allCategories = new Vector<Category>();
@@ -32,8 +34,7 @@ public class CategoryBean {
         if (this.listingBean == null) return false;
 
         try {
-            org.json.JSONArray arr =
-                this.listingBean.getEditDetails().optJSONArray(key);
+            JSONArray arr = this.listingBean.getEditDetails().optJSONArray(key);
 
             if (arr == null) return false;
 
@@ -415,6 +416,9 @@ public class CategoryBean {
 	        + "      <option value='Monitor' "
 	        + (getEditValue("geraetetyp").equals("Monitor") ? "selected" : "")
 	        + ">Monitor</option>"
+	        + "      <option value='Sonstiges' "
+	        + (getEditValue("geraetetyp").equals("Sonstiges") ? "selected" : "")
+	        + ">Sonstiges</option>"
 	        + "    </select>"
 	        + "  </div>"
 
@@ -554,6 +558,10 @@ public class CategoryBean {
 	        + "    <select class='form-select' name='zustandTauschen'>"
 
 	        + "      <option value=''>Wählen...</option>"
+	        
+			+ "      <option value='Neuwertig' "
+			+ (getEditValue("zustandTauschen").equals("Neuwertig") ? "selected" : "")
+			+ ">Neuwertig</option>"
 
 	        + "      <option value='Gebraucht' "
 	        + (getEditValue("zustandTauschen").equals("Gebraucht") ? "selected" : "")
@@ -667,6 +675,34 @@ public class CategoryBean {
 	    return html;
 	}
     
+	public String getSonstigesHtml() {
+
+	    String html = "<div id='catID9' hidden=''>"
+	        
+	        + "<div class='row row-gap'>"
+	        
+	        + "  <div class='col-md-6'>"
+	        + "    Preis-Option"
+	        + "    <select class='form-select' name='sonstigesTyp' id='sonstigesPreisSelect' onchange='checkSonstigesPreis()'>"
+	        + "      <option value=''>Wählen...</option>"
+	        + "      <option value='Gratis'>Gratis</option>"
+	        + "      <option value='Auf Anfrage'>Auf Anfrage</option>"
+	        + "      <option value='Preis'>Festpreis / VB</option>"
+	        + "    </select>"
+	        + "  </div>"
+
+	        + "  <div class='col-md-6' id='sonstigesPreisBlock' hidden=''>"
+	        + "    Preis (€)"
+	        + "    <input type='number' class='form-control' name='sonstigesPreis' "
+	        + "    id='sonstigesPreisInput' value='' min='0'>"
+	        + "  </div>"
+
+	        + "</div>" 
+	        
+	        + "</div>"; 
+
+	    return html;
+	}
     
  // Abschnitt Getter und Setter
     

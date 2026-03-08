@@ -138,8 +138,10 @@ public class SearchBean {
             return details.optInt("technikPreis", 0);
         } else if (details.has("preisProStunde")) {
             return details.optInt("preisProStunde", 0);
-        } else if (details.has("gesamtmiete")) {  // ✅ FÜR WG & WOHNEN
+        } else if (details.has("gesamtmiete")) { 
             return details.optInt("gesamtmiete", 0);
+        } else if (details.has("sonstigesPreis")) {
+        	return details.optInt("sonstigesPreis", 0);
         }
         return null;
     }
@@ -341,11 +343,16 @@ public class SearchBean {
 	            }
 	        } else {
 	            // Kategorie-spezifische Texte
-	            if (result.catid == 2) {
-	                html += "<p class='text-muted'>Preis auf Anfrage</p>";
+	            if (result.catid == 1) {
+	                html += "<p class='text-muted'>Gratis</p>";
+	            } else if (result.catid == 6 && "Kostenlos".equals(result.details.optString("eintritt"))) {
+	            	html += "<p class='text-muted'>Gratis</p>";
 	            } else if (result.catid == 7) {
-	                html += "<p class='text-success fw-bold'>Kostenlos / Tausch</p>";
-	            } else {
+	                html += "<p class='text-success fw-bold'>Tausch</p>";
+	            } else if (result.catid == 9 && "Gratis".equals(result.details.optString("sonstigesTyp"))){
+	            	html += "<p class='text-success fw-bold'>Kostenlos</p>";
+	            }  
+	            else {
 	                html += "<p class='text-muted'>Preis auf Anfrage</p>";
 	            }
 	        }

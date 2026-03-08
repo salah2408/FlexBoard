@@ -1,3 +1,4 @@
+<%@ include file="./AuthRequired.jsp" %>
 <%@page import="de.hwg_lu.bwi520.beans.ListingBean"%>
 <%@page import="de.hwg_lu.bwi520.beans.WeiterleitungsBean"%>
 <%@page import="de.hwg_lu.bwi520.beans.AccountBean"%>
@@ -7,7 +8,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>NavbarAppl</title>
+<title></title>
 </head>
 <body>
 
@@ -79,6 +80,10 @@ String preismodell = request.getParameter("preismodell");
 String dienstleistungPreis = request.getParameter("dienstleistungPreis");
 String referenzen = request.getParameter("referenzen");
 
+// Sonstiges catid 9
+String sonstigesTyp = request.getParameter("sonstigesTyp");
+String sonstigesPreis = request.getParameter("sonstigesPreis");
+
 
 
 
@@ -129,7 +134,7 @@ if(action.equals("Anzeige erstellen") || action.equals("Anzeige aktualisieren"))
         detailsJson.put("veranstalter", veranstalter);
         detailsJson.put("eintritt", eintritt);
         detailsJson.put("anmeldung", anmeldung);
-        detailsJson.put("eventPreis", eventPreis != null ? Integer.parseInt(eventPreis) : 0);
+        detailsJson.put("eventPreis", (eventPreis != null && !eventPreis.equals(""))? Integer.parseInt(eventPreis) : 0);
 
     } else if (categoryID.equals("7")) {
         detailsJson.put("tauschGegen", tauschGegen);
@@ -141,6 +146,9 @@ if(action.equals("Anzeige erstellen") || action.equals("Anzeige aktualisieren"))
         detailsJson.put("preismodell", preismodell);
         detailsJson.put("dienstleistungPreis", dienstleistungPreis != null ? Integer.parseInt(dienstleistungPreis) : 0);
         detailsJson.put("referenzen", referenzen);
+    } else if(categoryID.equals("9")){
+    	detailsJson.put("sonstigesTyp", sonstigesTyp);
+    	detailsJson.put("sonstigesPreis", (sonstigesPreis != null && !sonstigesPreis.equals("")) ? Integer.parseInt(sonstigesPreis) : 0);
     }
     if (imageBase64 != null && !imageBase64.isEmpty()) {
         // Neues Bild wurde hochgeladen
@@ -183,10 +191,18 @@ if(action.equals("Anzeige erstellen") || action.equals("Anzeige aktualisieren"))
             detailsJson
         );
     }
-    myListing.readAlleAnzeigenFromDB();
-    myListing.resetEditMode();
-
-    response.sendRedirect("./HomepageView.jsp");
+    if(success){
+    	myListing.readAlleAnzeigenFromDB();
+    	myListing.resetEditMode();
+    	int latestListing = myListing.getLatestListingId();
+    	response.sendRedirect("./NavbarAppl.jsp?action=zumListing&id=" + latestListing);
+    }
+    else{
+    	System.out.println("Ein Fehler beim Inserieren oder bearbeiten ist geschehen bitte wenden sie sich an ihren IT-Admin");
+    	response.sendRedirect("./HomepageView.jsp");
+    }
+    	
+    
 } else {
 	response.sendRedirect("./HomepageView.jsp");
 }
