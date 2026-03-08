@@ -658,13 +658,9 @@ public class AccountBean {
 	public void setActive(String active) {
 		user.setActive(active);
 	}
-
-	public String getAdmin() {
-		return user.getAdmin();
-	}
-
-	public void setAdmin(String admin) {
-		user.setAdmin(admin);
+	// gibt zurück ob der User ein admin ist
+	public boolean getAdmin() {
+		return user.getAdmin().toLowerCase().equals("y");
 	}
 
 	public boolean getLogedIn() {

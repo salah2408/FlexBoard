@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,6 +33,8 @@ public class ListingBean {
 	int editCatId;
 	JSONObject editDetails;
 	boolean editMode = false;
+	
+	Vector<Integer> reportedListings;
 
 	public ListingBean() throws ClassNotFoundException, SQLException {
 		this.dbConn = new PostgreSQLAccess().getConnection();
@@ -213,224 +216,273 @@ public class ListingBean {
 		}
 
 	// gethtml
-	public String getInseratDetailHtml() {
 
-		String html = "";
-		String sql = "SELECT c.name, l.userid, l.catid, l.title, l.descr, l.city, l.zip, l.status, l.date, l.details FROM listing l JOIN category c ON c.id = l.catid "
-				+ "WHERE listingid = ?";
+public String getInseratDetailHtml() {
 
-		try {
-			PreparedStatement prep = this.dbConn.prepareStatement(sql);
-			prep.setInt(1, this.aktListingId);
-			ResultSet dbRes = prep.executeQuery();
+    String html = "";
+    String sql = "SELECT c.name, l.userid, l.catid, l.title, l.descr, l.city, l.zip, l.status, l.date, l.details "
+               + "FROM listing l JOIN category c ON c.id = l.catid "
+               + "WHERE listingid = ?";
 
-			if (dbRes.next()) {
+    try {
+        PreparedStatement prep = this.dbConn.prepareStatement(sql);
+        prep.setInt(1, this.aktListingId);
+        ResultSet dbRes = prep.executeQuery();
 
-				String catName = dbRes.getString("name");
-				String userid = dbRes.getString("userid");
-				int catid = dbRes.getInt("catid");
-				String title = dbRes.getString("title");
-				String descr = dbRes.getString("descr");
-				String zip = dbRes.getString("zip");
-				String city = dbRes.getString("city");
-				String status = dbRes.getString("status");
-				Date date = dbRes.getDate("date");
-				String details = dbRes.getString("details");
-				JSONObject detailsJson = new JSONObject(details);
+        if (dbRes.next()) {
 
-				this.anbieterEmail = userid;
+            String catName = dbRes.getString("name");
+            String userid = dbRes.getString("userid");
+            int catid = dbRes.getInt("catid");
+            String title = dbRes.getString("title");
+            String descr = dbRes.getString("descr");
+            String zip = dbRes.getString("zip");
+            String city = dbRes.getString("city");
+            String status = dbRes.getString("status");
+            Date date = dbRes.getDate("date");
+            String details = dbRes.getString("details");
+            JSONObject detailsJson = new JSONObject(details);
 
-				boolean isOwner = this.account.getEmail().equals(userid);
+            this.anbieterEmail = userid;
 
-				html += "<div class='container py-5'>";
-				html += "<div class='row g-4'>";
+            boolean isOwner = this.account.getEmail().equals(userid);
+            
+            // NEU: Vorab prüfen, ob der User das Inserat schon gemeldet hat
+            boolean hatBereitsGemeldet = false;
+            if (this.account.getLogedIn()) {
+                hatBereitsGemeldet = this.hatUserSchonGemeldet();
+            }
 
-				if (isOwner) {
-				    html += "<div class='col-lg-8 offset-lg-2'>";
-				} else {
-				    html += "<div class='col-lg-8'>";
-				}
+            html += "<div class='container py-5'>";
+            html += "<div class='row g-4'>";
 
-				html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
-				html += "<div class='card-body p-4'>";
-				html += "<h2 class='fw-bold mb-2'>" + title + "</h2>";
-				html += "<span class='badge bg-primary fs-6 mb-3'>" + catName + "</span>";
-				html += "<p class='text-muted'>";
-				html += "<i class='bi bi-geo-alt me-1'></i>" + zip + " " + city;
-				html += "</p>";
-				html += "<hr>";
+            // Linke Spalte
+            if (isOwner) {
+                html += "<div class='col-lg-8 offset-lg-2'>";
+            } else {
+                html += "<div class='col-lg-8'>";
+            }
 
-				if (this.isPrice(detailsJson))
-					html += "<div class='display-6 fw-bold text-primary'>" + this.getPreisHtml(detailsJson) + "</div>";
-				else
-				    html += "<div class='display-6 fw-bold text-primary'>" + this.getGratisHtml(catid, detailsJson) + "</div>";
-				html += "</div>";
-				html += "</div>";
+            html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
+            html += "<div class='card-body p-4'>";
+            html += "<h2 class='fw-bold mb-2'>" + title + "</h2>";
+            html += "<span class='badge bg-primary fs-6 mb-3'>" + catName + "</span>";
+            html += "<p class='text-muted'>";
+            html += "<i class='bi bi-geo-alt me-1'></i>" + zip + " " + city;
+            html += "</p>";
+            html += "<hr>";
 
-				String imageBase64 = detailsJson.optString("imageBase64", null);
+            if (this.isPrice(detailsJson))
+                html += "<div class='display-6 fw-bold text-primary'>" + this.getPreisHtml(detailsJson) + "</div>";
+            else
+                html += "<div class='display-6 fw-bold text-primary'>" + this.getGratisHtml(catid, detailsJson) + "</div>";
+            html += "</div>";
+            html += "</div>";
 
-				html += "<div class='mb-4'>";
+            String imageBase64 = detailsJson.optString("imageBase64", null);
 
-				if (imageBase64 != null && !imageBase64.isEmpty()) {
+            html += "<div class='mb-4'>";
 
-					html += "<img src='" + imageBase64 + "' "
-							+ "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' "
-							+ "data-bs-toggle='modal' data-bs-target='#imageGalleryModal' " + "alt='Hauptbild'>";
+            if (imageBase64 != null && !imageBase64.isEmpty()) {
+                html += "<img src='" + imageBase64 + "' "
+                        + "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' "
+                        + "data-bs-toggle='modal' data-bs-target='#imageGalleryModal' " + "alt='Hauptbild'>";
+            } else {
+                html += "<img src='../img/flexboard-logo.jpg' "
+                        + "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' "
+                        + "data-bs-toggle='modal' data-bs-target='#imageGalleryModal' " + "alt='Placeholder'>";
+            }
+            html += "<div class='text-end mt-2'>";
+            html += "<small class='text-muted'><i class='bi bi-images'></i> Bild</small>";
+            html += "</div>";
+            html += "</div>";
 
-				} else {
+            html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
+            html += "<div class='card-body p-4'>";
+            html += "<h5 class='fw-bold mb-3'>Beschreibung</h5>";
+            html += "<p class='mb-0 description-text'>" + descr + "</p>";
+            html += "</div>";
+            html += "</div>";
 
-					html += "<img src='../img/flexboard-logo.jpg' "
-							+ "class='img-fluid rounded-4 shadow-sm w-100 listing-main-image' "
-							+ "data-bs-toggle='modal' data-bs-target='#imageGalleryModal' " + "alt='Placeholder'>";
-				}
-				html += "<div class='text-end mt-2'>";
-				html += "<small class='text-muted'><i class='bi bi-images'></i> Bild</small>";
-				html += "</div>";
-				html += "</div>";
+            html += this.getDetailsKategorie(catid, detailsJson);
 
-				html += "<div class='card shadow-sm border-0 rounded-4 mb-4'>";
-				html += "<div class='card-body p-4'>";
-				html += "<h5 class='fw-bold mb-3'>Beschreibung</h5>";
-				html += "<p class='mb-0 description-text'>" + descr + "</p>";
-				html += "</div>";
-				html += "</div>";
+            html += "</div>"; // Ende col-lg-8
 
-				html += this.getDetailsKategorie(catid, detailsJson);
+            // Rechte Spalte (Sidebar) - Wird nur gerendert, wenn man nicht der Besitzer ist
+            html += "<div class='col-lg-4'>";
+            
+            if(!isOwner) {
+                // Card für das Profil & Haupt-Aktionen
+                html += "<div class='card shadow-sm border-0 rounded-4 sticky-sidebar mb-3'>";
+                html += "<div class='card-body p-4 text-center'>";
+                html += "<div class='mb-3'>";
+                html += "<i class='bi bi-person-circle text-secondary profile-icon-large'></i>";
+                html += "</div>";
+                html += "<h5 class='fw-bold mb-1'>" + userid + "</h5>";
 
-				html += "</div>";
+                if (this.account.getLogedIn()) {
+                    // Chat Button
+                    html += "<button class='btn btn-primary w-100 py-2 mb-2 mt-3' data-bs-toggle='offcanvas' data-bs-target='#chatOffcanvas'>";
+                    html += "<i class='bi bi-envelope me-2'></i> Nachricht schreiben";
+                    html += "</button>";
 
-				html += "<div class='col-lg-4'>";
-				
-				// Nachricht schreiben soll nur erscheinen wenn der Inhaber der Anzeige nicht der User selbst ist
-				if(!isOwner) {
-					html += "<div class='card shadow-sm border-0 rounded-4 sticky-sidebar'>";
-					html += "<div class='card-body p-4 text-center'>";
-					html += "<div class='mb-3'>";
-					html += "<i class='bi bi-person-circle text-secondary profile-icon-large'></i>";
-					html += "</div>";
-					html += "<h5 class='fw-bold mb-1'>" + userid + "</h5>";
+                    // Favoriten Button
+                    if (this.isFavorite()) {
+                        html += "<button class='btn btn-danger w-100 py-2 mb-2 favorite-toggle' data-id='" + this.aktListingId + "' data-action='remove'>";
+                        html += "<i class='bi bi-heart-fill me-2'></i> Favorit entfernen";
+                        html += "</button>";
+                    } else {
+                        html += "<button class='btn btn-outline-danger w-100 py-2 mb-2 favorite-toggle' data-id='" + this.aktListingId + "' data-action='add'>";
+                        html += "<i class='bi bi-heart me-2'></i> Zu Favoriten hinzufügen";
+                        html += "</button>";
+                    }
+                } else {
+                    // Nicht eingeloggt
+                    html += "<a href='./InseratDetailAppl.jsp?action=anmelden&link=./InseratDetailView.jsp' class='btn btn-primary w-100 py-2 mb-2 mt-3'>";
+                    html += "<i class='bi bi-box-arrow-in-right me-2'></i> Einloggen für Aktionen";
+                    html += "</a>";
+                }
 
+                html += "</div>"; // Ende card-body
+                html += "</div>"; // Ende card Profil
 
-					if (this.account.getLogedIn()) {
-					    html += "<button class='btn btn-primary w-100 py-2 mb-2 mt-3' data-bs-toggle='offcanvas' data-bs-target='#chatOffcanvas'>";
-					    html += "<i class='bi bi-envelope me-2'></i> Nachricht schreiben";
-					    html += "</button>";
-					}if (this.account.getLogedIn()) {
+                // NEU: Der Melden-Button direkt unter der Profil-Card
+                if (this.account.getLogedIn()) {
+                    if (hatBereitsGemeldet) {
+                        html += "<button class='btn btn-secondary w-100 py-2 rounded-4 shadow-sm' disabled>";
+                        html += "<i class='bi bi-check-circle me-2'></i> Anzeige gemeldet";
+                        html += "</button>";
+                    } else {
+                        html += "<button class='btn btn-outline-danger w-100 py-2 rounded-4 shadow-sm' data-bs-toggle='modal' data-bs-target='#reportModal'>";
+                        html += "<i class='bi bi-exclamation-triangle me-2'></i> Anzeige melden";
+                        html += "</button>";
+                    }
+                } else {
+                    html += "<a href='./InseratDetailAppl.jsp?action=anmelden&link=./InseratDetailView.jsp' class='btn btn-outline-danger w-100 py-2 rounded-4 shadow-sm'>";
+                    html += "<i class='bi bi-exclamation-triangle me-2'></i> Zum Melden einloggen";
+                    html += "</a>";
+                }
+            }
 
-						if (this.isFavorite()) {
+            html += "</div>"; // Ende col-lg-4
+            html += "</div>"; // Ende row
+            html += "</div>"; // Ende container
 
-						    html += "<button ";
-						    html += "class='btn btn-danger w-100 py-2 mb-2 favorite-toggle' ";
-						    html += "data-id='" + this.aktListingId + "' ";
-						    html += "data-action='remove'>";
-						    html += "<i class='bi bi-heart-fill'></i> Favorit entfernen";
-						    html += "</button>";
+            // --- HIER STARTEN DIE POPUPS (MODALS & OFFCANVAS) ---
 
-						} else {
+            // Modal: Image Gallery
+            html += "<div class='modal fade' id='imageGalleryModal' tabindex='-1' aria-hidden='true'>";
+            html += "<div class='modal-dialog modal-xl modal-dialog-centered'>";
+            html += "<div class='modal-content bg-transparent border-0 shadow-none'>";
 
-						    html += "<button ";
-						    html += "class='btn btn-outline-danger w-100 py-2 mb-2 favorite-toggle' ";
-						    html += "data-id='" + this.aktListingId + "' ";
-						    html += "data-action='add'>";
-						    html += "<i class='bi bi-heart'></i> Zu Favoriten hinzufügen";
-						    html += "</button>";
+            html += "<div class='modal-header border-0 pb-0'>";
+            html += "<button type='button' class='btn-close btn-close-white ms-auto modal-close-custom' data-bs-dismiss='modal' aria-label='Close'></button>";
+            html += "</div>";
 
-						}
+            html += "<div class='modal-body p-0'>";
+            html += "<div id='listingCarousel' class='carousel slide' data-bs-ride='false'>";
+            html += "<div class='carousel-inner rounded-3 shadow'>";
 
-					} else {
-					    html += "<a href='./InseratDetailAppl.jsp?action=anmelden&link=./InseratDetailView.jsp' class='btn btn-primary w-100 py-2 mb-2 mt-3'>";
-					    html += "<i class='bi bi-box-arrow-in-right me-2'></i> Zum Schreiben einloggen";
-					    html += "</a>";
-					}
-				}
+            if (imageBase64 != null && !imageBase64.isEmpty()) {
+                html += "<div class='carousel-item active'>";
+                html += "<img src='" + imageBase64 + "' class='d-block w-100 carousel-image-custom' alt='Bild'>";
+                html += "</div>";
+            } else {
+                html += "<div class='carousel-item active'>";
+                html += "<img src='../img/flexboard-logo.jpg' class='d-block w-100 carousel-image-custom' alt='Placeholder'>";
+                html += "</div>";
+            }
 
-				html += "</div>";
-				html += "</div>";
-				html += "</div>";
-				html += "</div>";
-				html += "</div>";
+            html += "</div>";
 
-				html += "<div class='modal fade' id='imageGalleryModal' tabindex='-1' aria-hidden='true'>";
-				html += "<div class='modal-dialog modal-xl modal-dialog-centered'>";
-				html += "<div class='modal-content bg-transparent border-0 shadow-none'>";
+            html += "<button class='carousel-control-prev' type='button' data-bs-target='#listingCarousel' data-bs-slide='prev'>";
+            html += "<span class='carousel-control-prev-icon' aria-hidden='true'></span>";
+            html += "<span class='visually-hidden'>Zurück</span>";
+            html += "</button>";
+            html += "<button class='carousel-control-next' type='button' data-bs-target='#listingCarousel' data-bs-slide='next'>";
+            html += "<span class='carousel-control-next-icon' aria-hidden='true'></span>";
+            html += "<span class='visually-hidden'>Weiter</span>";
+            html += "</button>";
 
-				html += "<div class='modal-header border-0 pb-0'>";
-				html += "<button type='button' class='btn-close btn-close-white ms-auto modal-close-custom' data-bs-dismiss='modal' aria-label='Close'></button>";
-				html += "</div>";
+            html += "</div>"; // Ende carousel slide
+            html += "</div>"; // Ende modal-body
+            html += "</div>"; // Ende modal-content
+            html += "</div>"; // Ende modal-dialog
+            html += "</div>"; // Ende imageGalleryModal
 
-				html += "<div class='modal-body p-0'>";
-				html += "<div id='listingCarousel' class='carousel slide' data-bs-ride='false'>";
+            // Offcanvas: Chat
+            html += "<div class='offcanvas offcanvas-bottom shadow-lg rounded-top-4' tabindex='-1' id='chatOffcanvas' style='height: auto; max-height: 50vh;'>";
+            html += "<div class='offcanvas-header border-bottom px-4 py-3'>";
+            html += "<h5 class='offcanvas-title fw-bold'>";
+            html += "<i class='bi bi-chat-dots text-primary me-2'></i>Nachricht an " + userid;
+            html += "</h5>";
+            html += "<button type='button' class='btn-close' data-bs-dismiss='offcanvas' aria-label='Close'></button>";
+            html += "</div>";
 
-				html += "<div class='carousel-inner rounded-3 shadow'>";
+            html += "<div class='offcanvas-body p-4'>";
+            html += "<form action='./InseratDetailAppl.jsp' method='post'>"; 
 
-				if (imageBase64 != null && !imageBase64.isEmpty()) {
+            html += "<input type='hidden' name='empfaengerid' value='" + userid + "'>";
+            html += "<input type='hidden' name='listingid' value='" + this.aktListingId + "'>";
 
-				    html += "<div class='carousel-item active'>";
-				    html += "<img src='" + imageBase64 + "' class='d-block w-100 carousel-image-custom' alt='Bild'>";
-				    html += "</div>";
+            html += "<div class='mb-3'>";
+            html += "<label class='form-label text-muted small'>Deine Nachricht:</label>";
+            html += "<textarea class='form-control rounded-4 bg-light' name='nachrichtText' rows='4' placeholder='Hallo, ich habe Interesse an deinem Inserat...' required></textarea>";
+            html += "</div>";
 
-				} else {
+            html += "<div class='text-end'>";
+            html += "<input type='submit' name='action' value='Senden' class='btn btn-primary px-4 py-2 rounded-5'>";
+            html += "</div>";
 
-				    html += "<div class='carousel-item active'>";
-				    html += "<img src='../img/flexboard-logo.jpg' class='d-block w-100 carousel-image-custom' alt='Placeholder'>";
-				    html += "</div>";
+            html += "</form>";
+            html += "</div>"; // Ende offcanvas-body
+            html += "</div>"; // Ende chatOffcanvas
 
-				}
+            // NEU: Modal: Anzeige melden
+            html += "<div class='modal fade' id='reportModal' tabindex='-1' aria-hidden='true'>";
+            html += "<div class='modal-dialog modal-dialog-centered'>";
+            html += "<div class='modal-content rounded-4 border-0 shadow'>";
 
-				html += "</div>";
+            html += "<div class='modal-header border-bottom-0 pb-0'>";
+            html += "<h5 class='modal-title fw-bold text-danger'>";
+            html += "<i class='bi bi-exclamation-triangle-fill me-2'></i>Inserat melden";
+            html += "</h5>";
+            html += "<button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>";
+            html += "</div>";
 
-				html += "<button class='carousel-control-prev' type='button' data-bs-target='#listingCarousel' data-bs-slide='prev'>";
-				html += "<span class='carousel-control-prev-icon' aria-hidden='true'></span>";
-				html += "<span class='visually-hidden'>Zurück</span>";
-				html += "</button>";
-				html += "<button class='carousel-control-next' type='button' data-bs-target='#listingCarousel' data-bs-slide='next'>";
-				html += "<span class='carousel-control-next-icon' aria-hidden='true'></span>";
-				html += "<span class='visually-hidden'>Weiter</span>";
-				html += "</button>";
+            html += "<div class='modal-body p-4'>";
+            html += "<form action='./InseratDetailAppl.jsp' method='post'>"; 
 
-				html += "</div>";
-				html += "</div>";
+            html += "<input type='hidden' name='action' value='Melden'>";
+            html += "<input type='hidden' name='listingid' value='" + this.aktListingId + "'>";
 
-				html += "</div>";
-				html += "</div>";
-				html += "</div>";
+            html += "<div class='mb-4'>";
+            html += "<label class='form-label text-muted small'>Warum möchtest du dieses Inserat melden?</label>";
+            html += "<textarea class='form-control rounded-4 bg-light' name='reportText' rows='4' placeholder='Bitte beschreibe kurz, was mit diesem Inserat nicht stimmt...' required></textarea>";
+            html += "</div>";
 
-				html += "<div class='offcanvas offcanvas-bottom shadow-lg rounded-top-4' tabindex='-1' id='chatOffcanvas' style='height: auto; max-height: 50vh;'>";
-				html += "<div class='offcanvas-header border-bottom px-4 py-3'>";
-				html += "<h5 class='offcanvas-title fw-bold'>";
-				html += "<i class='bi bi-chat-dots text-primary me-2'></i>Nachricht an " + userid;
-				html += "</h5>";
-				html += "<button type='button' class='btn-close' data-bs-dismiss='offcanvas' aria-label='Close'></button>";
-				html += "</div>";
+            html += "<div class='text-end'>";
+            html += "<button type='button' class='btn btn-light me-2 rounded-5 px-4' data-bs-dismiss='modal'>Abbrechen</button>";
+            html += "<button type='submit' class='btn btn-danger px-4 py-2 rounded-5'>Meldung abschicken</button>";
+            html += "</div>";
 
-				html += "<div class='offcanvas-body p-4'>";
-				html += "<form action='./InseratDetailAppl.jsp' method='post'>"; 
+            html += "</form>";
+            html += "</div>"; // Ende modal-body
 
-				html += "<input type='hidden' name='empfaengerid' value='" + userid + "'>";
-				html += "<input type='hidden' name='listingid' value='" + this.aktListingId + "'>";
+            html += "</div>"; // Ende modal-content
+            html += "</div>"; // Ende modal-dialog
+            html += "</div>"; // Ende reportModal
 
-				html += "<div class='mb-3'>";
-				html += "<label class='form-label text-muted small'>Deine Nachricht:</label>";
-				html += "<textarea class='form-control rounded-4 bg-light' name='nachrichtText' rows='4' placeholder='Hallo, ich habe Interesse an deinem Inserat...' required></textarea>";
-				html += "</div>";
-
-				html += "<div class='text-end'>";
-				html += "<input type='submit' name='action' value='Senden' class='btn btn-primary px-4 py-2 rounded-5'>";
-
-				html += "</button>";
-				html += "</div>";
-
-				html += "</form>";
-
-				html += "</div>";
-				html += "</div>";
-
-			} else {
-				html = "<div class='container py-5 text-center text-muted'>" + "Inserat nicht gefunden." + "</div>";
-			}
-
-		    return html;
-		}
+        } else {
+            html = "<div class='container py-5 text-center text-muted'>Inserat nicht gefunden.</div>";
+        }
+        
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    
+    return html;
+}
 	// Hilfsmethoden für die DetailAnzeigenHtml
 
 	// Hilfsmethode um für die aktuellen Details der Anzeige zu bekommen (von
@@ -787,7 +839,7 @@ public class ListingBean {
 
 			String owner = rs.getString("userid");
 
-			if (!account.getEmail().equals(owner))
+			if (!account.getEmail().equals(owner) && !account.getAdmin())
 				return false;
 
 			String sqlUpdate = "UPDATE listing SET status = 'D' WHERE listingid = ?";
@@ -1070,7 +1122,7 @@ public class ListingBean {
 
 			String owner = rs.getString("userid");
 
-			if (!account.getEmail().equals(owner))
+			if (!account.getEmail().equals(owner) && !account.getAdmin())
 				return false;
 
 			String sqlUpdate = "UPDATE listing SET status = 'A' WHERE listingid = ?";
@@ -1175,6 +1227,218 @@ public class ListingBean {
 	    return false;
 	}
 	
+	public boolean reportListing(int listingid, String reportText) throws SQLException {
+		try {
+			String sql = "INSERT INTO reports (listingid, reporter_email, report_text) VALUES (?, ?, ?)";
+			PreparedStatement prep = this.dbConn.prepareStatement(sql);
+			prep.setInt(1, listingid);
+			prep.setString(2, this.account.getEmail());
+			prep.setString(3, reportText);
+			prep.executeUpdate();
+			return true;
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	// Hilfsmethode um zu überprüfen ob der user die aktuelle listingid bereits gemeldet hat (um mehrfache reports eines users zu vermeiden)
+	private boolean hatUserSchonGemeldet() {
+
+	    String sql = "SELECT 1 FROM reports WHERE listingid = ? AND reporter_email = ?";
+	    
+	    try {
+	        PreparedStatement prep = this.dbConn.prepareStatement(sql);
+	        prep.setInt(1, this.aktListingId);
+	        prep.setString(2, this.account.getEmail());
+	        ResultSet dbRes = prep.executeQuery();
+	        
+	        if(dbRes.next())
+	        	return true;
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    
+	    return false;
+	}
+	
+	
+	public String getAdminReportsHtml() {
+
+	    String html = "";
+
+	    String sql = "SELECT r.id AS reportid, r.listingid, r.reporter_email, r.report_text, r.report_date, "
+	            + "l.userid AS listing_owner, l.status "
+	            + "FROM reports r "
+	            + "JOIN listing l ON r.listingid = l.listingid "
+	            + "WHERE r.isClosed = false "
+	            + "ORDER BY r.report_date DESC";
+
+	    try {
+	        PreparedStatement prep = this.dbConn.prepareStatement(sql);
+	        ResultSet rs = prep.executeQuery();
+
+	        html += "<section class='py-5'>";
+	        html += "<div class='container'>";
+	        html += "<h2 class='fw-bold mb-4'>Eingegangene Meldungen</h2>";
+
+	        boolean hasResults = false;
+
+	        while (rs.next()) {
+	            hasResults = true;
+
+	            int reportId = rs.getInt("reportid");
+	            int listingId = rs.getInt("listingid");
+	            String reporterEmail = rs.getString("reporter_email");
+	            String reportText = rs.getString("report_text");
+	            java.sql.Timestamp reportDate = rs.getTimestamp("report_date");
+	            
+	            String listingOwner = rs.getString("listing_owner");
+	            String status = rs.getString("status");
+
+	            html += "<div class='card shadow-sm mb-4 border-0'>";
+	            html += "<div class='card-body'>";
+	            html += "<div class='d-flex justify-content-between align-items-start'>";
+	            
+	            // Linke Seite: Report-Details
+	            html += "<div>";
+	            html += "<h5 class='fw-bold'>Meldung #" + reportId + " (für Inserat ID: " + listingId + ")</h5>";
+	            
+	            html += "<p class='text-muted mb-1'>";
+	            html += "Gemeldet von: <strong>" + reporterEmail + "</strong>";
+	            html += "</p>";
+	            
+	            if (reportDate != null) {
+	                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm");
+	                html += "<p class='text-muted small'>Datum: " + sdf.format(reportDate) + " Uhr</p>";
+	            }
+
+	            html += "<div class='mt-3'>";
+	            html += "<p class='fw-bold mb-1'>Grund der Meldung:</p>";
+	            html += "<p class='mb-0 text-dark'>" + reportText + "</p>";
+	            html += "</div>";
+	            
+	            html += "</div>";
+
+	            // Rechte Seite: Action Buttons mit neuen Farben
+	            html += "<div class='text-end' style='min-width: 150px;'>";
+	            
+	            html += "<a href='./AdminControllAppl.jsp?action=zumListing&listingid=" + listingId + "' class='btn btn-sm btn-outline-secondary mb-2 d-block'>Details anzeigen</a>";
+	            
+	            if (status.equals("A")) {
+	                html += "<a href='./AdminControllAppl.jsp?action=deaktiviereListing&listingid=" + listingId + "' class='btn btn-sm btn-outline-danger mb-2 d-block'>Inserat Deaktivieren</a>";
+	            } else {
+	                html += "<a href='./AdminControllAppl.jsp?action=aktiviereListing&listingid=" + listingId + "' class='btn btn-sm btn-outline-success mb-2 d-block'>Inserat Reaktivieren</a>";
+	            }
+	            
+	            html += "<a href='./AdminControllAppl.jsp?action=loescheListing&listingid=" + listingId + "' class='btn btn-sm btn-danger mb-4 d-block' onclick=\"return confirm('Dieses Inserat endgültig löschen?');\">Inserat Löschen</a>";
+	            
+	            html += "<a href='./AdminControllAppl.jsp?action=sperreUser&userid=" + listingOwner + "' class='btn btn-sm btn-danger d-block mb-2' onclick=\"return confirm('Den Verkäufer wirklich sperren?');\">User sperren</a>";
+	            
+	         // NEU: Der Button öffnet jetzt ein Modal (beachte das data-bs-target mit der reportId!)
+	            html += "<button type='button' class='btn btn-sm btn-success d-block w-100' data-bs-toggle='modal' data-bs-target='#closeModal_" + reportId + "'>Report schließen</button>";
+	            
+	            html += "</div>"; // text-end
+	            
+	            html += "</div>"; // flex
+	            html += "</div>"; // card-body
+	            html += "</div>"; // card
+
+	            // NEU: Das Modal für diesen spezifischen Report (wird direkt nach der Card generiert)
+	            html += "<div class='modal fade' id='closeModal_" + reportId + "' tabindex='-1' aria-hidden='true'>";
+	            html += "<div class='modal-dialog modal-dialog-centered'>";
+	            html += "<div class='modal-content rounded-4 border-0 shadow'>";
+	            
+	            html += "<div class='modal-header border-bottom-0 pb-0'>";
+	            html += "<h5 class='modal-title fw-bold text-success'><i class='bi bi-check-circle-fill me-2'></i>Report #" + reportId + " schließen</h5>";
+	            html += "<button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>";
+	            html += "</div>";
+	            
+	            html += "<div class='modal-body p-4'>";
+	            html += "<form action='./AdminControllAppl.jsp' method='get'>"; 
+	            
+	            // Versteckte Parameter, die an die Appl gesendet werden
+	            html += "<input type='hidden' name='action' value='reportSchliessen'>";
+	            html += "<input type='hidden' name='reportid' value='" + reportId + "'>";
+	            
+	            html += "<div class='mb-4'>";
+	            html += "<label class='form-label text-muted small'>Begründung / Admin-Notiz:</label>";
+	            // Das Textfeld für den Admin
+	            html += "<textarea class='form-control rounded-4 bg-light' name='adminNotiz' rows='3'></textarea>";
+	            html += "</div>";
+	            
+	            html += "<div class='text-end'>";
+	            html += "<button type='button' class='btn btn-light me-2 rounded-5 px-4' data-bs-dismiss='modal'>Abbrechen</button>";
+	            html += "<button type='submit' class='btn btn-success'>Report schließen</button>";
+	            html += "</div>";
+	            
+	            html += "</form>";
+	            html += "</div>"; // modal-body
+	            
+	            html += "</div>"; // modal-content
+	            html += "</div>"; // modal-dialog
+	            html += "</div>"; // modal
+	        }
+
+	        if (!hasResults) {
+	            html += "<div class='text-muted'>Es liegen aktuell keine Meldungen vor.</div>";
+	        }
+
+	        html += "</div></section>";
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return html;
+	}
+	
+	public boolean bannUser(String userid) {
+		String sql = "UPDATE account SET isBanned = true WHERE email = ?";
+		
+		boolean success = false;
+
+	    try {
+	        PreparedStatement prep = this.dbConn.prepareStatement(sql);
+	        prep.setString(1, userid);
+	        
+	        int rowsAffected = prep.executeUpdate();
+	        
+	        if (rowsAffected > 0) {
+	            success = true;
+	            System.out.println("User " + userid + " wurde erfolgreich gesperrt.");
+	        } else {
+	            System.out.println("Fehler: User " + userid + " konnte nicht gefunden werden.");
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return success;
+	}
+	
+	public boolean closeReport(int reportid, String adminNotiz) {
+		String sql = "UPDATE reports SET isClosed = ?, close_text = ? WHERE id = ?";
+		
+		try {
+			PreparedStatement prep = this.dbConn.prepareStatement(sql);
+			prep.setBoolean(1, true);
+			prep.setString(2, adminNotiz);
+			prep.setInt(3, reportid);
+			
+			int rowsAffected = prep.executeUpdate();
+			
+			if(rowsAffected > 0)
+				return true;
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		return false;
+	}
 	// =============================
 	// FAVORIT ENTFERNEN
 	// =============================
