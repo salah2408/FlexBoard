@@ -273,7 +273,7 @@ public class HomeBean {
 
                     // Gast → Login
 
-                    html += "<a href='./NavbarAppl.jsp?action=zumLogin&id=" + listingId + "'";
+                    html += "<a href='./NavbarAppl.jsp?action=zumLogin' ";
                     html += "class='favorite-heart' title='Zum Login um Favoriten zu speichern'> ";                    
                     html += "<i class='bi bi-heart'></i>";
                     html += "</a>";

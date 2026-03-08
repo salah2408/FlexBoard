@@ -1,0 +1,66 @@
+/* Hauptbild auf der Detailseite */
+.listing-main-image {
+    cursor: pointer;
+    object-fit: cover;
+    max-height: 450px;
+}
+
+/* Erhält die Zeilenumbrüche aus der Textarea bei der Beschreibung */
+.description-text {
+    white-space: pre-wrap;
+}
+
+/* Lässt die rechte Info-Box beim Scrollen mitfahren */
+.sticky-sidebar {
+    position: sticky;
+    top: 2rem;
+    z-index: 1020;
+}
+
+/* Vergrößert das Profil-Icon in der Sidebar */
+.profile-icon-large {
+    font-size: 4rem;
+}
+
+/* Passt den Schließen-Button im Vollbild-Modal an dunkle Hintergründe an */
+.modal-close-custom {
+    z-index: 1055;
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Bilder innerhalb der Vollbild-Galerie */
+.carousel-image-custom {
+    max-height: 85vh;
+    object-fit: contain;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+/* =========================
+   Detail-Seite: Such-/Nav-Leiste
+   ========================= */
+.detail-search-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 1040;
+}
+
+.detail-nav-row {
+    background: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+    padding: 10px 0;
+}
+
+.detail-nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.detail-last-link {
+    text-decoration: none;
+    color: #0d6efd;
+}
+
+.detail-last-link:hover {
+    text-decoration: underline;
+}

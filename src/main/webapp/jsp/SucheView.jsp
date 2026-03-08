@@ -26,7 +26,7 @@
     <jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
     <jsp:useBean id="mySearch" class="de.hwg_lu.bwi520.beans.SearchBean" scope="session" />
     <jsp:useBean id="myCategory" class="de.hwg_lu.bwi520.beans.CategoryBean" scope="request" />
-    <jsp:useBean id="listingBean" class="de.hwg_lu.bwi520.beans.ListingBean" scope="session"></jsp:useBean>
+    <jsp:useBean id="listingBean" class="de.hwg_lu.bwi520.beans.ListingBean" scope="request"></jsp:useBean>
     
     <%
 mySearch.setAccount(myAccount);

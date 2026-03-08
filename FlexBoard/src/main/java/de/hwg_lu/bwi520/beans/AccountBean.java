@@ -72,8 +72,8 @@ public class AccountBean {
 			System.out.println(sql);
 			PreparedStatement prep = this.dbConn.prepareStatement(sql);
 			prep.setString(1, email);
-			prep.setString(2, Character.toUpperCase(vorname.charAt(0)) + vorname.substring(1));
-			prep.setString(3, Character.toUpperCase(nachname.charAt(0)) + nachname.substring(1));
+			prep.setString(2, vorname);
+			prep.setString(3, nachname);
 			prep.setString(4, passwort);
 			prep.setString(5, "yes");
 			prep.setString(6, "no");
@@ -91,28 +91,16 @@ public class AccountBean {
 
 	public boolean checkAccountExists(String email) throws SQLException {
 		String sql = "select email from account where email = ?";
+		System.out.println(sql);
 		PreparedStatement prep = this.dbConn.prepareStatement(sql);
 		prep.setString(1, email);
 		ResultSet dbRes = prep.executeQuery();
 		return dbRes.next();
 	}
-	
-	public boolean checkAccountBanned(String email) throws SQLException {
-		String sql = "SELECT isbanned FROM account where email = ?";
-		PreparedStatement prep = this.dbConn.prepareStatement(sql);
-		prep.setString(1, email);
-		ResultSet dbRes = prep.executeQuery();
-		if(dbRes.next())
-			return dbRes.getBoolean("isbanned");
-		else
-			return false;
-	}
-	
+
 	public boolean login(String email, String passwort) throws SQLException {
-		if(this.checkAccountBanned(email))
-			return false;
-		String sql = "select email, vorname, nachname, passwort, active, admin "
-				+ "from account where email = ?";
+		String sql = "select email, vorname, nachname, passwort, active, admin " + "from account where email = ?";
+		System.out.println(sql);
 		PreparedStatement prep = this.dbConn.prepareStatement(sql);
 		prep.setString(1, email);
 		ResultSet dbRes = prep.executeQuery();
@@ -308,13 +296,6 @@ public class AccountBean {
 					+ "<button type='submit' name='action' value='zurSuche' class='nav-link bg-transparent border-0 w-100 text-start "
 					+ (this.aktuelleSeite.equals("suche") ? "active fw-bold" : "") + "'>Jetzt finden</button>"
 					+ "</li>";
-			
-			if(this.getAdmin()) {
-				html += "<li class='nav-item'>"
-						+ "<button type='submit' name='action' value='zurAdminControll' class='nav-link bg-transparent border-0 w-100 text-start "
-						+ (this.aktuelleSeite.equals("suche") ? "active fw-bold" : "") + "'>Reports ansehen</button>"
-						+ "</li>";
-			}
 		}
 
 		html += "</ul>"
@@ -338,47 +319,45 @@ public class AccountBean {
 					+ "<li><button type='submit' name='action' value='zurPost' class='dropdown-item bg-transparent border-0'>Posteingang</button></li>"
 
 					+ "<li><button type='submit' name='action' value='zuMeineFavoriten' class='dropdown-item bg-transparent border-0'>"
-					+ "<i class='bi bi-heart-fill text-danger'></i> Favoriten ("
-					+ "<span id='favoriteCounter'>"
-					+ this.getFavoriteCount()
-					+ "</span>)</button></li>"
+					+ "<i class='bi bi-heart-fill text-danger'></i> Favoriten (" + "<span id='favoriteCounter'>"
+					+ this.getFavoriteCount() + "</span>)</button></li>"
 
 					+ "<li><hr class='dropdown-divider'></li>"
 					+ "<li><button type='submit' name='action' value='abmelden' class='dropdown-item text-danger bg-transparent border-0'>Abmelden</button></li>"
 					+ "</ul>" + "</li>";
 		}
 
-		html += "<input id='currSite' type='text' name='currSite' value='' hidden=''";
+		html += "<input id='currSite' type='text' name='currSite' value='' hidden=''>";
 		html += "</ul></div></div></nav></form>";
 
 		return html;
 	}
-	
+
 	public int getFavoriteCount() {
 
-	    if (!this.getLogedIn())
-	        return 0;
+		if (!this.getLogedIn())
+			return 0;
 
-	    int count = 0;
+		int count = 0;
 
-	    try {
+		try {
 
-	        String sql = "SELECT COUNT(*) FROM favorite WHERE userid=?";
-	        PreparedStatement prep = dbConn.prepareStatement(sql);
+			String sql = "SELECT COUNT(*) FROM favorite WHERE userid=?";
+			PreparedStatement prep = dbConn.prepareStatement(sql);
 
-	        prep.setString(1, this.getEmail());
+			prep.setString(1, this.getEmail());
 
-	        ResultSet rs = prep.executeQuery();
+			ResultSet rs = prep.executeQuery();
 
-	        if (rs.next()) {
-	            count = rs.getInt(1);
-	        }
+			if (rs.next()) {
+				count = rs.getInt(1);
+			}
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-	    return count;
+		return count;
 	}
 
 	public String getFooter() {
@@ -407,11 +386,18 @@ public class AccountBean {
 			html += "</div>" + "</div>";
 
 			html += "<div class='col-12 col-md-8 col-lg-9 d-flex flex-column p-0'>"
-					+ "<div class='border-bottom p-3 fw-bold'>" + this.getTitleFromUser(this.aktAnzeigeID) + "---"
-					+ this.getNameFromUser(this.aktAnzeigeID) + "</div>" + "<div class='chat-messages flex-grow-1'>";
-			System.out.println(
-					"Aktuelle anzeigeID: " + this.aktAnzeigeID + " Und der ChatPartner: " + this.getAktChatPartner());
 
+					+ "<div class='border-bottom px-4 py-3 d-flex justify-content-between align-items-center'>"
+
+					+ "<div class='fw-semibold fs-5 text-dark'>" + this.getTitleFromUser(this.aktAnzeigeID) + "</div>"
+
+					+ "<div class='d-flex align-items-center text-muted small'>"
+					+ "<i class='bi bi-person-circle me-2 fs-5'></i>" + "<span class='fw-medium'>"
+					+ this.getNameFromUser(this.aktAnzeigeID) + "</span>" + "</div>"
+
+					+ "</div>"
+
+					+ "<div class='chat-messages flex-grow-1'>";
 			html += this.getChatverlauf();
 
 			html += "</div>" + "<div class='border-top p-3'>" + "<div class='input-group'>"
@@ -420,8 +406,15 @@ public class AccountBean {
 					+ "<input class='btn btn-primary' type='submit' name='action' value='Senden'>" + "</form>"
 					+ "</div>" + "</div>" + "</div>" + "</div>" + "</div>";
 		} else {
-			html = "<div class='col-12 col-md-8 col-lg-9 d-flex flex-column p-0'>";
-			html += "<h2> Es wurden noch keine Chats angefangen</h2>";
+
+			html = "<div class='col-12 d-flex flex-column align-items-center justify-content-center text-center py-5'>";
+
+			html += "<img src='../img/tumbleweed-on-road-animation.jpg' " + "class='img-fluid mb-4' "
+					+ "style='max-width:500px; border-radius:12px;'>";
+
+			html += "<h3 class='fw-bold'>Ganz schön dürre hier.</h3>";
+			html += "<p class='text-muted'>Es wurden noch keine Chats gestartet.</p>";
+
 			html += "</div>";
 		}
 
@@ -677,6 +670,7 @@ public class AccountBean {
 	public void setActive(String active) {
 		user.setActive(active);
 	}
+
 	// gibt zurück ob der User ein admin ist
 	public boolean getAdmin() {
 		return user.getAdmin().toLowerCase().equals("y");
@@ -711,7 +705,7 @@ public class AccountBean {
 	}
 
 	public void setListingBean(ListingBean listingBean) {
-	ListingBean = listingBean;
+		ListingBean = listingBean;
 	}
 
 }
