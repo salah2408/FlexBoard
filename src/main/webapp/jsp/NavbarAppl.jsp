@@ -142,6 +142,10 @@
 		listingBean.removeFavorite();
 		response.sendRedirect("./MeineFavoritenView.jsp");
 	}
+	
+	else if(action.equals("zurAdminControll")){
+		response.sendRedirect("./AdminControllView.jsp");
+	}
 
 	else
 		response.sendRedirect("./HomepageView.jsp");

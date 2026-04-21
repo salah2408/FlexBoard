@@ -23,7 +23,6 @@
 		response.sendRedirect("./NachrichtenView.jsp");
 	}
 	else if(action.equals("switch")){
-		System.out.println("Switch wurde gedrückt: " + Integer.parseInt(user));
 		myAccount.setAktAnzeigeID(Integer.parseInt(user));
 		myAccount.setAktChatPartner(Integer.parseInt(user));
 		myAccount.readAlleNachrichtenFromDB();

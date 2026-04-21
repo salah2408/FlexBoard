@@ -296,6 +296,13 @@ public class AccountBean {
 					+ "<button type='submit' name='action' value='zurSuche' class='nav-link bg-transparent border-0 w-100 text-start "
 					+ (this.aktuelleSeite.equals("suche") ? "active fw-bold" : "") + "'>Jetzt finden</button>"
 					+ "</li>";
+			
+			if(this.getAdmin()) {
+				html += "<li class='nav-item'>"
+						+ "<button type='submit' name='action' value='zurAdminControll' class='nav-link bg-transparent border-0 w-100 text-start "
+						+ (this.aktuelleSeite.equals("suche") ? "active fw-bold" : "") + "'>Reports ansehen</button>"
+						+ "</li>";
+			}
 		}
 
 		html += "</ul>"
@@ -673,7 +680,7 @@ public class AccountBean {
 
 	// gibt zurück ob der User ein admin ist
 	public boolean getAdmin() {
-		return user.getAdmin().toLowerCase().equals("y");
+		return user.getAdmin().toLowerCase().equals("yes");
 	}
 
 	public boolean getLogedIn() {

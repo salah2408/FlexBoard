@@ -24,6 +24,7 @@
 	
 	if(action.equals("zumListing")){
 		myListing.setAktListingId(Integer.parseInt(listingid));
+		System.out.println(myListing.getAktListingId());
 		response.sendRedirect("./InseratDetailView.jsp");
 	}
 	else if(action.equals("deaktiviereListing")){
