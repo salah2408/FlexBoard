@@ -40,10 +40,7 @@
 	else  {
 		response.sendRedirect("./HomepageView.jsp");
 	}
-	if (agbAccepted == null || !"true".equals(agbAccepted)) {
-	    response.sendRedirect("./RegView.jsp");
-	    return;
-	}
+	
 %>
 </body>
 </html>

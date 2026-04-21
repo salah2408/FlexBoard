@@ -226,6 +226,7 @@ public String getInseratDetailHtml() {
 
     try {
         PreparedStatement prep = this.dbConn.prepareStatement(sql);
+        System.out.println(this.getAktListingId());
         prep.setInt(1, this.aktListingId);
         ResultSet dbRes = prep.executeQuery();
 
