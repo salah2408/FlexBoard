@@ -1473,6 +1473,7 @@ public String getInseratDetailHtml() {
 		return this.latestListingId;
 	}
 	public void setAktListingId(int id) {
+		System.out.println("Die aktuelle id ist: " + id);
 		this.aktListingId = id;
 	}
 

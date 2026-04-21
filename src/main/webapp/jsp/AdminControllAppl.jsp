@@ -10,7 +10,7 @@
 </head>
 <body>
 <jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
-<jsp:useBean id="myListing" class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
+<jsp:useBean id="listingBean" class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
 
 <%
 	String action = request.getParameter("action");
@@ -23,31 +23,31 @@
 		action = "";
 	
 	if(action.equals("zumListing")){
-		myListing.setAktListingId(Integer.parseInt(listingid));
-		System.out.println(myListing.getAktListingId());
+		listingBean.setAktListingId(Integer.parseInt(listingid));
+		System.out.println(listingBean.getAktListingId());
 		response.sendRedirect("./InseratDetailView.jsp");
 	}
 	else if(action.equals("deaktiviereListing")){
-		myListing.setAktListingId(Integer.parseInt(listingid));
-		myListing.deaktiviereListing();
+		listingBean.setAktListingId(Integer.parseInt(listingid));
+		listingBean.deaktiviereListing();
 		response.sendRedirect("./AdminControllView.jsp");
 	}
 	else if(action.equals("aktiviereListing")){
-		myListing.setAktListingId(Integer.parseInt(listingid));
-		myListing.aktiviereListing();
+		listingBean.setAktListingId(Integer.parseInt(listingid));
+		listingBean.aktiviereListing();
 		response.sendRedirect("./AdminControllView.jsp");
 	}
 	else if(action.equals("loescheListing")){
-		myListing.setAktListingId(Integer.parseInt(listingid));
-		myListing.loescheListing();
+		listingBean.setAktListingId(Integer.parseInt(listingid));
+		listingBean.loescheListing();
 		response.sendRedirect("./AdminControllView.jsp");
 	}
 	else if(action.equals("sperreUser")){
-		myListing.bannUser(userid);
+		listingBean.bannUser(userid);
 		response.sendRedirect("./AdminControllView.jsp");
 	}
 	else if(action.equals("reportSchliessen")){
-		myListing.closeReport(Integer.parseInt(reportid), adminNotiz);
+		listingBean.closeReport(Integer.parseInt(reportid), adminNotiz);
 		response.sendRedirect("./AdminControllView.jsp");
 	}
 	else{

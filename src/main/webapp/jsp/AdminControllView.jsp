@@ -13,15 +13,15 @@
 </head>
 <body class="d-flex flex-column min-vh-100">
 <jsp:useBean id="myAccount" class="de.hwg_lu.bwi520.beans.AccountBean" scope="session" />
-<jsp:useBean id="myListing" class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
+<jsp:useBean id="listingBean" class="de.hwg_lu.bwi520.beans.ListingBean" scope="session" />
 
 <% if(!myAccount.getLogedIn() || !myAccount.getAdmin()) response.sendRedirect("./HomepageView.jsp");%>
-<% myListing.setAccount(myAccount); %>
+<% listingBean.setAccount(myAccount); %>
 
 <jsp:getProperty name="myAccount" property="navbarHtml"/>
 
 <main class='flex-fill'>
-	<jsp:getProperty name="myListing" property="adminReportsHtml"/>
+	<jsp:getProperty name="listingBean" property="adminReportsHtml"/>
 </main>
 
 <jsp:getProperty name="myAccount" property="footerHtml" />
